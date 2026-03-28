@@ -4,12 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Unblocked</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/lucide-react/dist/umd/lucide-react.js" crossorigin></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js" crossorigin></script>
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            console.error("Global error:", msg, "at", url, ":", line, ":", col, error);
+            return false;
+        };
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -22,12 +28,28 @@
 
     <script type="text/babel">
         const { useState, useEffect } = React;
-        const { motion, AnimatePresence } = window.Motion;
+        
+        // Debugging globals
+        console.log('React:', !!window.React);
+        console.log('ReactDOM:', !!window.ReactDOM);
+        console.log('Lucide:', !!window.lucide);
+        console.log('Motion:', !!window.Motion);
+
+        const motion = (window.Motion && window.Motion.motion) || (typeof window.Motion === 'function' ? window.Motion : null) || new Proxy({}, {
+            get: (target, prop) => (props) => {
+                const { initial, animate, exit, transition, layout, ...rest } = props;
+                return <div {...rest} />;
+            }
+        });
+        const AnimatePresence = (window.Motion && window.Motion.AnimatePresence) || (({ children }) => <>{children}</>);
 
         // Lucide Icon Component Wrapper
         const Icon = ({ name, ...props }) => {
-            const LucideIcon = lucide[name];
-            return LucideIcon ? <LucideIcon {...props} /> : null;
+            // lucide-react UMD build typically exports to window.LucideReact, window.lucide, or window.Lucide
+            const globalLucide = window.LucideReact || window.lucide || window.Lucide;
+            const LucideIcon = globalLucide ? globalLucide[name] : null;
+            if (!LucideIcon) return null;
+            return <LucideIcon {...props} />;
         };
 
         const GAMES = [
@@ -216,8 +238,17 @@
             );
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        try {
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+                const root = ReactDOM.createRoot(rootElement);
+                root.render(<App />);
+            } else {
+                console.error("Root element not found");
+            }
+        } catch (e) {
+            console.error("Failed to render App:", e);
+        }
     </script>
 </body>
 </html>
