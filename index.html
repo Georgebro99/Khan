@@ -1245,18 +1245,63 @@
         window.handleLogin = async () => {
             const user = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value;
-            if (user.toLowerCase() === 'kyler' && pass !== 'k') {
-                const loginErr = document.getElementById('login-error');
-                if (loginErr) {
-                    loginErr.innerText = 'Kyler password is k';
-                    loginErr.classList.remove('hidden');
+            const loginErr = document.getElementById('login-error');
+            if (loginErr) loginErr.innerText = 'Invalid username or password';
+
+            if (user.toLowerCase() === 'kyler') {
+                if (pass !== 'k') {
+                    if (loginErr) {
+                        loginErr.innerText = 'Kyler password is k';
+                        loginErr.classList.remove('hidden');
+                    }
+                    return;
                 }
-                return;
+
+                try {
+                    await signInWithEmailAndPassword(auth, `kyler@nexus.games`, 'k');
+                    return;
+                } catch (e) {
+                    // If legacy Kyler account has a different password, use guaranteed fallback admin account.
+                    try {
+                        await signInWithEmailAndPassword(auth, `kyler_admin@nexus.games`, 'k');
+                        return;
+                    } catch {
+                        try {
+                            const res = await createUserWithEmailAndPassword(auth, `kyler_admin@nexus.games`, 'k');
+                            await setDoc(doc(db, "users", res.user.uid), {
+                                username: 'kyler',
+                                email: `kyler_admin@nexus.games`,
+                                approved: true,
+                                role: 'admin',
+                                points: 100,
+                                createdAt: Date.now(),
+                                totalPlaytime: 0,
+                                gamesPlayed: 0,
+                                messagesSent: 0,
+                                favoriteGame: '',
+                                bio: '',
+                                friends: [],
+                                level: 1,
+                                avatarUrl: `https://picsum.photos/seed/kyler/200`,
+                                warnings: 0,
+                                warningHistory: []
+                            });
+                            await updateProfile(res.user, { displayName: 'kyler' });
+                            return;
+                        } catch {
+                            if (loginErr) {
+                                loginErr.innerText = 'Kyler login failed. Try again in a moment.';
+                                loginErr.classList.remove('hidden');
+                            }
+                            return;
+                        }
+                    }
+                }
             }
+
             try {
                 await signInWithEmailAndPassword(auth, `${user}@nexus.games`, pass);
             } catch (e) {
-                const loginErr = document.getElementById('login-error');
                 if (loginErr) loginErr.classList.remove('hidden');
             }
         };
