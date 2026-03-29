@@ -1127,16 +1127,19 @@
         // Load config from file
         let app, auth, db;
         let appReady = false;
+        let appInitError = '';
+        let initPromise = null;
 
         async function initFirebase() {
-            const configRes = await fetch('/firebase-applet-config.json');
-            const firebaseConfig = await configRes.json();
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-            appReady = true;
+            try {
+                const configRes = await fetch('/firebase-applet-config.json');
+                const firebaseConfig = await configRes.json();
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+                appReady = true;
 
-            onAuthStateChanged(auth, async (user) => {
+                onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     currentUser = user;
                     const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -1167,11 +1170,20 @@
                     if (document.getElementById('main-ui')) document.getElementById('main-ui').style.display = 'none';
                     if (document.getElementById('pending-screen')) document.getElementById('pending-screen').classList.add('hidden');
                 }
-                lucide.createIcons();
-            });
+                    lucide.createIcons();
+                });
+            } catch (e) {
+                appInitError = e?.message || 'Failed to initialize Firebase';
+                console.error('Firebase init failed:', e);
+            }
         }
 
-        initFirebase();
+        function startFirebaseInit() {
+            if (!initPromise) initPromise = initFirebase();
+            return initPromise;
+        }
+
+        startFirebaseInit();
 
         // Error Handling Spec for Firestore Operations
         const OperationType = {
@@ -1249,11 +1261,14 @@
             const pass = document.getElementById('login-pass').value;
             const loginErr = document.getElementById('login-error');
             if (!appReady || !auth || !db) {
-                if (loginErr) {
-                    loginErr.innerText = 'App is still loading. Wait 2 seconds and try again.';
-                    loginErr.classList.remove('hidden');
+                await startFirebaseInit();
+                if (!appReady || !auth || !db) {
+                    if (loginErr) {
+                        loginErr.innerText = appInitError ? `App failed to initialize: ${appInitError}` : 'App is still loading. Wait 2 seconds and try again.';
+                        loginErr.classList.remove('hidden');
+                    }
+                    return;
                 }
-                return;
             }
             if (loginErr) loginErr.innerText = 'Invalid username or password';
 
@@ -1318,7 +1333,10 @@
         window.handleSignUp = async () => {
             const user = document.getElementById('signup-user').value.trim();
             const pass = document.getElementById('signup-pass').value;
-            if (!appReady || !auth || !db) return alert('App is still loading. Please try again in a moment.');
+            if (!appReady || !auth || !db) {
+                await startFirebaseInit();
+                if (!appReady || !auth || !db) return alert(appInitError ? `App failed to initialize: ${appInitError}` : 'App is still loading. Please try again in a moment.');
+            }
             if (!user || !pass) return;
             try {
                 // Check for duplicate username
