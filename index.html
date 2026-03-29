@@ -3,289 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Unblocked</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+    <title>Unblocked Games</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide-react/dist/umd/lucide-react.js" crossorigin></script>
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js" crossorigin></script>
-    <script>
-        window.onerror = function(msg, url, line, col, error) {
-            console.error("Global error:", msg, "at", url, ":", line, ":", col, error);
-            return false;
-        };
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        .game-card {
+            transition: transform 0.2s;
+            position: relative;
+        }
+        .game-card:hover {
+            transform: scale(1.02);
+        }
+        .game-card .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(4px);
+            pointer-events: none;
+        }
+        .game-card:hover .overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .play-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: none;
+            cursor: pointer;
+        }
+        .play-btn:hover {
+            transform: scale(1.15);
+            background: #2563eb;
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+        }
+        .play-btn:active {
+            transform: scale(0.95);
+        }
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+        #game-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 1000;
+        }
     </style>
 </head>
-<body class="bg-[#0a0a0a] text-white">
-    <div id="root"></div>
+<body>
+    <div id="main-ui">
+        <header class="bg-black p-6 border-b border-blue-500/20 shadow-xl">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <h1 class="text-3xl font-black tracking-tighter">Nexus<span class="text-blue-500">Games</span></h1>
+                <div class="flex gap-4">
+                    <input type="text" id="search" placeholder="Search games..." oninput="render()" class="bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 text-white">
+                    <button onclick="toggleStealth()" class="bg-zinc-900 p-2 rounded-lg hover:bg-zinc-800 text-blue-500">
+                        <i data-lucide="ghost"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        
-        // Debugging globals
-        console.log('React:', !!window.React);
-        console.log('ReactDOM:', !!window.ReactDOM);
-        console.log('Lucide:', !!window.lucide);
-        console.log('Motion:', !!window.Motion);
+        <main class="max-w-6xl mx-auto p-8">
+            <div id="featured-section" class="mb-12 hidden">
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <i data-lucide="star" class="text-yellow-400 fill-yellow-400"></i>
+                    FEATURED GAME
+                </h2>
+                <div id="featured-game" class="w-full"></div>
+            </div>
 
-        const motion = (window.Motion && window.Motion.motion) || (typeof window.Motion === 'function' ? window.Motion : null) || new Proxy({}, {
-            get: (target, prop) => (props) => {
-                const { initial, animate, exit, transition, layout, ...rest } = props;
-                return <div {...rest} />;
-            }
-        });
-        const AnimatePresence = (window.Motion && window.Motion.AnimatePresence) || (({ children }) => <>{children}</>);
+            <h2 class="text-xl font-bold mb-6 text-zinc-400 uppercase tracking-widest text-sm">All Games</h2>
+            <div id="grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Games here -->
+            </div>
+        </main>
+    </div>
 
-        // Lucide Icon Component Wrapper
-        const Icon = ({ name, ...props }) => {
-            // lucide-react UMD build typically exports to window.LucideReact, window.lucide, or window.Lucide
-            const globalLucide = window.LucideReact || window.lucide || window.Lucide;
-            const LucideIcon = globalLucide ? globalLucide[name] : null;
-            if (!LucideIcon) return null;
-            return <LucideIcon {...props} />;
-        };
+    <div id="game-container">
+        <div class="absolute top-4 left-4 z-50 flex gap-2">
+            <button onclick="closeGame()" class="bg-zinc-900/80 hover:bg-zinc-900 p-3 rounded-full text-blue-500 backdrop-blur-sm transition-all hover:scale-110 active:scale-95" title="Close Game">
+                <i data-lucide="arrow-left"></i>
+            </button>
+            <button onclick="reloadGame()" class="bg-zinc-900/80 hover:bg-zinc-900 p-3 rounded-full text-blue-500 backdrop-blur-sm transition-all hover:scale-110 active:scale-95" title="Reload Game">
+                <i data-lucide="refresh-cw"></i>
+            </button>
+        </div>
+        <iframe id="game-iframe" src=""></iframe>
+    </div>
+
+    <script>
+        // Initialize votes from localStorage or default to 0
+        const savedVotes = JSON.parse(localStorage.getItem('nexus_votes') || '{}');
 
         const GAMES = [
-            { id: "volley-random", title: "Volley Random", thumbnail: "https://picsum.photos/seed/volley/400/300", url: "https://www.twoplayergames.org/gameframe/volley-random", category: "Sports", rating: 4.8, isHot: true }
-        ];
+            { title: 'Basket Random', url: 'https://www.twoplayergames.org/gameframe/basket-random', img: 'https://picsum.photos/seed/basket/400/250' },
+            { title: 'Soccer Random', url: 'https://www.twoplayergames.org/gameframe/soccer-random', img: 'https://picsum.photos/seed/soccer/400/250' },
+            { title: 'Boxing Random', url: 'https://www.twoplayergames.org/gameframe/boxing-random', img: 'https://picsum.photos/seed/boxing/400/250' },
+            { title: 'Retro Bowl', url: 'https://www.twoplayergames.org/gameframe/retro-bowl', img: 'https://picsum.photos/seed/retro/400/250' },
+            { title: 'BitLife', url: 'https://www.twoplayergames.org/gameframe/bitlife', img: 'https://picsum.photos/seed/bitlife/400/250' },
+            { title: '1v1.lol', url: 'https://www.twoplayergames.org/gameframe/1v1-lol', img: 'https://picsum.photos/seed/1v1/400/250' },
+            { title: 'Slope', url: 'https://www.twoplayergames.org/gameframe/slope', img: 'https://picsum.photos/seed/slope/400/250' },
+            { title: 'Tunnel Rush', url: 'https://www.twoplayergames.org/gameframe/tunnel-rush', img: 'https://picsum.photos/seed/tunnel/400/250' },
+            { title: 'Drift Hunters', url: 'https://www.twoplayergames.org/gameframe/drift-hunters', img: 'https://picsum.photos/seed/drift/400/250' },
+            { title: 'Moto X3M', url: 'https://www.twoplayergames.org/gameframe/moto-x3m', img: 'https://picsum.photos/seed/moto/400/250' }
+        ].map(g => ({ ...g, votes: savedVotes[g.title] || 0 }));
 
-        const CATEGORIES = ["All", "Sports"];
+        let currentUrl = '';
 
-        function App() {
-            const [searchQuery, setSearchQuery] = useState("");
-            const [selectedCategory, setSelectedCategory] = useState("All");
-            const [selectedGame, setSelectedGame] = useState(null);
-            const [isStealthMode, setIsStealthMode] = useState(false);
-            const [showSettings, setShowSettings] = useState(false);
+        function render() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const grid = document.getElementById('grid');
+            const featuredSection = document.getElementById('featured-section');
+            const featuredGameContainer = document.getElementById('featured-game');
 
-            useEffect(() => {
-                if (isStealthMode) {
-                    document.title = "Google Classroom";
-                    const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-                    link.type = 'image/x-icon';
-                    link.rel = 'shortcut icon';
-                    link.href = 'https://ssl.gstatic.com/classroom/favicon.png';
-                    document.getElementsByTagName('head')[0].appendChild(link);
-                } else {
-                    document.title = "Nexus Unblocked";
-                    const link = document.querySelector("link[rel*='icon']");
-                    if (link) link.href = "https://cdn-icons-png.flaticon.com/512/686/686589.png";
-                }
-            }, [isStealthMode]);
+            // Find featured game (highest votes, must be > 0)
+            const sortedByVotes = [...GAMES].sort((a, b) => b.votes - a.votes);
+            const topGame = sortedByVotes[0];
 
-            const filteredGames = GAMES.filter(game => {
-                const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
-                const matchesCategory = selectedCategory === "All" || game.category === selectedCategory;
-                return matchesSearch && matchesCategory;
-            });
-
-            return (
-                <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-orange-500 selection:text-white">
-                    <nav className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/10">
-                        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setSelectedGame(null)}>
-                                <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20">
-                                    <Icon name="Gamepad2" className="text-white" size={24} />
-                                </div>
-                                <span className="text-xl font-bold tracking-tighter hidden sm:block">NEXUS<span className="text-orange-500">GAMES</span></span>
-                            </div>
-
-                            <div className="flex-1 max-w-md mx-4">
-                                <div className="relative group">
-                                    <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-orange-500 transition-colors" size={18} />
-                                    <input 
-                                        type="text"
-                                        placeholder="Search games..."
-                                        className="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-orange-500/50 focus:bg-white/10 transition-all text-sm"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => setIsStealthMode(!isStealthMode)} className={`p-2 rounded-full transition-all ${isStealthMode ? 'bg-orange-500 text-white' : 'hover:bg-white/10 text-white/60'}`}>
-                                    <Icon name="Ghost" size={20} />
-                                </button>
-                                <button onClick={() => setShowSettings(!showSettings)} className="p-2 rounded-full hover:bg-white/10 text-white/60 transition-all">
-                                    <Icon name="Settings" size={20} />
-                                </button>
+            if (topGame && topGame.votes > 0 && !query) {
+                featuredSection.classList.remove('hidden');
+                featuredGameContainer.innerHTML = `
+                    <div class="game-card bg-zinc-900 rounded-2xl overflow-hidden border border-blue-500/30 group flex flex-col md:flex-row h-auto md:h-64 shadow-2xl shadow-blue-500/10">
+                        <div class="relative w-full md:w-1/2 h-48 md:h-full">
+                            <img src="${topGame.img}" class="w-full h-full object-cover" referrerPolicy="no-referrer">
+                            <div class="overlay">
+                                <button class="play-btn" onclick="play('${topGame.url}')">Play Featured Game</button>
                             </div>
                         </div>
-                    </nav>
-
-                    <main className="max-w-7xl mx-auto px-4 py-8">
-                        <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar mb-8">
-                            {CATEGORIES.map(cat => (
-                                <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-orange-500 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'}`}>
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
-
-                        {!selectedGame && (
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12 relative rounded-3xl overflow-hidden aspect-[21/9] sm:aspect-[3/1] group">
-                                <img src="https://picsum.photos/seed/gaming/1200/400" alt="Featured" className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
-                                <div className="absolute bottom-0 left-0 p-8">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <span className="bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Featured</span>
-                                        <span className="text-white/60 text-xs flex items-center gap-1"><Icon name="Star" size={12} className="fill-orange-500 text-orange-500" /> 5.0 Rating</span>
-                                    </div>
-                                    <h1 className="text-4xl sm:text-5xl font-black mb-4 tracking-tight uppercase">Volley Random</h1>
-                                    <button onClick={() => setSelectedGame(GAMES.find(g => g.id === "volley-random"))} className="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-orange-500 hover:text-white transition-all flex items-center gap-2">
-                                        Play Now <Icon name="ExternalLink" size={18} />
+                        <div class="p-8 flex flex-col justify-center flex-1 bg-gradient-to-br from-zinc-900 to-black">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <span class="text-blue-500 text-xs font-bold tracking-widest uppercase mb-2 block">Top Rated</span>
+                                    <h3 class="text-3xl font-black tracking-tight text-white">${topGame.title}</h3>
+                                </div>
+                                <div class="flex flex-col items-center bg-zinc-800/50 p-3 rounded-xl border border-zinc-700">
+                                    <button onclick="vote('${topGame.title}', 1)" class="text-zinc-400 hover:text-blue-500 transition-colors">
+                                        <i data-lucide="chevron-up" class="w-6 h-6"></i>
+                                    </button>
+                                    <span class="font-bold text-xl text-blue-400 my-1">${topGame.votes}</span>
+                                    <button onclick="vote('${topGame.title}', -1)" class="text-zinc-400 hover:text-red-500 transition-colors">
+                                        <i data-lucide="chevron-down" class="w-6 h-6"></i>
                                     </button>
                                 </div>
-                            </motion.div>
-                        )}
-
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            <AnimatePresence mode="popLayout">
-                                {filteredGames.map((game, index) => (
-                                    <motion.div layout key={game.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ delay: index * 0.05 }} onClick={() => setSelectedGame(game)} className="group cursor-pointer">
-                                        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-white/5 border border-white/10 mb-3">
-                                            <img src={game.thumbnail} alt={game.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center shadow-xl shadow-orange-500/40">
-                                                    <Icon name="Gamepad2" size={24} />
-                                                </div>
-                                            </div>
-                                            {game.isNew && <span className="absolute top-3 left-3 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">New</span>}
-                                            {game.isHot && <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">Hot</span>}
-                                        </div>
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <h3 className="font-bold text-white/90 group-hover:text-orange-500 transition-colors">{game.title}</h3>
-                                                <p className="text-xs text-white/40">{game.category}</p>
-                                            </div>
-                                            <div className="flex items-center gap-1 text-xs text-orange-500 font-medium">
-                                                <Icon name="Star" size={12} className="fill-orange-500" />
-                                                {game.rating}
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
+                            </div>
+                            <p class="text-zinc-400 text-sm mb-6 line-clamp-2">The community's current favorite. Jump in and see why everyone is playing ${topGame.title}!</p>
+                            <button onclick="play('${topGame.url}')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl transition-all w-fit flex items-center gap-2">
+                                <i data-lucide="play" class="fill-current w-4 h-4"></i>
+                                PLAY NOW
+                            </button>
                         </div>
-                    </main>
-
-                    <AnimatePresence>
-                        {selectedGame && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/95 flex flex-col">
-                                <div className="h-14 border-b border-white/10 flex items-center justify-between px-4 bg-[#0a0a0a]">
-                                    <div className="flex items-center gap-3">
-                                        <button onClick={() => setSelectedGame(null)} className="p-2 hover:bg-white/10 rounded-full transition-all">
-                                            <Icon name="X" size={20} />
-                                        </button>
-                                        <h2 className="font-bold text-sm sm:text-base">{selectedGame.title}</h2>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <button className="p-2 hover:bg-white/10 rounded-full text-white/60 transition-all"><Icon name="Maximize2" size={18} /></button>
-                                        <button className="p-2 hover:bg-white/10 rounded-full text-white/60 transition-all"><Icon name="Info" size={18} /></button>
-                                        <button 
-                                            onClick={() => {
-                                                const win = window.open('about:blank', '_blank');
-                                                if (win) {
-                                                    win.document.title = isStealthMode ? "Google Classroom" : selectedGame.title;
-                                                    const iframe = win.document.createElement('iframe');
-                                                    iframe.src = selectedGame.url;
-                                                    iframe.style.width = '100%';
-                                                    iframe.style.height = '100%';
-                                                    iframe.style.border = 'none';
-                                                    iframe.style.position = 'fixed';
-                                                    iframe.style.top = '0';
-                                                    iframe.style.left = '0';
-                                                    win.document.body.appendChild(iframe);
-                                                    win.document.body.style.margin = '0';
-                                                }
-                                            }}
-                                            className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-xs font-bold hover:bg-orange-600 transition-all flex items-center gap-2"
-                                        >
-                                            Stealth Launch <Icon name="ExternalLink" size={14} />
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="flex-1 bg-black relative flex items-center justify-center">
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                                        <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4" />
-                                        <p className="text-white/60 mb-4">Loading game...</p>
-                                        <div className="max-w-xs space-y-4">
-                                            <p className="text-xs text-white/40">If the game doesn't load, it might be blocked by your network or the site's security settings.</p>
-                                            <a href={selectedGame.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-2 rounded-full text-sm font-bold transition-all">
-                                                Try Direct Link <Icon name="ExternalLink" size={16} />
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <iframe src={selectedGame.url} className="w-full h-full border-none relative z-10" title={selectedGame.title} allowFullScreen />
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {showSettings && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowSettings(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-                            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-full max-w-md bg-[#1a1a1a] border border-white/10 rounded-3xl overflow-hidden shadow-2xl p-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-xl font-bold">Settings</h2>
-                                    <button onClick={() => setShowSettings(false)} className="p-2 hover:bg-white/10 rounded-full"><Icon name="X" size={20} /></button>
-                                </div>
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="font-bold">Stealth Mode</p>
-                                            <p className="text-xs text-white/40">Disguise tab as Google Classroom</p>
-                                        </div>
-                                        <button onClick={() => setIsStealthMode(!isStealthMode)} className={`w-12 h-6 rounded-full transition-all relative ${isStealthMode ? 'bg-orange-500' : 'bg-white/10'}`}>
-                                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${isStealthMode ? 'left-7' : 'left-1'}`} />
-                                        </button>
-                                    </div>
-
-                                    <div className="pt-4 border-t border-white/10">
-                                        <p className="font-bold mb-2">How to use</p>
-                                        <ul className="text-xs text-white/40 space-y-2">
-                                            <li className="flex items-start gap-2">
-                                                <Icon name="CheckCircle2" size={14} className="text-orange-500 shrink-0 mt-0.5" />
-                                                <span>If a game doesn't load in the site, use the <b>Stealth Launch</b> button to open it in a disguised new tab.</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <Icon name="CheckCircle2" size={14} className="text-orange-500 shrink-0 mt-0.5" />
-                                                <span>Stealth Mode changes the tab title and icon to "Google Classroom" to hide it from others.</span>
-                                            </li>
-                                        </ul>
-                                    </div>
-
-                                    <button className="w-full bg-white/5 hover:bg-white/10 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2">
-                                        <Icon name="AlertTriangle" size={16} /> Report a broken game
-                                    </button>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        try {
-            const rootElement = document.getElementById('root');
-            if (rootElement) {
-                const root = ReactDOM.createRoot(rootElement);
-                root.render(<App />);
+                    </div>
+                `;
             } else {
-                console.error("Root element not found");
+                featuredSection.classList.add('hidden');
             }
-        } catch (e) {
-            console.error("Failed to render App:", e);
+
+            const filteredGames = GAMES.filter(g => g.title.toLowerCase().includes(query));
+            
+            grid.innerHTML = filteredGames.map(g => `
+                <div class="game-card bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 hover:border-blue-500 group">
+                    <div class="relative">
+                        <img src="${g.img}" class="w-full h-40 object-cover" referrerPolicy="no-referrer">
+                        <div class="overlay">
+                            <button class="play-btn" onclick="play('${g.url}')">Play Game</button>
+                        </div>
+                    </div>
+                    <div class="p-4 flex items-center justify-between">
+                        <h3 class="font-bold text-zinc-100 truncate mr-2">${g.title}</h3>
+                        <div class="flex items-center gap-2 bg-black/40 px-2 py-1 rounded-lg border border-zinc-800">
+                            <button onclick="vote('${g.title}', 1)" class="text-zinc-500 hover:text-blue-500 transition-colors">
+                                <i data-lucide="chevron-up" class="w-4 h-4"></i>
+                            </button>
+                            <span class="text-xs font-mono font-bold ${g.votes >= 0 ? 'text-blue-400' : 'text-red-400'} min-w-[1.5rem] text-center">${g.votes}</span>
+                            <button onclick="vote('${g.title}', -1)" class="text-zinc-500 hover:text-red-500 transition-colors">
+                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
         }
+
+        function vote(title, delta) {
+            const game = GAMES.find(g => g.title === title);
+            if (game) {
+                game.votes += delta;
+                
+                // Save to localStorage
+                const votesToSave = {};
+                GAMES.forEach(g => {
+                    if (g.votes !== 0) votesToSave[g.title] = g.votes;
+                });
+                localStorage.setItem('nexus_votes', JSON.stringify(votesToSave));
+                
+                render();
+            }
+        }
+
+        function play(url) {
+            currentUrl = url;
+            document.getElementById('game-iframe').src = url;
+            document.getElementById('game-container').style.display = 'block';
+            document.getElementById('main-ui').style.display = 'none';
+        }
+
+        function closeGame() {
+            document.getElementById('game-iframe').src = '';
+            document.getElementById('game-container').style.display = 'none';
+            document.getElementById('main-ui').style.display = 'block';
+        }
+
+        function reloadGame() {
+            const iframe = document.getElementById('game-iframe');
+            if (iframe.src) {
+                const url = iframe.src;
+                iframe.src = '';
+                iframe.src = url;
+            }
+        }
+
+        function toggleStealth() {
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.inset = '0';
+            overlay.style.zIndex = '9999';
+            overlay.style.background = 'white';
+            overlay.innerHTML = '<iframe src="https://classroom.google.com" style="width:100%;height:100%;border:none;"></iframe>';
+            document.body.appendChild(overlay);
+            document.title = "Google Classroom";
+            
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    overlay.remove();
+                    document.title = "Unblocked Games";
+                }
+            }, { once: true });
+        }
+
+        render();
+        lucide.createIcons();
     </script>
 </body>
 </html>
-
