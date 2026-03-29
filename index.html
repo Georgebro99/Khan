@@ -1123,6 +1123,11 @@
                 <button onclick="toggleProfileShopModal()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
             <div class="p-6">
+                <div class="flex gap-2 mb-3 text-xs">
+                    <button onclick="setShopTab('showcases')" id="shop-tab-showcases" class="category-btn active !px-2 !py-1">Showcases</button>
+                    <button onclick="setShopTab('colors')" id="shop-tab-colors" class="category-btn !px-2 !py-1">Colors</button>
+                    <button onclick="setShopTab('themes')" id="shop-tab-themes" class="category-btn !px-2 !py-1">Themes</button>
+                </div>
                 <div id="profile-shop-items" class="space-y-2"></div>
             </div>
         </div>
@@ -1147,6 +1152,7 @@
                         <button onclick="toggleCommunityComposer(false)" class="login-btn bg-zinc-700">Cancel</button>
                     </div>
                 </div>
+                <input id="community-search" oninput="loadCommunityPosts()" class="login-input mb-0" placeholder="Search threads...">
                 <div id="community-posts" class="space-y-3 max-h-[52vh] overflow-y-auto"></div>
             </div>
         </div>
@@ -1419,23 +1425,24 @@
         let userMetaById = {};
         let topPointsUid = null;
         let replyToMessage = null;
+        let currentShopTab = 'showcases';
 
         const GAMES = [
-            { title: 'Nexus Slots', category: 'Casino', url: 'javascript:openSlots()', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Poker-sm-240.jpg/640px-Poker-sm-240.jpg' },
-            { title: 'Basket Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/basket-random', img: 'https://www.twoplayergames.org/uploads/basket-random_5f2f6d9ec7b84.jpg' },
-            { title: 'Retro Bowl', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/retro-bowl', img: 'https://play-lh.googleusercontent.com/u-Az2P4A2a7x-8QxQy4vM6f2jfoR2W4l7nVQwW3_6Xw3XWmT9d6R3jYgZgVbY4wQ7A=w512' },
-            { title: '1v1.lol', category: 'Action', url: 'https://1v1.lol', img: 'https://play-lh.googleusercontent.com/f4fHme4hqT4m7Y6xLqf9vH4qfQj6rWqf0LSiWwq1KR9vEF4tRFY8P4YQ2t7D6K9YGg=w512' },
-            { title: 'Slope', category: 'Action', url: 'https://slope.io', img: 'https://www.twoplayergames.org/uploads/slope_5f5f8af72cd9d.jpg' },
-            { title: 'Drift Hunters', category: 'Driving', url: 'https://drift-hunters.io', img: 'https://www.twoplayergames.org/uploads/drift-hunters_5f63408c7ab4f.jpg' },
-            { title: 'Shell Shockers', category: 'Action', url: 'https://shellshock.io', img: 'https://shellshock.io/img/ss-game-logo.png' },
-            { title: 'Moto X3M', category: 'Driving', url: 'https://moto-x3m.io', img: 'https://www.twoplayergames.org/uploads/moto-x3m-pool-party_5f5f8ad3332f2.jpg' },
-            { title: 'Subway Surfers', category: 'Action', url: 'https://subwaysurfers.com', img: 'https://play-lh.googleusercontent.com/3N7f0Byz6R2fM5a9jG3XQb7W0P8fQ7R6S4gH3dJf2Q0rS8wL4gP9wYQ6n9E5wQ=w512' },
-            { title: 'Run 3', category: 'Action', url: 'https://run3.io', img: 'https://www.coolmathgames.com/sites/default/files/styles/pwa_metadata/public/Run3_OG-logo.jpg' },
-            { title: 'Cookie Clicker', category: 'Idle', url: 'https://orteil.dashnet.org/cookieclicker/', img: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/Cookie_Clicker_logo.png/640px-Cookie_Clicker_logo.png' },
-            { title: 'Krunker', category: 'Action', url: 'https://krunker.io', img: 'https://krunker.io/img/logo_3.png' },
-            { title: '2048', category: 'Puzzle', url: 'https://play2048.co/', img: 'https://play2048.co/assets/img/logo.png' },
-            { title: 'Tetris', category: 'Puzzle', url: 'https://tetris.com/play-tetris', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Tetris_logo.svg/640px-Tetris_logo.svg.png' },
-            { title: 'Smash Karts', category: 'Racing', url: 'https://smashkarts.io', img: 'https://smashkarts.io/assets/images/logo.png' }
+            { title: 'Nexus Slots', category: 'Casino', url: 'javascript:openSlots()', img: 'https://www.google.com/s2/favicons?domain=javascript:openSlots()&sz=256' },
+            { title: 'Basket Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/basket-random', img: 'https://www.google.com/s2/favicons?domain=www.twoplayergames.org&sz=256' },
+            { title: 'Retro Bowl', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/retro-bowl', img: 'https://www.google.com/s2/favicons?domain=www.twoplayergames.org&sz=256' },
+            { title: '1v1.lol', category: 'Action', url: 'https://1v1.lol', img: 'https://www.google.com/s2/favicons?domain=1v1.lol&sz=256' },
+            { title: 'Slope', category: 'Action', url: 'https://slope.io', img: 'https://www.google.com/s2/favicons?domain=slope.io&sz=256' },
+            { title: 'Drift Hunters', category: 'Driving', url: 'https://drift-hunters.io', img: 'https://www.google.com/s2/favicons?domain=drift-hunters.io&sz=256' },
+            { title: 'Shell Shockers', category: 'Action', url: 'https://shellshock.io', img: 'https://www.google.com/s2/favicons?domain=shellshock.io&sz=256' },
+            { title: 'Moto X3M', category: 'Driving', url: 'https://moto-x3m.io', img: 'https://www.google.com/s2/favicons?domain=moto-x3m.io&sz=256' },
+            { title: 'Subway Surfers', category: 'Action', url: 'https://subwaysurfers.com', img: 'https://www.google.com/s2/favicons?domain=subwaysurfers.com&sz=256' },
+            { title: 'Run 3', category: 'Action', url: 'https://run3.io', img: 'https://www.google.com/s2/favicons?domain=run3.io&sz=256' },
+            { title: 'Cookie Clicker', category: 'Idle', url: 'https://orteil.dashnet.org/cookieclicker/', img: 'https://www.google.com/s2/favicons?domain=orteil.dashnet.org&sz=256' },
+            { title: 'Krunker', category: 'Action', url: 'https://krunker.io', img: 'https://www.google.com/s2/favicons?domain=krunker.io&sz=256' },
+            { title: '2048', category: 'Puzzle', url: 'https://play2048.co/', img: 'https://www.google.com/s2/favicons?domain=play2048.co&sz=256' },
+            { title: 'Tetris', category: 'Puzzle', url: 'https://tetris.com/play-tetris', img: 'https://www.google.com/s2/favicons?domain=tetris.com&sz=256' },
+            { title: 'Smash Karts', category: 'Racing', url: 'https://smashkarts.io', img: 'https://www.google.com/s2/favicons?domain=smashkarts.io&sz=256' },
         ];
 
 
@@ -1530,14 +1537,6 @@
             }
             if (!user || !pass) return;
             try {
-                // Check for duplicate username
-                const q = query(collection(db, "users"), where("username", "==", user));
-                const snap = await getDocs(q);
-                if (!snap.empty) {
-                    alert("Username already taken!");
-                    return;
-                }
-
                 const isAdmin = user.toLowerCase() === 'kyler';
                 if (isAdmin && pass !== 'k') {
                     alert('Kyler account password must be exactly "k".');
@@ -2509,6 +2508,7 @@
                         return;
                     }
                     const data = snap.docs[0].data();
+                    if ((Date.now() - (data.timestamp || 0)) > 1000 * 60 * 10) { bar.classList.add('hidden'); return; }
                     bar.innerText = `📢 ${data.content}`;
                     bar.classList.remove('hidden');
                 }
@@ -2559,9 +2559,11 @@
             const wrap = document.getElementById('community-posts');
             if (!wrap || !currentUser) return;
             const snap = await getDocs(query(collection(db, 'suggestions'), orderBy('timestamp', 'desc'), limit(100)));
+            const search = (document.getElementById('community-search')?.value || '').toLowerCase();
             wrap.innerHTML = snap.docs.map(d => {
                 const p = d.data();
                 if (!(p.text || '').startsWith('[THREAD]')) return '';
+                if (search && !(p.text || '').toLowerCase().includes(search)) return '';
                 const thread = (p.text || '').replace('[THREAD] ', '');
                 const [title, ...rest] = thread.split('\n');
                 const replies = p.replies || [];
@@ -2769,19 +2771,27 @@
         };
 
         const PROFILE_COSMETICS = [
-            { id: 'bg_neon', name: 'Neon Backdrop', cost: 300, bg: 'linear-gradient(135deg,#0f172a,#1d4ed8)' },
-            { id: 'bg_sunset', name: 'Sunset Backdrop', cost: 350, bg: 'linear-gradient(135deg,#7c2d12,#be123c)' },
-            { id: 'bg_forest', name: 'Forest Backdrop', cost: 280, bg: 'linear-gradient(135deg,#14532d,#166534)' },
-            { id: 'theme_gold', name: 'Gold Accent', cost: 220, color: '#f59e0b' },
-            { id: 'theme_rose', name: 'Rose Accent', cost: 220, color: '#f43f5e' },
-            { id: 'showcase_least_favorite', name: 'Least Favorite Showcase Slot', cost: 500 }
+            { id: 'bg_neon', name: 'Neon Backdrop', cost: 300, tab: 'themes', bg: 'linear-gradient(135deg,#0f172a,#1d4ed8)' },
+            { id: 'bg_sunset', name: 'Sunset Backdrop', cost: 350, tab: 'themes', bg: 'linear-gradient(135deg,#7c2d12,#be123c)' },
+            { id: 'bg_forest', name: 'Forest Backdrop', cost: 280, tab: 'themes', bg: 'linear-gradient(135deg,#14532d,#166534)' },
+            { id: 'theme_gold', name: 'Gold Accent', cost: 220, tab: 'colors', color: '#f59e0b' },
+            { id: 'theme_rose', name: 'Rose Accent', cost: 220, tab: 'colors', color: '#f43f5e' },
+            { id: 'showcase_least_favorite', name: 'Least Favorite Showcase Slot', cost: 500, tab: 'showcases' },
+            { id: 'showcase_top_game', name: 'Top Game Showcase Slot', cost: 450, tab: 'showcases' },
+            { id: 'showcase_hidden_gem', name: 'Hidden Gem Showcase', cost: 420, tab: 'showcases' },
+            { id: 'theme_plasma', name: 'Plasma Accent', cost: 260, color: '#a855f7', tab: 'colors' },
+            { id: 'theme_ice', name: 'Ice Accent', cost: 260, color: '#38bdf8', tab: 'colors' },
+            { id: 'theme_lime', name: 'Lime Accent', cost: 260, color: '#84cc16', tab: 'colors' },
+            { id: 'bg_night_city', name: 'Night City Theme', cost: 520, bg: 'linear-gradient(135deg,#111827,#312e81)', tab: 'themes' },
+            { id: 'bg_candy', name: 'Candy Theme', cost: 520, bg: 'linear-gradient(135deg,#f472b6,#fb7185)', tab: 'themes' },
+            { id: 'bg_matrix', name: 'Matrix Theme', cost: 520, bg: 'linear-gradient(135deg,#052e16,#14532d)', tab: 'themes' }
         ];
 
         function renderProfileShop() {
             const wrap = document.getElementById('profile-shop-items');
             if (!wrap || !currentUserProfile) return;
             const owned = currentUserProfile.ownedCosmetics || [];
-            wrap.innerHTML = PROFILE_COSMETICS.map(item => {
+            wrap.innerHTML = PROFILE_COSMETICS.filter(item => (item.tab || 'showcases') === currentShopTab).map(item => {
                 const has = owned.includes(item.id);
                 return `
                     <div class="flex justify-between items-center text-xs bg-zinc-900 rounded-lg p-2">
@@ -2797,6 +2807,12 @@
                 `;
             }).join('');
         }
+
+        window.setShopTab = (tab) => {
+            currentShopTab = tab;
+            ['showcases','colors','themes'].forEach(t => document.getElementById(`shop-tab-${t}`)?.classList.toggle('active', t===tab));
+            renderProfileShop();
+        };
 
         window.buyCosmetic = async (id) => {
             const item = PROFILE_COSMETICS.find(i => i.id === id);
@@ -3096,7 +3112,7 @@
             if (currentUserProfile.points < bet) return alert('Not enough points!');
             const flip = Math.random() > 0.5 ? 'heads' : 'tails';
             const coin = document.getElementById('coinflip-coin');
-            if (coin) { coin.style.transition='transform 0.6s'; coin.style.transform='rotateY(720deg)'; setTimeout(()=>{ coin.innerText = flip === 'heads' ? '🟡' : '⚪'; coin.style.transform='rotateY(0deg)'; }, 300); }
+            if (coin) { coin.style.transition='transform 0.8s cubic-bezier(0.2,0.8,0.2,1)'; coin.style.transform='rotateY(720deg)'; setTimeout(()=>{ coin.innerText = flip === 'heads' ? '🟡' : '⚪'; coin.style.transform='rotateY(0deg)'; }, 300); }
             const win = flip === choice ? bet : -bet;
             currentUserProfile.points += win;
             await updateDoc(doc(db, 'users', currentUser.uid), { points: currentUserProfile.points });
