@@ -785,6 +785,15 @@
         </div>
     </div>
 
+    <div id="banned-screen" class="hidden fixed inset-0 bg-[#050505] z-[2000] flex items-center justify-center p-8">
+        <div class="login-card text-center border-red-600">
+            <i data-lucide="ban" class="w-16 h-16 text-red-500 mx-auto mb-6"></i>
+            <h2 class="text-2xl font-black mb-4">Account Banned</h2>
+            <p class="text-zinc-400 text-sm mb-8">Your account is banned from Nexus Games. You can submit an appeal from the chat gavel button once unbanned access is restored.</p>
+            <button onclick="handleLogout()" class="login-btn bg-zinc-800 hover:bg-zinc-700">Back to Login</button>
+        </div>
+    </div>
+
     <div id="main-ui">
         <div id="announcement-bar" class="hidden announcement-bar"></div>
         <header class="bg-black p-6 border-b border-blue-500/20 shadow-xl">
@@ -940,6 +949,7 @@
             <div class="flex gap-2 mb-4">
                 <button id="gamble-tab-slots" onclick="setGambleTab('slots')" class="category-btn active">Slots</button>
                 <button id="gamble-tab-coinflip" onclick="setGambleTab('coinflip')" class="category-btn">Coinflip</button>
+                <button id="gamble-tab-blackjack" onclick="setGambleTab('blackjack')" class="category-btn">Blackjack</button>
             </div>
             <div id="gamble-view-slots">
                 <div class="slot-machine">
@@ -959,6 +969,16 @@
                     <button onclick="playCoinflip('tails')" class="login-btn bg-zinc-700">Tails</button>
                 </div>
             </div>
+            <div id="gamble-view-blackjack" class="hidden space-y-3">
+                <p class="text-zinc-400 text-sm">Bet: 20 points. Try to hit 21 without busting.</p>
+                <div class="text-sm">Dealer: <span id="bj-dealer">?</span></div>
+                <div class="text-sm">You: <span id="bj-player">0</span></div>
+                <div class="flex gap-2">
+                    <button onclick="startBlackjack()" class="login-btn bg-zinc-700">Deal</button>
+                    <button onclick="blackjackHit()" class="login-btn bg-zinc-700">Hit</button>
+                    <button onclick="blackjackStand()" class="login-btn bg-zinc-700">Stand</button>
+                </div>
+            </div>
             <div id="slots-result" class="text-lg font-bold h-8"></div>
         </div>
     </div>
@@ -972,7 +992,7 @@
                         <h2 id="profile-username" class="text-3xl font-black"></h2>
                         <div class="steam-lvl-badge" id="profile-level">1</div>
                     </div>
-                    <span id="profile-role" class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-blue-600/20 text-blue-400"></span>
+                    <div class="flex items-center gap-2"><span id="profile-role" class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-blue-600/20 text-blue-400"></span><button id="profile-block-btn" class="hidden text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-red-600/20 text-red-400" onclick="toggleBlockCurrentProfile()">Block</button></div>
                     <p id="profile-bio" class="text-zinc-400 text-sm mt-4 italic line-clamp-2"></p>
                 </div>
                 <div class="text-right">
@@ -1085,7 +1105,7 @@
         </div>
         <div id="chat-messages" class="chat-messages"></div>
         <div class="chat-input-container relative">
-            <div id="gif-picker" class="hidden absolute bottom-full right-0 w-64 h-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl flex flex-direction-column overflow-hidden mb-2">
+            <div id="gif-picker" class="hidden absolute bottom-full left-0 w-80 h-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl flex flex-direction-column overflow-hidden mb-2">
                 <div class="p-2 border-b border-zinc-800">
                     <input type="text" placeholder="Search GIFs..." class="w-full bg-black border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500" oninput="searchGifs(this.value)">
                 </div>
@@ -1174,9 +1194,11 @@
                     const userDoc = await getDoc(doc(db, "users", user.uid));
                     if (userDoc.exists()) {
                         currentUserProfile = userDoc.data();
-                        if (currentUserProfile.approved) {
+                        if (currentUserProfile.approved && !currentUserProfile.banned) {
                             if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'none';
                             if (document.getElementById('pending-screen')) document.getElementById('pending-screen').classList.add('hidden');
+                    if (document.getElementById('banned-screen')) document.getElementById('banned-screen').classList.add('hidden');
+                            if (document.getElementById('banned-screen')) document.getElementById('banned-screen').classList.add('hidden');
                             if (document.getElementById('main-ui')) document.getElementById('main-ui').style.display = 'block';
                             if (currentUserProfile.role === 'admin') {
                                 const adminBtn = document.getElementById('admin-toggle-btn');
@@ -1187,8 +1209,15 @@
                             render();
                             setupChat();
                             loadSlowmodeSettings();
+                        } else if (currentUserProfile.banned) {
+                            if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'none';
+                            if (document.getElementById('pending-screen')) document.getElementById('pending-screen').classList.add('hidden');
+                    if (document.getElementById('banned-screen')) document.getElementById('banned-screen').classList.add('hidden');
+                            if (document.getElementById('banned-screen')) document.getElementById('banned-screen').classList.remove('hidden');
+                            if (document.getElementById('main-ui')) document.getElementById('main-ui').style.display = 'none';
                         } else {
                             if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'none';
+                            if (document.getElementById('banned-screen')) document.getElementById('banned-screen').classList.add('hidden');
                             if (document.getElementById('pending-screen')) document.getElementById('pending-screen').classList.remove('hidden');
                         }
                     }
@@ -1198,6 +1227,7 @@
                     if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'flex';
                     if (document.getElementById('main-ui')) document.getElementById('main-ui').style.display = 'none';
                     if (document.getElementById('pending-screen')) document.getElementById('pending-screen').classList.add('hidden');
+                    if (document.getElementById('banned-screen')) document.getElementById('banned-screen').classList.add('hidden');
                 }
                     lucide.createIcons();
                 });
@@ -1272,6 +1302,8 @@
         let lastMessageAt = 0;
         let gambleTab = 'slots';
         const KYLER_AUTH_PASSWORD = 'kyler_admin_secret_k';
+        let profileViewingUserId = null;
+        let blackjackState = { inRound: false, dealer: 0, player: 0 };
 
         const GAMES = [
             { title: 'Nexus Slots', category: 'Casino', url: 'javascript:openSlots()', img: 'https://picsum.photos/seed/slots/800/400' },
@@ -1334,7 +1366,8 @@
                             level: 1,
                             avatarUrl: `https://picsum.photos/seed/kyler/200`,
                             warnings: 0,
-                            warningHistory: []
+                            warningHistory: [],
+                    blockedUsers: []
                         });
                         await updateProfile(res.user, { displayName: 'kyler' });
                         return;
@@ -1400,7 +1433,8 @@
                     level: 1,
                     avatarUrl: `https://picsum.photos/seed/${user}/200`,
                     warnings: 0,
-                    warningHistory: []
+                    warningHistory: [],
+                    blockedUsers: []
                 });
                 await updateProfile(res.user, { displayName: user });
             } catch (e) {
@@ -1718,7 +1752,55 @@
             'chatterbox': { name: 'Chatterbox', icon: 'messages-square', color: 'text-pink-400', description: 'Sent 100+ messages in global chat.' },
             'grinder': { name: 'Point Grinder', icon: 'gem', color: 'text-indigo-400', description: 'Reached 1000 points.' },
             'veteran': { name: 'Veteran', icon: 'sword', color: 'text-emerald-400', description: 'Played 50+ games.' },
-            'reporter': { name: 'Reporter', icon: 'flag', color: 'text-rose-400', description: 'Reported messages that improved chat safety.' }
+            'reporter': { name: 'Reporter', icon: 'flag', color: 'text-rose-400', description: 'Reported messages that improved chat safety.' },
+            'basket_random_rookie': { name: 'Basket Random Rookie', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Basket Random 5+ times.' },
+            'basket_random_pro': { name: 'Basket Random Pro', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Basket Random 25+ times.' },
+            'basket_random_legend': { name: 'Basket Random Legend', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Basket Random 100+ times.' },
+            'basket_random_master': { name: 'Basket Random Master', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Basket Random 250+ times.' },
+            'basket_random_mythic': { name: 'Basket Random Mythic', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Basket Random 500+ times.' },
+            'basket_random_insane': { name: 'Basket Random Insane', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Basket Random 1000+ times.' },
+            'retro_bowl_rookie': { name: 'Retro Bowl Rookie', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Retro Bowl 5+ times.' },
+            'retro_bowl_pro': { name: 'Retro Bowl Pro', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Retro Bowl 25+ times.' },
+            'retro_bowl_legend': { name: 'Retro Bowl Legend', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Retro Bowl 100+ times.' },
+            'retro_bowl_master': { name: 'Retro Bowl Master', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Retro Bowl 250+ times.' },
+            'retro_bowl_mythic': { name: 'Retro Bowl Mythic', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Retro Bowl 500+ times.' },
+            'retro_bowl_insane': { name: 'Retro Bowl Insane', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Retro Bowl 1000+ times.' },
+            '1v1_lol_rookie': { name: '1v1.lol Rookie', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played 1v1.lol 5+ times.' },
+            '1v1_lol_pro': { name: '1v1.lol Pro', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played 1v1.lol 25+ times.' },
+            '1v1_lol_legend': { name: '1v1.lol Legend', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played 1v1.lol 100+ times.' },
+            '1v1_lol_master': { name: '1v1.lol Master', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played 1v1.lol 250+ times.' },
+            '1v1_lol_mythic': { name: '1v1.lol Mythic', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played 1v1.lol 500+ times.' },
+            '1v1_lol_insane': { name: '1v1.lol Insane', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played 1v1.lol 1000+ times.' },
+            'slope_rookie': { name: 'Slope Rookie', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Slope 5+ times.' },
+            'slope_pro': { name: 'Slope Pro', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Slope 25+ times.' },
+            'slope_legend': { name: 'Slope Legend', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Slope 100+ times.' },
+            'slope_master': { name: 'Slope Master', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Slope 250+ times.' },
+            'slope_mythic': { name: 'Slope Mythic', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Slope 500+ times.' },
+            'slope_insane': { name: 'Slope Insane', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Slope 1000+ times.' },
+            'drift_hunters_rookie': { name: 'Drift Hunters Rookie', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Drift Hunters 5+ times.' },
+            'drift_hunters_pro': { name: 'Drift Hunters Pro', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Drift Hunters 25+ times.' },
+            'drift_hunters_legend': { name: 'Drift Hunters Legend', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Drift Hunters 100+ times.' },
+            'drift_hunters_master': { name: 'Drift Hunters Master', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Drift Hunters 250+ times.' },
+            'drift_hunters_mythic': { name: 'Drift Hunters Mythic', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Drift Hunters 500+ times.' },
+            'drift_hunters_insane': { name: 'Drift Hunters Insane', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Drift Hunters 1000+ times.' },
+            'shell_shockers_rookie': { name: 'Shell Shockers Rookie', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Shell Shockers 5+ times.' },
+            'shell_shockers_pro': { name: 'Shell Shockers Pro', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Shell Shockers 25+ times.' },
+            'shell_shockers_legend': { name: 'Shell Shockers Legend', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Shell Shockers 100+ times.' },
+            'shell_shockers_master': { name: 'Shell Shockers Master', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Shell Shockers 250+ times.' },
+            'shell_shockers_mythic': { name: 'Shell Shockers Mythic', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Shell Shockers 500+ times.' },
+            'shell_shockers_insane': { name: 'Shell Shockers Insane', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Shell Shockers 1000+ times.' },
+            'moto_x3m_rookie': { name: 'Moto X3M Rookie', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Moto X3M 5+ times.' },
+            'moto_x3m_pro': { name: 'Moto X3M Pro', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Moto X3M 25+ times.' },
+            'moto_x3m_legend': { name: 'Moto X3M Legend', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Moto X3M 100+ times.' },
+            'moto_x3m_master': { name: 'Moto X3M Master', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Moto X3M 250+ times.' },
+            'moto_x3m_mythic': { name: 'Moto X3M Mythic', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Moto X3M 500+ times.' },
+            'moto_x3m_insane': { name: 'Moto X3M Insane', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Moto X3M 1000+ times.' },
+            'subway_surfers_rookie': { name: 'Subway Surfers Rookie', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 5+ times.' },
+            'subway_surfers_pro': { name: 'Subway Surfers Pro', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 25+ times.' },
+            'subway_surfers_legend': { name: 'Subway Surfers Legend', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 100+ times.' },
+            'subway_surfers_master': { name: 'Subway Surfers Master', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 250+ times.' },
+            'subway_surfers_mythic': { name: 'Subway Surfers Mythic', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 500+ times.' },
+            'subway_surfers_insane': { name: 'Subway Surfers Insane', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 1000+ times.' }
         };
 
         let activeDM = null;
@@ -1749,6 +1831,7 @@
             const input = document.getElementById('dm-input');
             const text = input.value.trim();
             if (!text || !activeDM) return;
+            if ((currentUserProfile.blockedUsers || []).includes(activeDM.id)) return alert('Unblock this user before sending a DM.');
             
             try {
                 const participants = [currentUser.uid, activeDM.id].sort();
@@ -1880,6 +1963,8 @@
                 container.innerHTML = '';
                 snap.forEach(d => {
                     const m = d.data();
+                    const blocked = currentUserProfile.blockedUsers || [];
+                    if (blocked.includes(m.uid)) return;
                     const isMine = m.uid === currentUser.uid;
                     const isAdminUser = currentUserProfile.role === 'admin';
                     const div = document.createElement('div');
@@ -1887,7 +1972,7 @@
                     div.innerHTML = `
                         <div class="message-bubble ${isMine ? 'mine' : 'others'}">
                             <div class="flex justify-between items-start gap-4">
-                                <span class="text-[10px] font-bold block mb-1">${m.user}</span>
+                                <button onclick="showUserProfile('${m.uid}')" class="text-[10px] font-bold block mb-1 hover:text-blue-400">${m.user}</button>
                                 ${isAdminUser ? `<button onclick="deleteMessage('${d.id}')" class="text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="trash-2" class="w-3 h-3"></i></button>` : ''}
                             </div>
                             ${m.gif ? `<img src="${m.gif}" class="rounded-lg mb-2 w-full max-h-56 object-contain bg-black/20">` : ''}
@@ -2160,6 +2245,7 @@
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <button onclick="adminAction('${d.id}', 'mute')" class="bg-zinc-800 hover:bg-yellow-600/20 text-xs px-3 py-1.5 rounded-lg border border-zinc-700 transition-all">${data.muted ? 'Unmute' : 'Mute'}</button>
+                            <button onclick="adminAction('${d.id}', 'ban')" class="bg-zinc-800 hover:bg-red-600/20 text-xs px-3 py-1.5 rounded-lg border border-zinc-700 transition-all">${data.banned ? 'Unban' : 'Ban'}</button>
                             <button onclick="manageUserBadges('${d.id}', '${data.username}')" class="bg-zinc-800 hover:bg-blue-600/20 text-xs px-3 py-1.5 rounded-lg border border-zinc-700 transition-all">Badges</button>
                             <button onclick="editUserStats('${d.id}', '${data.username}')" class="bg-zinc-800 hover:bg-green-600/20 text-xs px-3 py-1.5 rounded-lg border border-zinc-700 transition-all">Stats</button>
                             <button onclick="adminAction('${d.id}', 'delete_messages')" class="bg-zinc-800 hover:bg-orange-600/20 text-xs px-3 py-1.5 rounded-lg border border-zinc-700 transition-all text-orange-500">Clear Chat</button>
@@ -2246,6 +2332,10 @@
             if (action === 'mute') {
                 const userDoc = await getDoc(doc(db, "users", id));
                 await updateDoc(doc(db, "users", id), { muted: !userDoc.data().muted });
+            } else if (action === 'ban') {
+                const userDoc = await getDoc(doc(db, "users", id));
+                const currentlyBanned = !!userDoc.data().banned;
+                await updateDoc(doc(db, "users", id), { banned: !currentlyBanned, muted: !currentlyBanned });
             } else if (action === 'delete') {
                 if (confirm("Are you sure you want to delete this user? This will also clean up their data.")) {
                     // 1. Mark messages as deleted
@@ -2275,17 +2365,18 @@
 
         // Profile
         window.showOwnProfile = () => {
-            renderProfileData(currentUserProfile, true);
+            renderProfileData(currentUserProfile, true, currentUser.uid);
         };
 
         window.showUserProfile = async (userId) => {
             const userDoc = await getDoc(doc(db, "users", userId));
             if (userDoc.exists()) {
-                renderProfileData(userDoc.data(), false);
+                renderProfileData(userDoc.data(), false, userId);
             }
         };
 
-        function renderProfileData(data, isOwn) {
+        function renderProfileData(data, isOwn, userId) {
+            profileViewingUserId = userId;
             document.getElementById('profile-username').innerText = data.username;
             document.getElementById('profile-avatar').src = data.avatarUrl || `https://picsum.photos/seed/${data.username}/200`;
             document.getElementById('profile-role').innerText = data.role;
@@ -2326,10 +2417,32 @@
                 }
             }
 
+            const blockBtn = document.getElementById('profile-block-btn');
+            if (blockBtn) {
+                if (isOwn) {
+                    blockBtn.classList.add('hidden');
+                } else {
+                    const blocked = (currentUserProfile.blockedUsers || []).includes(userId);
+                    blockBtn.classList.remove('hidden');
+                    blockBtn.innerText = blocked ? 'Unblock' : 'Block';
+                }
+            }
+
             const profileModal = document.getElementById('profile-modal');
             if (profileModal) profileModal.classList.remove('hidden');
             lucide.createIcons();
         }
+
+        window.toggleBlockCurrentProfile = async () => {
+            if (!profileViewingUserId || profileViewingUserId === currentUser.uid) return;
+            const blocked = currentUserProfile.blockedUsers || [];
+            const exists = blocked.includes(profileViewingUserId);
+            const next = exists ? blocked.filter(v => v !== profileViewingUserId) : [...blocked, profileViewingUserId];
+            await updateDoc(doc(db, 'users', currentUser.uid), { blockedUsers: next });
+            currentUserProfile.blockedUsers = next;
+            const btn = document.getElementById('profile-block-btn');
+            if (btn) btn.innerText = exists ? 'Block' : 'Unblock';
+        };
 
         window.closeProfile = () => {
             const profileModal = document.getElementById('profile-modal');
@@ -2483,8 +2596,10 @@
             gambleTab = tab;
             document.getElementById('gamble-view-slots').classList.toggle('hidden', tab !== 'slots');
             document.getElementById('gamble-view-coinflip').classList.toggle('hidden', tab !== 'coinflip');
+            document.getElementById('gamble-view-blackjack').classList.toggle('hidden', tab !== 'blackjack');
             document.getElementById('gamble-tab-slots').classList.toggle('active', tab === 'slots');
             document.getElementById('gamble-tab-coinflip').classList.toggle('active', tab === 'coinflip');
+            document.getElementById('gamble-tab-blackjack').classList.toggle('active', tab === 'blackjack');
         };
 
         window.playCoinflip = async (choice) => {
@@ -2497,6 +2612,45 @@
             const resDiv = document.getElementById('slots-result');
             resDiv.innerText = `Coin landed on ${flip}. ${win > 0 ? 'You won +10!' : 'You lost 10.'}`;
             resDiv.className = win > 0 ? 'text-green-500 font-bold' : 'text-red-500 font-bold';
+        };
+
+        function drawCard() {
+            return Math.floor(Math.random() * 10) + 1;
+        }
+
+        window.startBlackjack = async () => {
+            if (currentUserProfile.points < 20) return alert('Need 20 points.');
+            blackjackState = { inRound: true, dealer: drawCard() + drawCard(), player: drawCard() + drawCard() };
+            document.getElementById('bj-dealer').innerText = blackjackState.dealer;
+            document.getElementById('bj-player').innerText = blackjackState.player;
+            document.getElementById('slots-result').innerText = 'Round started.';
+        };
+
+        window.blackjackHit = async () => {
+            if (!blackjackState.inRound) return;
+            blackjackState.player += drawCard();
+            document.getElementById('bj-player').innerText = blackjackState.player;
+            if (blackjackState.player > 21) {
+                blackjackState.inRound = false;
+                currentUserProfile.points -= 20;
+                await updateDoc(doc(db, 'users', currentUser.uid), { points: currentUserProfile.points });
+                updatePointsDisplay();
+                document.getElementById('slots-result').innerText = 'Bust! -20 points';
+            }
+        };
+
+        window.blackjackStand = async () => {
+            if (!blackjackState.inRound) return;
+            while (blackjackState.dealer < 17) blackjackState.dealer += drawCard();
+            document.getElementById('bj-dealer').innerText = blackjackState.dealer;
+            blackjackState.inRound = false;
+            let delta = -20;
+            if (blackjackState.dealer > 21 || blackjackState.player > blackjackState.dealer) delta = 20;
+            if (blackjackState.player === blackjackState.dealer) delta = 0;
+            currentUserProfile.points += delta;
+            await updateDoc(doc(db, 'users', currentUser.uid), { points: currentUserProfile.points });
+            updatePointsDisplay();
+            document.getElementById('slots-result').innerText = delta > 0 ? 'You win +20!' : (delta === 0 ? 'Push (0)' : 'Dealer wins -20');
         };
 
         // Leaderboard
