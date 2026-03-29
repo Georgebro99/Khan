@@ -33,19 +33,25 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function userExists() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
     function isAdmin() {
       return isAuthenticated() &&
         (
-          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+          (userExists() && getUserData().role == 'admin') ||
           (request.auth.token.email == "kyler@nexus.games")
         );
     }
 
     function isApproved() {
       return isAuthenticated() && 
-        (isAdmin() || (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.approved == true));
+        (isAdmin() || (userExists() && getUserData().approved == true));
     }
 
     function isValidMessage(data) {
@@ -63,6 +69,24 @@ service cloud.firestore {
              data.createdAt is number;
     }
 
+    function isValidFriendRequest(data) {
+      return data.fromId == request.auth.uid &&
+             data.fromName is string &&
+             data.toId is string &&
+             data.toName is string &&
+             data.status in ['pending', 'accepted'] &&
+             data.timestamp is number;
+    }
+
+    function isValidDirectMessage(data) {
+      return request.auth.uid in data.participants &&
+             data.text is string && data.text.size() > 0 && data.text.size() < 1000 &&
+             data.senderId == request.auth.uid &&
+             data.senderName is string &&
+             data.timestamp is number &&
+             data.channelId is string;
+    }
+
     match /messages/{messageId} {
       allow read: if isApproved();
       allow create: if isApproved() && isValidMessage(request.resource.data);
@@ -70,7 +94,7 @@ service cloud.firestore {
     }
     
     match /users/{userId} {
-      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isOwner(userId) && 
                       isValidUser(request.resource.data) && 
                       (
@@ -81,6 +105,21 @@ service cloud.firestore {
         (isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.approved == resource.data.approved && request.resource.data.role == resource.data.role) ||
         (isAdmin() && isValidUser(request.resource.data))
       );
+    }
+
+    match /friend_requests/{requestId} {
+      allow read: if isAuthenticated() && (resource.data.fromId == request.auth.uid || resource.data.toId == request.auth.uid);
+      allow create: if isAuthenticated() && isValidFriendRequest(request.resource.data);
+      allow update: if isAuthenticated() && (resource.data.toId == request.auth.uid) && 
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+                      request.resource.data.status == 'accepted';
+      allow delete: if isAuthenticated() && (resource.data.fromId == request.auth.uid || resource.data.toId == request.auth.uid);
+    }
+
+    match /direct_messages/{messageId} {
+      allow read: if isAuthenticated() && (request.auth.uid in resource.data.participants);
+      allow create: if isAuthenticated() && isValidDirectMessage(request.resource.data);
+      allow delete: if isAuthenticated() && (resource.data.senderId == request.auth.uid);
     }
   }
 }

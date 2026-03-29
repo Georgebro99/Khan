@@ -51,6 +51,34 @@
         }
       },
       "required": ["username", "email", "approved", "role", "createdAt"]
+    },
+    "FriendRequest": {
+      "title": "FriendRequest",
+      "description": "A request to be friends",
+      "type": "object",
+      "properties": {
+        "fromId": { "type": "string" },
+        "fromName": { "type": "string" },
+        "toId": { "type": "string" },
+        "toName": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted"] },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["fromId", "fromName", "toId", "toName", "status", "timestamp"]
+    },
+    "DirectMessage": {
+      "title": "DirectMessage",
+      "description": "A private message between two users",
+      "type": "object",
+      "properties": {
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "text": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "channelId": { "type": "string" }
+      },
+      "required": ["participants", "text", "senderId", "senderName", "timestamp", "channelId"]
     }
   },
   "firestore": {
@@ -61,6 +89,14 @@
     "/users/{userId}": {
       "schema": "User",
       "description": "User profiles collection"
+    },
+    "/friend_requests/{requestId}": {
+      "schema": "FriendRequest",
+      "description": "Friend requests collection"
+    },
+    "/direct_messages/{messageId}": {
+      "schema": "DirectMessage",
+      "description": "Direct messages collection"
     }
   }
 }

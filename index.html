@@ -364,24 +364,81 @@
     </div>
 
     <div id="chat-panel" class="chat-panel">
-        <div class="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
-            <div class="flex items-center gap-2">
-                <i data-lucide="message-square" class="text-blue-500 w-5 h-5"></i>
-                <h2 class="font-bold text-white">Live Chat</h2>
-            </div>
-            <button onclick="toggleChat()" class="text-zinc-500 hover:text-white transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </div>
-        <div id="chat-messages" class="chat-messages">
-            <!-- Messages will appear here -->
-        </div>
-        <div class="chat-input-container">
-            <div class="flex gap-2">
-                <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
-                <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg transition-colors">
-                    <i data-lucide="send" class="w-4 h-4"></i>
+        <div class="p-4 border-b border-zinc-800 flex flex-col gap-4 bg-zinc-900/50">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="message-square" class="text-blue-500 w-5 h-5"></i>
+                    <h2 class="font-bold text-white" id="chat-title">Live Chat</h2>
+                </div>
+                <button onclick="toggleChat()" class="text-zinc-500 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
+            </div>
+            <div class="flex gap-1 bg-black/40 p-1 rounded-lg">
+                <button onclick="setChatTab('global')" id="tab-global" class="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all bg-blue-600 text-white">Global</button>
+                <button onclick="setChatTab('friends')" id="tab-friends" class="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all text-zinc-500 hover:text-zinc-300">Friends</button>
+                <button onclick="setChatTab('dms')" id="tab-dms" class="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all text-zinc-500 hover:text-zinc-300">DMs</button>
+            </div>
+        </div>
+
+        <!-- Global Chat View -->
+        <div id="view-global" class="flex-1 flex flex-direction-column overflow-hidden">
+            <div id="chat-messages" class="chat-messages flex-1"></div>
+            <div class="chat-input-container">
+                <div class="flex gap-2">
+                    <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg transition-colors">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Friends View -->
+        <div id="view-friends" class="hidden flex-1 flex flex-col overflow-hidden">
+            <div class="p-4 border-b border-zinc-800">
+                <div class="relative">
+                    <input type="text" id="user-search" placeholder="Search users..." oninput="searchUsers()" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-zinc-500"></i>
+                </div>
+            </div>
+            <div id="friends-content" class="flex-1 overflow-y-auto p-4 space-y-6">
+                <div>
+                    <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Friend Requests</h3>
+                    <div id="friend-requests-list" class="space-y-2"></div>
+                </div>
+                <div>
+                    <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Your Friends</h3>
+                    <div id="friends-list" class="space-y-2"></div>
+                </div>
+                <div id="search-results-section" class="hidden">
+                    <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Search Results</h3>
+                    <div id="search-results-list" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DM View -->
+        <div id="view-dms" class="hidden flex-1 flex flex-col overflow-hidden">
+            <div id="dm-list-view" class="flex-1 overflow-y-auto p-4 space-y-2">
+                <!-- DM channels list -->
+            </div>
+            <div id="dm-chat-view" class="hidden flex-1 flex flex-col overflow-hidden">
+                <div class="p-3 border-b border-zinc-800 flex items-center gap-3">
+                    <button onclick="backToDMList()" class="text-zinc-500 hover:text-white">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    </button>
+                    <span id="dm-target-name" class="font-bold text-sm"></span>
+                </div>
+                <div id="dm-messages" class="chat-messages flex-1"></div>
+                <div class="chat-input-container">
+                    <div class="flex gap-2">
+                        <input type="text" id="dm-input" placeholder="Type a message..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <button onclick="sendDM()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg transition-colors">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -430,6 +487,15 @@
         let unreadCount = 0;
         let isChatOpen = false;
         let isAdminPanelOpen = false;
+        let currentChatTab = 'global';
+        let currentDMChannel = null;
+        let friends = [];
+        let friendRequests = [];
+        let dmChannels = [];
+        let unsubscribeDMs = null;
+        let unsubscribeChat = null;
+        let unsubscribeFriends1 = null;
+        let unsubscribeFriends2 = null;
 
         // Error Handling Spec for Firestore Operations
         const OperationType = {
@@ -512,6 +578,8 @@
                             
                             render();
                             setupChat();
+                            setupFriends();
+                            setupDMChannels();
                         } else {
                             document.getElementById('login-screen').style.display = 'none';
                             document.getElementById('pending-screen').classList.remove('hidden');
@@ -733,15 +801,38 @@
         });
 
         window.handleLogout = () => {
+            if (unsubscribeChat) unsubscribeChat();
+            if (unsubscribeFriends1) unsubscribeFriends1();
+            if (unsubscribeFriends2) unsubscribeFriends2();
+            if (unsubscribeDMs) unsubscribeDMs();
             signOut(auth);
         };
 
         // Chat Logic
+        window.setChatTab = (tab) => {
+            currentChatTab = tab;
+            const views = ['global', 'friends', 'dms'];
+            views.forEach(v => {
+                document.getElementById(`view-${v}`).classList.toggle('hidden', v !== tab);
+                const tabBtn = document.getElementById(`tab-${v}`);
+                if (v === tab) {
+                    tabBtn.classList.add('bg-blue-600', 'text-white');
+                    tabBtn.classList.remove('text-zinc-500');
+                } else {
+                    tabBtn.classList.remove('bg-blue-600', 'text-white');
+                    tabBtn.classList.add('text-zinc-500');
+                }
+            });
+            document.getElementById('chat-title').innerText = tab === 'global' ? 'Live Chat' : (tab === 'friends' ? 'Friends' : 'Direct Messages');
+            lucide.createIcons();
+        };
+
         function setupChat() {
+            if (unsubscribeChat) unsubscribeChat();
             const path = "messages";
             const q = query(collection(db, path), orderBy("timestamp", "asc"), limit(50));
             
-            onSnapshot(q, (snapshot) => {
+            unsubscribeChat = onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('chat-messages');
                 container.innerHTML = '';
                 
@@ -802,6 +893,258 @@
                 handleFirestoreError(error, OperationType.DELETE, path);
             }
         };
+
+        // Friends & DM Logic
+        function setupFriends() {
+            if (unsubscribeFriends1) unsubscribeFriends1();
+            if (unsubscribeFriends2) unsubscribeFriends2();
+            
+            const path = "friend_requests";
+            const q = query(collection(db, path), where("toId", "==", currentUser.uid));
+            const q2 = query(collection(db, path), where("fromId", "==", currentUser.uid));
+
+            // Listen for requests to me
+            unsubscribeFriends1 = onSnapshot(q, (snapshot) => {
+                friendRequests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderFriendsUI();
+            });
+
+            // Listen for requests from me (to track accepted status)
+            unsubscribeFriends2 = onSnapshot(q2, (snapshot) => {
+                const acceptedFromMe = snapshot.docs
+                    .map(doc => ({ id: doc.id, ...doc.data() }))
+                    .filter(r => r.status === 'accepted');
+                
+                // Combine with accepted requests to me
+                const qAcceptedToMe = query(collection(db, path), where("toId", "==", currentUser.uid), where("status", "==", "accepted"));
+                getDocs(qAcceptedToMe).then(snap => {
+                    const acceptedToMe = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    friends = [...acceptedFromMe, ...acceptedToMe].map(f => ({
+                        uid: f.fromId === currentUser.uid ? f.toId : f.fromId,
+                        username: f.fromId === currentUser.uid ? f.toName : f.fromName
+                    }));
+                    renderFriendsUI();
+                    renderDMList();
+                });
+            });
+        }
+
+        function renderFriendsUI() {
+            const requestsList = document.getElementById('friend-requests-list');
+            const friendsList = document.getElementById('friends-list');
+
+            const pendingRequests = friendRequests.filter(r => r.status === 'pending');
+            if (pendingRequests.length === 0) {
+                requestsList.innerHTML = '<p class="text-[10px] text-zinc-600 italic">No pending requests</p>';
+            } else {
+                requestsList.innerHTML = pendingRequests.map(r => `
+                    <div class="flex items-center justify-between p-2 bg-zinc-900 rounded-lg border border-zinc-800">
+                        <span class="text-xs font-bold text-white">${r.fromName}</span>
+                        <div class="flex gap-1">
+                            <button onclick="acceptFriendRequest('${r.id}')" class="bg-blue-600 p-1 rounded hover:bg-blue-500"><i data-lucide="check" class="w-3 h-3"></i></button>
+                            <button onclick="deleteFriendRequest('${r.id}')" class="bg-zinc-800 p-1 rounded hover:bg-zinc-700"><i data-lucide="x" class="w-3 h-3"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            if (friends.length === 0) {
+                friendsList.innerHTML = '<p class="text-[10px] text-zinc-600 italic">No friends yet</p>';
+            } else {
+                friendsList.innerHTML = friends.map(f => `
+                    <div class="flex items-center justify-between p-2 bg-zinc-900 rounded-lg border border-zinc-800 group">
+                        <span class="text-xs font-bold text-white">${f.username}</span>
+                        <button onclick="openDM('${f.uid}', '${f.username}')" class="text-blue-500 opacity-0 group-hover:opacity-100 transition-all">
+                            <i data-lucide="message-circle" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+            lucide.createIcons();
+        }
+
+        window.searchUsers = async () => {
+            const queryText = document.getElementById('user-search').value.trim().toLowerCase();
+            const resultsSection = document.getElementById('search-results-section');
+            const resultsList = document.getElementById('search-results-list');
+
+            if (queryText.length < 2) {
+                resultsSection.classList.add('hidden');
+                return;
+            }
+
+            try {
+                const q = query(collection(db, "users"), where("username", ">=", queryText), where("username", "<=", queryText + '\uf8ff'), limit(5));
+                const snapshot = await getDocs(q);
+                
+                resultsSection.classList.remove('hidden');
+                if (snapshot.empty) {
+                    resultsList.innerHTML = '<p class="text-[10px] text-zinc-600 italic">No users found</p>';
+                } else {
+                    resultsList.innerHTML = snapshot.docs
+                        .map(doc => ({ id: doc.id, ...doc.data() }))
+                        .filter(u => u.id !== currentUser.uid)
+                        .map(u => {
+                            const isFriend = friends.some(f => f.uid === u.id);
+                            const hasRequest = friendRequests.some(r => r.fromId === u.id || r.toId === u.id);
+                            
+                            return `
+                                <div class="flex items-center justify-between p-2 bg-zinc-900 rounded-lg border border-zinc-800">
+                                    <span class="text-xs font-bold text-white">${u.username}</span>
+                                    ${isFriend ? '<span class="text-[10px] text-zinc-500">Friends</span>' : 
+                                      (hasRequest ? '<span class="text-[10px] text-zinc-500">Pending</span>' : 
+                                      `<button onclick="sendFriendRequest('${u.id}', '${u.username}')" class="text-blue-500 hover:text-blue-400"><i data-lucide="user-plus" class="w-4 h-4"></i></button>`)}
+                                </div>
+                            `;
+                        }).join('');
+                }
+                lucide.createIcons();
+            } catch (error) {
+                console.error("Search error:", error);
+            }
+        };
+
+        window.sendFriendRequest = async (toId, toName) => {
+            try {
+                await addDoc(collection(db, "friend_requests"), {
+                    fromId: currentUser.uid,
+                    fromName: currentUserProfile.username,
+                    toId: toId,
+                    toName: toName,
+                    status: 'pending',
+                    timestamp: Date.now()
+                });
+                searchUsers();
+            } catch (error) {
+                handleFirestoreError(error, OperationType.CREATE, "friend_requests");
+            }
+        };
+
+        window.acceptFriendRequest = async (requestId) => {
+            try {
+                await updateDoc(doc(db, "friend_requests", requestId), {
+                    status: 'accepted'
+                });
+            } catch (error) {
+                handleFirestoreError(error, OperationType.UPDATE, "friend_requests");
+            }
+        };
+
+        window.deleteFriendRequest = async (requestId) => {
+            try {
+                await deleteDoc(doc(db, "friend_requests", requestId));
+            } catch (error) {
+                handleFirestoreError(error, OperationType.DELETE, "friend_requests");
+            }
+        };
+
+        // DM Logic
+        function setupDMChannels() {
+            const q = query(collection(db, "direct_messages"), where("participants", "array-contains", currentUser.uid), orderBy("timestamp", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const channels = {};
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (!channels[data.channelId]) {
+                        channels[data.channelId] = {
+                            id: data.channelId,
+                            lastMessage: data.text,
+                            timestamp: data.timestamp,
+                            otherUser: data.participants.find(p => p !== currentUser.uid),
+                            otherName: data.senderId === currentUser.uid ? (data.receiverName || 'User') : data.senderName
+                        };
+                    }
+                });
+                dmChannels = Object.values(channels);
+                renderDMList();
+            });
+        }
+
+        function renderDMList() {
+            const list = document.getElementById('dm-list-view');
+            if (dmChannels.length === 0) {
+                list.innerHTML = '<p class="text-zinc-500 text-center py-8 text-xs italic">No direct messages yet. Add friends to start chatting!</p>';
+                return;
+            }
+
+            list.innerHTML = dmChannels.map(c => `
+                <div onclick="openDM('${c.otherUser}', '${c.otherName}')" class="p-3 bg-zinc-900 rounded-xl border border-zinc-800 hover:border-blue-500 cursor-pointer transition-all">
+                    <div class="flex justify-between items-baseline mb-1">
+                        <span class="font-bold text-white text-sm">${c.otherName}</span>
+                        <span class="text-[9px] text-zinc-500">${new Date(c.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <p class="text-xs text-zinc-400 truncate">${c.lastMessage}</p>
+                </div>
+            `).join('');
+        }
+
+        window.openDM = (otherId, otherName) => {
+            const channelId = [currentUser.uid, otherId].sort().join('_');
+            currentDMChannel = { id: channelId, otherId, otherName };
+            
+            setChatTab('dms');
+            document.getElementById('dm-list-view').classList.add('hidden');
+            document.getElementById('dm-chat-view').classList.remove('hidden');
+            document.getElementById('dm-target-name').innerText = otherName;
+            
+            if (unsubscribeDMs) unsubscribeDMs();
+            
+            const q = query(collection(db, "direct_messages"), where("channelId", "==", channelId), orderBy("timestamp", "asc"), limit(50));
+            unsubscribeDMs = onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('dm-messages');
+                container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const msg = doc.data();
+                    const isMine = msg.senderId === currentUser.uid;
+                    const wrapper = document.createElement('div');
+                    wrapper.className = `message-container ${isMine ? 'items-end' : 'items-start'}`;
+                    const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    wrapper.innerHTML = `
+                        <div class="message-bubble ${isMine ? 'mine' : 'others'}">
+                            <div class="flex justify-between items-baseline mb-1 gap-4">
+                                <span class="text-[10px] font-bold ${isMine ? 'text-blue-100' : 'text-blue-400'} uppercase tracking-wider">${isMine ? 'You' : msg.senderName}</span>
+                                <span class="text-[9px] ${isMine ? 'text-blue-200' : 'text-zinc-500'}">${time}</span>
+                            </div>
+                            <p class="text-sm ${isMine ? 'text-white' : 'text-zinc-200'}">${msg.text}</p>
+                        </div>
+                    `;
+                    container.appendChild(wrapper);
+                });
+                container.scrollTop = container.scrollHeight;
+            });
+        };
+
+        window.backToDMList = () => {
+            document.getElementById('dm-list-view').classList.remove('hidden');
+            document.getElementById('dm-chat-view').classList.add('hidden');
+            currentDMChannel = null;
+            if (unsubscribeDMs) unsubscribeDMs();
+        };
+
+        window.sendDM = async () => {
+            const input = document.getElementById('dm-input');
+            const text = input.value.trim();
+            if (text && currentDMChannel) {
+                try {
+                    await addDoc(collection(db, "direct_messages"), {
+                        participants: [currentUser.uid, currentDMChannel.otherId],
+                        text: text,
+                        senderId: currentUser.uid,
+                        senderName: currentUserProfile.username,
+                        timestamp: Date.now(),
+                        channelId: currentDMChannel.id
+                    });
+                    input.value = '';
+                } catch (error) {
+                    handleFirestoreError(error, OperationType.CREATE, "direct_messages");
+                }
+            }
+        };
+
+        document.getElementById('dm-input')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') window.sendDM();
+        });
 
         window.sendMessage = async () => {
             const path = "messages";
