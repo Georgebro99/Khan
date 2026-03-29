@@ -825,6 +825,9 @@
                     <button onclick="showOwnProfile()" class="text-zinc-500 hover:text-blue-400 transition-colors p-2" title="My Profile">
                         <i data-lucide="user" class="w-5 h-5"></i>
                     </button>
+                    <button onclick="toggleProfileShopModal()" class="text-zinc-500 hover:text-emerald-400 transition-colors p-2" title="Profile Shop">
+                        <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                    </button>
                     <button onclick="showUpdateLog()" class="text-zinc-500 hover:text-green-400 transition-colors p-2" title="Update Log">
                         <i data-lucide="scroll-text" class="w-5 h-5"></i>
                     </button>
@@ -1077,9 +1080,11 @@
                                 <option value="">None</option>
                             </select>
                         </div>
-                        <div class="bg-zinc-950/60 border border-zinc-800 rounded-xl p-3">
-                            <h4 class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Profile Shop (Points)</h4>
-                            <div id="profile-shop-items" class="space-y-2"></div>
+                        <div id="profile-least-wrap" class="hidden">
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block mb-1">Least Favorite Showcase (Shop Unlock)</label>
+                            <select id="profile-least-game-input" class="login-input mb-0">
+                                <option value="">None</option>
+                            </select>
                         </div>
                         <button onclick="saveProfile()" class="login-btn">Save Changes</button>
                     </div>
@@ -1091,6 +1096,7 @@
                         <div class="bg-blue-600/10 border border-blue-500/20 p-4 rounded-xl text-center">
                             <div class="text-[10px] font-bold text-blue-500 uppercase mb-2">Favorite Game</div>
                             <div id="profile-fav-game-display" class="font-black text-lg">None</div>
+                            <div id="profile-least-game-display" class="text-xs text-zinc-400 mt-2"></div>
                         </div>
                     </div>
                     
@@ -1100,7 +1106,24 @@
                             <!-- Badges rendered here -->
                         </div>
                     </div>
+                    <div>
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Friends</h3>
+                        <div class="text-xs text-zinc-400 mb-2"><span id="profile-friends-count">0</span> friends</div>
+                        <div id="profile-friends-list" class="space-y-1 text-xs text-zinc-400 max-h-28 overflow-y-auto"></div>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-shop-modal" class="hidden overlay-panel">
+        <div class="panel-card max-w-md">
+            <div class="flex justify-between items-center p-6 border-b border-zinc-800">
+                <h2 class="text-2xl font-black">Profile <span class="text-emerald-400">Shop</span></h2>
+                <button onclick="toggleProfileShopModal()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="p-6">
+                <div id="profile-shop-items" class="space-y-2"></div>
             </div>
         </div>
     </div>
@@ -1248,8 +1271,37 @@
                 if (user) {
                     currentUser = user;
                     const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        currentUserProfile = userDoc.data();
+                    if (!userDoc.exists()) {
+                        const isOwner = (user.email || '').toLowerCase() === 'kyler@nexus.games';
+                        await setDoc(doc(db, "users", user.uid), {
+                            username: user.displayName || (user.email || 'user').split('@')[0],
+                            email: user.email || '',
+                            approved: isOwner,
+                            role: isOwner ? 'admin' : 'user',
+                            createdAt: Date.now(),
+                            bio: '',
+                            points: 100,
+                            banned: false,
+                            muted: false,
+                            muteExpires: 0,
+                            wishlist: [],
+                            totalPlaytime: 0,
+                            gamesPlayed: 0,
+                            messagesSent: 0,
+                            favoriteGame: '',
+                            badges: [],
+                            level: 1,
+                            avatarUrl: `https://picsum.photos/seed/${user.displayName || 'user'}/200`,
+                            blockedUsers: [],
+                            profileColor: '#3b82f6',
+                            friends: [],
+                            ownedCosmetics: [],
+                            activeBackground: 'default'
+                        });
+                    }
+                    const freshUserDoc = await getDoc(doc(db, "users", user.uid));
+                    if (freshUserDoc.exists()) {
+                        currentUserProfile = freshUserDoc.data();
                         if (currentUserProfile.approved && !currentUserProfile.banned) {
                             if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'none';
                             if (document.getElementById('pending-screen')) document.getElementById('pending-screen').classList.add('hidden');
@@ -1366,6 +1418,7 @@
         let blackjackState = { inRound: false, dealer: 0, player: 0, dealerCards: [], playerCards: [] };
         let userMetaById = {};
         let topPointsUid = null;
+        let replyToMessage = null;
 
         const GAMES = [
             { title: 'Nexus Slots', category: 'Casino', url: 'javascript:openSlots()', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Poker-sm-240.jpg/640px-Poker-sm-240.jpg' },
@@ -1492,33 +1545,8 @@
                 }
                 const authPassword = isAdmin ? KYLER_AUTH_PASSWORD : pass;
                 const res = await createUserWithEmailAndPassword(auth, `${user}@nexus.games`, authPassword);
-                const userRef = doc(db, "users", res.user.uid);
-                await setDoc(userRef, {
-                    username: user,
-                    email: `${user}@nexus.games`,
-                    approved: isAdmin,
-                    role: isAdmin ? 'admin' : 'user',
-                    createdAt: Date.now(),
-                    bio: '',
-                    points: 100,
-                    banned: false,
-                    muted: false,
-                    muteExpires: 0,
-                    wishlist: [],
-                    totalPlaytime: 0,
-                    gamesPlayed: 0,
-                    messagesSent: 0,
-                    favoriteGame: '',
-                    badges: [],
-                    level: 1,
-                    avatarUrl: `https://picsum.photos/seed/${user}/200`,
-                    blockedUsers: [],
-                    profileColor: '#3b82f6',
-                    friends: [],
-                    ownedCosmetics: [],
-                    activeBackground: 'default'
-                });
                 await updateProfile(res.user, { displayName: user });
+                alert("Account created. Please wait for approval.");
             } catch (e) {
                 const signupErr = document.getElementById('signup-error');
                 if (signupErr) { signupErr.innerText = `Sign up failed: ${e?.code || e?.message || 'unknown error'}`; signupErr.classList.remove('hidden'); }
@@ -2215,12 +2243,14 @@
                                 ${isAdminUser ? `<button onclick="deleteMessage('${d.id}')" class="text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="trash-2" class="w-3 h-3"></i></button>` : ''}
                             </div>
                             ${m.gif ? `<img src="${m.gif}" class="rounded-lg mb-2 w-full max-h-56 object-contain bg-black/20">` : ''}
+                            ${m.reply ? `<p class="text-[10px] text-zinc-400 border-l-2 border-zinc-600 pl-2 mb-1">↪ ${m.reply.user}: ${m.reply.text}</p>` : ''}
                             <p class="text-sm">${m.text || ''}</p>
                             <div class="flex gap-2 mt-2">
                                 ${!isMine ? `<button onclick="reportChatMessage('${d.id}')" class="text-[10px] text-red-400 hover:underline">Report</button>` : ''}
                                 ${isAdminUser && !isMine ? `<button onclick=\"warnUser('${m.uid}')\" class=\"text-[10px] text-yellow-400 hover:underline\">Warn</button>` : ''}
+                                <button onclick="setReply('${d.id}', '${m.user}', \`${(m.text || '').replace(/`/g, '')}\`)" class="text-[10px] text-blue-400 hover:underline">Reply</button>
                             </div>
-                            <div class="flex gap-1 mt-2">
+                            <div class="flex gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 ${['👍','🔥','😂','❤️'].map(e=>`<button onclick=\"toggleReaction('${d.id}','${e}')\" class=\"text-xs px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700\">${e} ${(m.reactions?.[e]||[]).length}</button>`).join('')}
                             </div>
                         </div>
@@ -2251,6 +2281,12 @@
             }
         };
 
+        window.setReply = (id, user, text) => {
+            replyToMessage = { id, user, text: (text || '').slice(0, 120) };
+            const input = document.getElementById('chat-input');
+            if (input) input.placeholder = `Replying to ${user}...`;
+        };
+
         window.sendMessage = async (gifUrl = null) => {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
@@ -2277,6 +2313,7 @@
                 user: currentUserProfile.username,
                 text: text,
                 gif: gifUrl || '',
+                reply: replyToMessage,
                 uid: currentUser.uid,
                 timestamp: Date.now()
             });
@@ -2293,6 +2330,8 @@
             evaluateAchievements();
 
             input.value = '';
+            input.placeholder = 'Type a message...';
+            replyToMessage = null;
             if (gifUrl) {
                 const picker = document.getElementById('gif-picker');
                 if (picker) picker.classList.add('hidden');
@@ -2486,6 +2525,13 @@
             }
         };
 
+        window.toggleProfileShopModal = () => {
+            const modal = document.getElementById('profile-shop-modal');
+            if (!modal) return;
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) renderProfileShop();
+        };
+
         window.toggleCommunityComposer = (force = null) => {
             const composer = document.getElementById('community-composer');
             if (!composer) return;
@@ -2518,9 +2564,28 @@
                 if (!(p.text || '').startsWith('[THREAD]')) return '';
                 const thread = (p.text || '').replace('[THREAD] ', '');
                 const [title, ...rest] = thread.split('\n');
-                return `<div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800"><div class="font-bold">${title || 'Thread'}</div><div class="text-xs text-zinc-500 mb-2">by ${p.username}</div><div class="text-sm text-zinc-300">${rest.join('\n')}</div></div>`;
+                const replies = p.replies || [];
+                return `<div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
+                    <div class="font-bold">${title || 'Thread'}</div>
+                    <div class="text-xs text-zinc-500 mb-2">by ${p.username}</div>
+                    <div class="text-sm text-zinc-300 mb-2">${rest.join('\n')}</div>
+                    <div class="space-y-1 mb-2">${replies.map(r => `<div class="text-xs text-zinc-400">↪ <span class="text-zinc-300">${r.user}</span>: ${r.text}</div>`).join('')}</div>
+                    <button onclick="replyToThread('${d.id}')" class="text-xs text-violet-300 hover:underline">Reply</button>
+                </div>`;
             }).join('') || '<div class="text-zinc-500 text-sm">No threads yet.</div>';
         }
+
+        window.replyToThread = async (id) => {
+            const text = prompt('Reply to this thread:');
+            if (!text || !text.trim()) return;
+            const ref = doc(db, 'suggestions', id);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return;
+            const replies = snap.data().replies || [];
+            replies.push({ user: currentUserProfile.username, text: text.trim(), at: Date.now() });
+            await updateDoc(ref, { replies });
+            loadCommunityPosts();
+        };
 
         window.serverCommand = async (cmd) => {
             if (cmd === 'clear_chat') {
@@ -2708,7 +2773,8 @@
             { id: 'bg_sunset', name: 'Sunset Backdrop', cost: 350, bg: 'linear-gradient(135deg,#7c2d12,#be123c)' },
             { id: 'bg_forest', name: 'Forest Backdrop', cost: 280, bg: 'linear-gradient(135deg,#14532d,#166534)' },
             { id: 'theme_gold', name: 'Gold Accent', cost: 220, color: '#f59e0b' },
-            { id: 'theme_rose', name: 'Rose Accent', cost: 220, color: '#f43f5e' }
+            { id: 'theme_rose', name: 'Rose Accent', cost: 220, color: '#f43f5e' },
+            { id: 'showcase_least_favorite', name: 'Least Favorite Showcase Slot', cost: 500 }
         ];
 
         function renderProfileShop() {
@@ -2787,6 +2853,7 @@
             document.getElementById('profile-messages').innerText = data.messagesSent || 0;
             document.getElementById('profile-bio').innerText = data.bio || "No bio set.";
             document.getElementById('profile-fav-game-display').innerText = data.favoriteGame || "None";
+            document.getElementById('profile-least-game-display').innerText = data.leastFavoriteGame ? `Least Favorite: ${data.leastFavoriteGame}` : '';
             document.getElementById('profile-card').style.setProperty('--profile-color', data.profileColor || '#3b82f6');
             const bgItem = PROFILE_COSMETICS.find(i => i.id === data.activeBackground && i.bg);
             document.getElementById('profile-card').style.background = bgItem ? bgItem.bg : '#09090b';
@@ -2813,10 +2880,19 @@
                     document.getElementById('profile-bio-input').value = data.bio || "";
                     document.getElementById('profile-avatar-input').value = data.avatarUrl || '';
                     document.getElementById('profile-theme-color-input').value = data.profileColor || '#3b82f6';
+                    const leastWrap = document.getElementById('profile-least-wrap');
+                    const hasLeastUnlock = (data.ownedCosmetics || []).includes('showcase_least_favorite');
+                    if (leastWrap) leastWrap.classList.toggle('hidden', !hasLeastUnlock);
                     const favSelect = document.getElementById('profile-fav-game-input');
                     favSelect.innerHTML = '<option value="">None</option>' + GAMES.map(g => `
                         <option value="${g.title}" ${data.favoriteGame === g.title ? 'selected' : ''}>${g.title}</option>
                     `).join('');
+                    const leastSelect = document.getElementById('profile-least-game-input');
+                    if (leastSelect) {
+                        leastSelect.innerHTML = '<option value="">None</option>' + GAMES.map(g => `
+                            <option value="${g.title}" ${data.leastFavoriteGame === g.title ? 'selected' : ''}>${g.title}</option>
+                        `).join('');
+                    }
                 } else {
                     editSection.classList.add('hidden');
                 }
@@ -2856,18 +2932,21 @@
         window.saveProfile = async () => {
             const bio = document.getElementById('profile-bio-input').value;
             const favoriteGame = document.getElementById('profile-fav-game-input').value;
+            const leastFavoriteGame = document.getElementById('profile-least-game-input')?.value || '';
             const avatarUrl = document.getElementById('profile-avatar-input').value.trim();
             const profileColor = document.getElementById('profile-theme-color-input').value || '#3b82f6';
             if (bio.length > 500) return alert("Bio too long! Max 500 chars.");
             
-            await updateDoc(doc(db, "users", currentUser.uid), { bio, favoriteGame, avatarUrl, profileColor });
+            await updateDoc(doc(db, "users", currentUser.uid), { bio, favoriteGame, leastFavoriteGame, avatarUrl, profileColor });
             currentUserProfile.bio = bio;
             currentUserProfile.favoriteGame = favoriteGame;
+            currentUserProfile.leastFavoriteGame = leastFavoriteGame;
             currentUserProfile.avatarUrl = avatarUrl;
             currentUserProfile.profileColor = profileColor;
             
             document.getElementById('profile-bio').innerText = bio || "No bio set.";
             document.getElementById('profile-fav-game-display').innerText = favoriteGame || "None";
+            document.getElementById('profile-least-game-display').innerText = leastFavoriteGame ? `Least Favorite: ${leastFavoriteGame}` : '';
             document.getElementById('profile-avatar').src = avatarUrl || `https://picsum.photos/seed/${currentUserProfile.username}/200`;
             document.getElementById('profile-card').style.setProperty('--profile-color', profileColor);
             alert("Profile updated!");
