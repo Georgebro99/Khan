@@ -1032,7 +1032,11 @@
                         <h2 id="profile-username" class="text-3xl font-black"></h2>
                         <div class="steam-lvl-badge" id="profile-level">1</div>
                     </div>
-                    <div class="flex items-center gap-2"><span id="profile-role" class="profile-mini-chip text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-transparent"></span><button id="profile-block-btn" class="hidden text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-red-600/20 text-red-400" onclick="toggleBlockCurrentProfile()">Block</button></div>
+                    <div class="flex items-center gap-2">
+                        <span id="profile-role" class="profile-mini-chip text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-transparent"></span>
+                        <button id="profile-block-btn" class="hidden text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-red-600/20 text-red-400" onclick="toggleBlockCurrentProfile()">Block</button>
+                        <button id="profile-report-btn" class="hidden text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-amber-600/20 text-amber-300" onclick="openProfileReportModal()">Report</button>
+                    </div>
                     <p id="profile-bio" class="text-zinc-400 text-sm mt-4 italic line-clamp-2"></p>
                 </div>
                 <div class="text-right">
@@ -1131,11 +1135,38 @@
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Friends</h3>
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Friends</h3>
+                            <button id="profile-friends-open-btn" onclick="openProfileFriendsFrame()" class="hidden text-[10px] font-bold uppercase tracking-widest text-blue-400 hover:text-blue-300">View all</button>
+                        </div>
                         <div class="text-xs text-zinc-400 mb-2"><span id="profile-friends-count">0</span> friends</div>
                         <div id="profile-friends-list" class="space-y-1 text-xs text-zinc-400 max-h-28 overflow-y-auto"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-friends-modal" class="hidden overlay-panel">
+        <div class="panel-card max-w-md">
+            <div class="flex justify-between items-center p-6 border-b border-zinc-800">
+                <h2 id="profile-friends-modal-title" class="text-xl font-black">Friends</h2>
+                <button onclick="closeProfileFriendsFrame()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div id="profile-friends-modal-list" class="p-6 space-y-2 max-h-[55vh] overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <div id="profile-report-modal" class="hidden overlay-panel">
+        <div class="panel-card max-w-md">
+            <div class="flex justify-between items-center p-6 border-b border-zinc-800">
+                <h2 class="text-xl font-black">Report Profile</h2>
+                <button onclick="closeProfileReportModal()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="p-6 space-y-3">
+                <p id="profile-report-target" class="text-sm text-zinc-400"></p>
+                <textarea id="profile-report-reason" class="login-input h-28 mb-0" placeholder="Explain what happened so admins can review it..."></textarea>
+                <button onclick="submitProfileReport()" class="login-btn bg-amber-600 hover:bg-amber-500">Submit Report</button>
             </div>
         </div>
     </div>
@@ -1447,6 +1478,8 @@
         let gambleTab = 'slots';
         const KYLER_AUTH_PASSWORD = 'kyler_admin_secret_k';
         let profileViewingUserId = null;
+        let profileViewingUsername = '';
+        let profileViewingFriends = [];
         let blackjackState = { inRound: false, dealer: 0, player: 0, dealerCards: [], playerCards: [] };
         let userMetaById = {};
         let topPointsUid = null;
@@ -3125,8 +3158,51 @@
             }
         };
 
+        async function getFriendsForUser(userId) {
+            const [sentSnap, receivedSnap] = await Promise.all([
+                getDocs(query(collection(db, "friend_requests"), where("fromId", "==", userId), where("status", "==", "accepted"))),
+                getDocs(query(collection(db, "friend_requests"), where("toId", "==", userId), where("status", "==", "accepted")))
+            ]);
+            const seen = new Set();
+            const friends = [];
+            sentSnap.forEach(d => {
+                const row = d.data();
+                if (!seen.has(row.toId)) {
+                    seen.add(row.toId);
+                    friends.push({ id: row.toId, name: row.toName || 'Unknown User' });
+                }
+            });
+            receivedSnap.forEach(d => {
+                const row = d.data();
+                if (!seen.has(row.fromId)) {
+                    seen.add(row.fromId);
+                    friends.push({ id: row.fromId, name: row.fromName || 'Unknown User' });
+                }
+            });
+            return friends;
+        }
+
+        function renderProfileFriendsPreview() {
+            const countEl = document.getElementById('profile-friends-count');
+            const listEl = document.getElementById('profile-friends-list');
+            const openBtn = document.getElementById('profile-friends-open-btn');
+            if (!countEl || !listEl || !openBtn) return;
+            countEl.innerText = String(profileViewingFriends.length);
+            if (!profileViewingFriends.length) {
+                listEl.innerHTML = `<div class="text-zinc-500">No friends listed.</div>`;
+                openBtn.classList.add('hidden');
+                return;
+            }
+            listEl.innerHTML = profileViewingFriends.slice(0, 4).map(f => `
+                <button onclick="showUserProfile('${f.id}')" class="block w-full text-left hover:text-blue-300 transition-colors">${f.name}</button>
+            `).join('');
+            openBtn.classList.toggle('hidden', profileViewingFriends.length <= 4);
+        }
+
         function renderProfileData(data, isOwn, userId) {
             profileViewingUserId = userId;
+            profileViewingUsername = data.username || 'User';
+            profileViewingFriends = [];
             document.getElementById('profile-username').innerText = data.username;
             document.getElementById('profile-avatar').src = data.avatarUrl || `https://picsum.photos/seed/${data.username}/200`;
             document.getElementById('profile-role').innerText = data.role;
@@ -3196,11 +3272,78 @@
                     blockBtn.innerText = blocked ? 'Unblock' : 'Block';
                 }
             }
+            const reportBtn = document.getElementById('profile-report-btn');
+            if (reportBtn) reportBtn.classList.toggle('hidden', isOwn);
+
+            const friendsList = document.getElementById('profile-friends-list');
+            if (friendsList) friendsList.innerHTML = `<div class="text-zinc-500">Loading...</div>`;
+            getFriendsForUser(userId).then(friends => {
+                profileViewingFriends = friends;
+                renderProfileFriendsPreview();
+            }).catch(() => {
+                const listEl = document.getElementById('profile-friends-list');
+                const countEl = document.getElementById('profile-friends-count');
+                if (listEl) listEl.innerHTML = `<div class="text-red-400">Failed to load friends.</div>`;
+                if (countEl) countEl.innerText = '0';
+            });
 
             const profileModal = document.getElementById('profile-modal');
             if (profileModal) profileModal.classList.remove('hidden');
             lucide.createIcons();
         }
+
+        window.openProfileFriendsFrame = () => {
+            const modal = document.getElementById('profile-friends-modal');
+            const title = document.getElementById('profile-friends-modal-title');
+            const list = document.getElementById('profile-friends-modal-list');
+            if (!modal || !title || !list) return;
+            title.innerText = `${profileViewingUsername}'s Friends`;
+            if (!profileViewingFriends.length) {
+                list.innerHTML = `<div class="text-zinc-500 text-sm">No friends listed.</div>`;
+            } else {
+                list.innerHTML = profileViewingFriends.map(f => `
+                    <button onclick="closeProfileFriendsFrame();showUserProfile('${f.id}')" class="w-full text-left p-3 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-blue-500/40 hover:text-blue-300 transition-colors">${f.name}</button>
+                `).join('');
+            }
+            modal.classList.remove('hidden');
+        };
+        window.closeProfileFriendsFrame = () => {
+            const modal = document.getElementById('profile-friends-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.openProfileReportModal = () => {
+            if (!profileViewingUserId || profileViewingUserId === currentUser?.uid) return;
+            const modal = document.getElementById('profile-report-modal');
+            const target = document.getElementById('profile-report-target');
+            const reason = document.getElementById('profile-report-reason');
+            if (!modal || !target || !reason) return;
+            target.innerText = `Reporting profile: ${profileViewingUsername}`;
+            reason.value = '';
+            modal.classList.remove('hidden');
+        };
+        window.closeProfileReportModal = () => {
+            const modal = document.getElementById('profile-report-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+        window.submitProfileReport = async () => {
+            const reason = document.getElementById('profile-report-reason')?.value?.trim();
+            if (!reason || reason.length < 10) return alert('Please include at least 10 characters describing what happened.');
+            await addDoc(collection(db, 'chat_reports'), {
+                messageId: `profile:${profileViewingUserId}`,
+                messageText: '',
+                reportedUserId: profileViewingUserId,
+                reportedUsername: profileViewingUsername,
+                reporterId: currentUser.uid,
+                reporterName: currentUserProfile.username,
+                reason,
+                type: 'profile',
+                status: 'pending',
+                createdAt: Date.now()
+            });
+            closeProfileReportModal();
+            alert('Profile report sent to admins.');
+        };
 
         window.toggleBlockCurrentProfile = async () => {
             if (!profileViewingUserId || profileViewingUserId === currentUser.uid) return;
