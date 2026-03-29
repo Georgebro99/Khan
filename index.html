@@ -1142,7 +1142,7 @@
     <div id="community-modal" class="hidden overlay-panel">
         <div class="panel-card max-w-2xl">
             <div class="flex justify-between items-center p-6 border-b border-zinc-800">
-                <h2 class="text-2xl font-black tracking-tighter">Community <span class="text-violet-400">Threads</span></h2>
+                <div class="flex items-center gap-2"><button id="community-back-btn" onclick="openThread(null)" class="hidden text-zinc-400 hover:text-white"><i data-lucide="arrow-left" class="w-5 h-5"></i></button><h2 class="text-2xl font-black tracking-tighter">Community <span class="text-violet-400">Threads</span></h2></div>
                 <div class="flex items-center gap-2">
                     <button onclick="toggleCommunityComposer()" class="bg-violet-600/20 text-violet-300 p-2 rounded-lg" title="New Thread"><i data-lucide="plus" class="w-5 h-5"></i></button>
                     <button onclick="toggleCommunityModal()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
@@ -2428,7 +2428,9 @@
                 if (r) r.classList.add('spinning');
             });
             
-            await new Promise(r => setTimeout(r, 1000));
+            const spinIntervals = reels.map(r => setInterval(() => { if (r) r.innerText = SLOT_ITEMS[Math.floor(Math.random()*SLOT_ITEMS.length)]; }, 90));
+            await new Promise(r => setTimeout(r, 1400));
+            spinIntervals.forEach(i => clearInterval(i));
             
             const results = reels.map(r => {
                 if (r) {
@@ -2613,7 +2615,9 @@
             if (!wrap || !currentUser) return;
             const snap = await getDocs(query(collection(db, 'suggestions'), orderBy('timestamp', 'desc'), limit(100)));
             const search = (document.getElementById('community-search')?.value || '').toLowerCase();
-            wrap.innerHTML = snap.docs.map(d => {
+            document.getElementById('community-back-btn')?.classList.toggle('hidden', !activeThreadId);
+            const docs = activeThreadId ? snap.docs.filter(d => d.id === activeThreadId) : snap.docs;
+            wrap.innerHTML = docs.map(d => {
                 const p = d.data();
                 if (!(p.text || '').startsWith('[THREAD]')) return '';
                 if (search && !(p.text || '').toLowerCase().includes(search)) return '';
@@ -2622,21 +2626,22 @@
                 const replies = p.replies || [];
                 const reactions = p.reactions || {};
                 const expanded = activeThreadId === d.id;
-                return `<div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800">
-                    <button onclick="openThread('${d.id}')" class="font-bold hover:text-violet-300 text-left w-full">${title || 'Thread'}</button>
+                return `<div class="group p-3 rounded-xl bg-zinc-900 border border-zinc-800 cursor-pointer" onclick="openThread('${d.id}')">
+                    <div class="font-bold hover:text-violet-300 text-left w-full">${title || 'Thread'}</div>
                     <div class="text-xs text-zinc-500 mb-2">by ${p.username}</div>
                     <div class="text-sm text-zinc-300 mb-2 ${expanded ? '' : 'line-clamp-2'}">${rest.join('\n')}</div>
-                    <div class="flex gap-1 mb-2">
+                    <div class="flex gap-1 mb-2 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
                         ${['👍','🔥','😂','❤️'].map(e=>`<button onclick="toggleThreadReaction('${d.id}','${e}')" class="text-xs px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700">${e} ${(reactions[e]||[]).length}</button>`).join('')}
                         ${p.uid === currentUser.uid || currentUserProfile.role === 'admin' ? `<button onclick="deleteThread('${d.id}')" class="text-xs px-1.5 py-0.5 rounded bg-red-900/40 text-red-300">Delete</button>` : ''}
                     </div>
                     <div class="space-y-1 mb-2">${replies.map((r,idx) => `<div class="text-xs text-zinc-400">↪ <span class="text-zinc-300">${r.user}</span>: ${r.text} <button onclick="toggleThreadReplyReaction('${d.id}', ${idx}, '❤️')" class="text-[10px] text-pink-300">❤️ ${(r.reactions?.['❤️']||[]).length}</button></div>`).join('')}</div>
-                    ${expanded ? `<button onclick="replyToThread('${d.id}')" class="text-xs text-violet-300 hover:underline">Reply</button>` : '<span class="text-[10px] text-zinc-500">Open thread to reply</span>'}
+                    ${expanded ? `<button onclick=\"event.stopPropagation();replyToThread('${d.id}')\" class=\"text-xs text-violet-300 hover:underline\">Reply</button>` : '<span class="text-[10px] text-zinc-500">Open thread to reply</span>'}
                 </div>`;
             }).join('') || '<div class="text-zinc-500 text-sm">No threads yet.</div>';
         }
 
         window.openThread = (id) => {
+            if (!id) { activeThreadId = null; loadCommunityPosts(); return; }
             activeThreadId = activeThreadId === id ? null : id;
             loadCommunityPosts();
         };
@@ -2811,10 +2816,16 @@
             if (points === null) return;
             const level = prompt(`Edit level for ${username}:`, data.level || 1);
             if (level === null) return;
+            const playtime = prompt(`Edit total playtime seconds for ${username}:`, data.totalPlaytime || 0);
+            if (playtime === null) return;
+            const messages = prompt(`Edit messages sent for ${username}:`, data.messagesSent || 0);
+            if (messages === null) return;
             
             await updateDoc(doc(db, "users", userId), {
                 points: parseInt(points),
-                level: parseInt(level)
+                level: parseInt(level),
+                totalPlaytime: parseInt(playtime),
+                messagesSent: parseInt(messages)
             });
             loadUsers();
             alert("Stats updated!");
@@ -2852,7 +2863,7 @@
                     ];
                     for (const q of collectionsToClean) {
                         const s = await getDocs(q);
-                        for (const d of s.docs) await deleteDoc(doc(db, d.ref.path));
+                        for (const d of s.docs) { try { await deleteDoc(d.ref); } catch(e) { console.warn('cleanup skip', e); } }
                     }
                     // 4. Delete user doc
                     await deleteDoc(doc(db, "users", id));
@@ -2892,7 +2903,67 @@
             { id: 'showcase_speedrun', name: 'Speedrun Showcase Slot', cost: 480, tab: 'showcases' },
             { id: 'showcase_mastered', name: 'Mastered Game Showcase', cost: 500, tab: 'showcases' },
             { id: 'showcase_chill', name: 'Chill Game Showcase', cost: 450, tab: 'showcases' },
-            { id: 'showcase_rage', name: 'Rage Game Showcase', cost: 550, tab: 'showcases' }
+            { id: 'showcase_rage', name: 'Rage Game Showcase', cost: 550, tab: 'showcases' },
+            { id: 'theme_extra_1', name: 'Extra Theme 1', cost: 305, tab: 'themes', bg: 'linear-gradient(135deg,hsl(17 70% 20%), hsl(23 70% 45%))' },
+            { id: 'theme_extra_2', name: 'Extra Theme 2', cost: 310, tab: 'themes', bg: 'linear-gradient(135deg,hsl(34 70% 20%), hsl(46 70% 45%))' },
+            { id: 'theme_extra_3', name: 'Extra Theme 3', cost: 315, tab: 'themes', bg: 'linear-gradient(135deg,hsl(51 70% 20%), hsl(69 70% 45%))' },
+            { id: 'theme_extra_4', name: 'Extra Theme 4', cost: 320, tab: 'themes', bg: 'linear-gradient(135deg,hsl(68 70% 20%), hsl(92 70% 45%))' },
+            { id: 'theme_extra_5', name: 'Extra Theme 5', cost: 325, tab: 'themes', bg: 'linear-gradient(135deg,hsl(85 70% 20%), hsl(115 70% 45%))' },
+            { id: 'theme_extra_6', name: 'Extra Theme 6', cost: 330, tab: 'themes', bg: 'linear-gradient(135deg,hsl(102 70% 20%), hsl(138 70% 45%))' },
+            { id: 'theme_extra_7', name: 'Extra Theme 7', cost: 335, tab: 'themes', bg: 'linear-gradient(135deg,hsl(119 70% 20%), hsl(161 70% 45%))' },
+            { id: 'theme_extra_8', name: 'Extra Theme 8', cost: 340, tab: 'themes', bg: 'linear-gradient(135deg,hsl(136 70% 20%), hsl(184 70% 45%))' },
+            { id: 'theme_extra_9', name: 'Extra Theme 9', cost: 345, tab: 'themes', bg: 'linear-gradient(135deg,hsl(153 70% 20%), hsl(207 70% 45%))' },
+            { id: 'theme_extra_10', name: 'Extra Theme 10', cost: 350, tab: 'themes', bg: 'linear-gradient(135deg,hsl(170 70% 20%), hsl(230 70% 45%))' },
+            { id: 'theme_extra_11', name: 'Extra Theme 11', cost: 355, tab: 'themes', bg: 'linear-gradient(135deg,hsl(187 70% 20%), hsl(253 70% 45%))' },
+            { id: 'theme_extra_12', name: 'Extra Theme 12', cost: 360, tab: 'themes', bg: 'linear-gradient(135deg,hsl(204 70% 20%), hsl(276 70% 45%))' },
+            { id: 'theme_extra_13', name: 'Extra Theme 13', cost: 365, tab: 'themes', bg: 'linear-gradient(135deg,hsl(221 70% 20%), hsl(299 70% 45%))' },
+            { id: 'theme_extra_14', name: 'Extra Theme 14', cost: 370, tab: 'themes', bg: 'linear-gradient(135deg,hsl(238 70% 20%), hsl(322 70% 45%))' },
+            { id: 'theme_extra_15', name: 'Extra Theme 15', cost: 375, tab: 'themes', bg: 'linear-gradient(135deg,hsl(255 70% 20%), hsl(345 70% 45%))' },
+            { id: 'theme_extra_16', name: 'Extra Theme 16', cost: 380, tab: 'themes', bg: 'linear-gradient(135deg,hsl(272 70% 20%), hsl(8 70% 45%))' },
+            { id: 'theme_extra_17', name: 'Extra Theme 17', cost: 385, tab: 'themes', bg: 'linear-gradient(135deg,hsl(289 70% 20%), hsl(31 70% 45%))' },
+            { id: 'theme_extra_18', name: 'Extra Theme 18', cost: 390, tab: 'themes', bg: 'linear-gradient(135deg,hsl(306 70% 20%), hsl(54 70% 45%))' },
+            { id: 'theme_extra_19', name: 'Extra Theme 19', cost: 395, tab: 'themes', bg: 'linear-gradient(135deg,hsl(323 70% 20%), hsl(77 70% 45%))' },
+            { id: 'theme_extra_20', name: 'Extra Theme 20', cost: 400, tab: 'themes', bg: 'linear-gradient(135deg,hsl(340 70% 20%), hsl(100 70% 45%))' },
+            { id: 'color_extra_1', name: 'Extra Color 1', cost: 184, tab: 'colors', color: 'hsl(19 80% 55%)' },
+            { id: 'color_extra_2', name: 'Extra Color 2', cost: 188, tab: 'colors', color: 'hsl(38 80% 55%)' },
+            { id: 'color_extra_3', name: 'Extra Color 3', cost: 192, tab: 'colors', color: 'hsl(57 80% 55%)' },
+            { id: 'color_extra_4', name: 'Extra Color 4', cost: 196, tab: 'colors', color: 'hsl(76 80% 55%)' },
+            { id: 'color_extra_5', name: 'Extra Color 5', cost: 200, tab: 'colors', color: 'hsl(95 80% 55%)' },
+            { id: 'color_extra_6', name: 'Extra Color 6', cost: 204, tab: 'colors', color: 'hsl(114 80% 55%)' },
+            { id: 'color_extra_7', name: 'Extra Color 7', cost: 208, tab: 'colors', color: 'hsl(133 80% 55%)' },
+            { id: 'color_extra_8', name: 'Extra Color 8', cost: 212, tab: 'colors', color: 'hsl(152 80% 55%)' },
+            { id: 'color_extra_9', name: 'Extra Color 9', cost: 216, tab: 'colors', color: 'hsl(171 80% 55%)' },
+            { id: 'color_extra_10', name: 'Extra Color 10', cost: 220, tab: 'colors', color: 'hsl(190 80% 55%)' },
+            { id: 'color_extra_11', name: 'Extra Color 11', cost: 224, tab: 'colors', color: 'hsl(209 80% 55%)' },
+            { id: 'color_extra_12', name: 'Extra Color 12', cost: 228, tab: 'colors', color: 'hsl(228 80% 55%)' },
+            { id: 'color_extra_13', name: 'Extra Color 13', cost: 232, tab: 'colors', color: 'hsl(247 80% 55%)' },
+            { id: 'color_extra_14', name: 'Extra Color 14', cost: 236, tab: 'colors', color: 'hsl(266 80% 55%)' },
+            { id: 'color_extra_15', name: 'Extra Color 15', cost: 240, tab: 'colors', color: 'hsl(285 80% 55%)' },
+            { id: 'color_extra_16', name: 'Extra Color 16', cost: 244, tab: 'colors', color: 'hsl(304 80% 55%)' },
+            { id: 'color_extra_17', name: 'Extra Color 17', cost: 248, tab: 'colors', color: 'hsl(323 80% 55%)' },
+            { id: 'color_extra_18', name: 'Extra Color 18', cost: 252, tab: 'colors', color: 'hsl(342 80% 55%)' },
+            { id: 'color_extra_19', name: 'Extra Color 19', cost: 256, tab: 'colors', color: 'hsl(1 80% 55%)' },
+            { id: 'color_extra_20', name: 'Extra Color 20', cost: 260, tab: 'colors', color: 'hsl(20 80% 55%)' },
+            { id: 'showcase_extra_1', name: 'Extra Showcase 1', cost: 426, tab: 'showcases' },
+            { id: 'showcase_extra_2', name: 'Extra Showcase 2', cost: 432, tab: 'showcases' },
+            { id: 'showcase_extra_3', name: 'Extra Showcase 3', cost: 438, tab: 'showcases' },
+            { id: 'showcase_extra_4', name: 'Extra Showcase 4', cost: 444, tab: 'showcases' },
+            { id: 'showcase_extra_5', name: 'Extra Showcase 5', cost: 450, tab: 'showcases' },
+            { id: 'showcase_extra_6', name: 'Extra Showcase 6', cost: 456, tab: 'showcases' },
+            { id: 'showcase_extra_7', name: 'Extra Showcase 7', cost: 462, tab: 'showcases' },
+            { id: 'showcase_extra_8', name: 'Extra Showcase 8', cost: 468, tab: 'showcases' },
+            { id: 'showcase_extra_9', name: 'Extra Showcase 9', cost: 474, tab: 'showcases' },
+            { id: 'showcase_extra_10', name: 'Extra Showcase 10', cost: 480, tab: 'showcases' },
+            { id: 'showcase_extra_11', name: 'Extra Showcase 11', cost: 486, tab: 'showcases' },
+            { id: 'showcase_extra_12', name: 'Extra Showcase 12', cost: 492, tab: 'showcases' },
+            { id: 'showcase_extra_13', name: 'Extra Showcase 13', cost: 498, tab: 'showcases' },
+            { id: 'showcase_extra_14', name: 'Extra Showcase 14', cost: 504, tab: 'showcases' },
+            { id: 'showcase_extra_15', name: 'Extra Showcase 15', cost: 510, tab: 'showcases' },
+            { id: 'showcase_extra_16', name: 'Extra Showcase 16', cost: 516, tab: 'showcases' },
+            { id: 'showcase_extra_17', name: 'Extra Showcase 17', cost: 522, tab: 'showcases' },
+            { id: 'showcase_extra_18', name: 'Extra Showcase 18', cost: 528, tab: 'showcases' },
+            { id: 'showcase_extra_19', name: 'Extra Showcase 19', cost: 534, tab: 'showcases' },
+            { id: 'showcase_extra_20', name: 'Extra Showcase 20', cost: 540, tab: 'showcases' },
         ];
 
         function renderProfileShop() {
