@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -256,7 +255,10 @@
             </div>
             <input type="text" id="login-user" placeholder="Username" class="login-input">
             <input type="password" id="login-pass" placeholder="Password" class="login-input">
-            <button onclick="handleLogin()" class="login-btn">Sign In</button>
+            <div class="flex gap-2">
+                <button onclick="handleLogin()" class="login-btn flex-1">Sign In</button>
+                <button onclick="handleSignUp()" class="login-btn flex-1 bg-zinc-800 hover:bg-zinc-700">Sign Up</button>
+            </div>
             <p class="text-center mt-6 text-[10px] text-zinc-600 uppercase tracking-widest">Authorized Personnel Only</p>
         </div>
     </div>
@@ -334,44 +336,149 @@
         <div id="chat-badge" class="chat-badge hidden">0</div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            projectId: "gen-lang-client-0921564734",
+            appId: "1:596110904964:web:75fccdd48c6411bef87cd1",
+            apiKey: "AIzaSyDy2KA4v_AJWgyhZYB2EVAUrW7juRNJzkI",
+            authDomain: "gen-lang-client-0921564734.firebaseapp.com",
+            firestoreDatabaseId: "ai-studio-2a2b3ac8-093f-4a77-8fe4-9d32b7b3bfba",
+            storageBucket: "gen-lang-client-0921564734.firebasestorage.app",
+            messagingSenderId: "596110904964"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+
         // Global state
-        let myUsername = localStorage.getItem('nexus_user_name') || 'Guest';
+        let currentUser = null;
         let unreadCount = 0;
         let isChatOpen = false;
 
-        // Socket.io setup
-        const socket = io();
-
-        socket.on('chat_history', (messages) => {
-            const container = document.getElementById('chat-messages');
-            container.innerHTML = '';
-            messages.forEach(addMessageToUI);
-            scrollToBottom();
-        });
-
-        socket.on('new_message', (msg) => {
-            addMessageToUI(msg);
-            if (!isChatOpen) {
-                unreadCount++;
-                updateBadge();
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-ui').style.display = 'block';
+                render();
+                setupChat();
+            } else {
+                currentUser = null;
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('main-ui').style.display = 'none';
             }
-            scrollToBottom();
+            lucide.createIcons();
         });
 
-        socket.on('message_deleted', (id) => {
-            const el = document.getElementById(`msg-${id}`);
-            if (el) el.remove();
+        window.handleLogin = async () => {
+            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value;
+            const errorEl = document.getElementById('login-error');
+            errorEl.textContent = "Invalid username or password";
+
+            if (!user || !pass) return;
+
+            // Internal email mapping for Firebase Auth
+            const email = `${user}@nexus.games`;
+            // Firebase requires 6 chars minimum, so we pad it internally
+            const firebasePass = pass.length < 6 ? pass.padEnd(6, '_') : pass;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, firebasePass);
+            } catch (error) {
+                // If it's the first time for 'kyler' and 'k', bootstrap the account
+                // Newer Firebase versions return 'auth/invalid-credential' instead of 'auth/user-not-found'
+                if (user === 'kyler' && pass === 'k' && (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential')) {
+                    try {
+                        const userCredential = await createUserWithEmailAndPassword(auth, email, firebasePass);
+                        await updateProfile(userCredential.user, { displayName: user });
+                        return;
+                    } catch (createError) {
+                        // If user already exists, the error was likely wrong password
+                        if (createError.code === 'auth/email-already-in-use') {
+                            console.error("Login failed: Incorrect password for kyler");
+                        } else {
+                            console.error("Bootstrap failed:", createError);
+                        }
+                    }
+                }
+                
+                console.error("Login failed:", error.code, error.message);
+                errorEl.classList.remove('hidden');
+                setTimeout(() => errorEl.classList.add('hidden'), 3000);
+            }
+        };
+
+        window.handleSignUp = async () => {
+            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value;
+            const errorEl = document.getElementById('login-error');
+
+            if (!user || !pass) return;
+            
+            const email = `${user}@nexus.games`;
+            const firebasePass = pass.length < 6 ? pass.padEnd(6, '_') : pass;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, firebasePass);
+                await updateProfile(userCredential.user, { displayName: user });
+            } catch (error) {
+                console.error("Sign up failed:", error);
+                errorEl.textContent = error.code === 'auth/email-already-in-use' ? "Username already taken" : "Sign up failed";
+                errorEl.classList.remove('hidden');
+                setTimeout(() => errorEl.classList.add('hidden'), 3000);
+            }
+        };
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') {
+                window.handleLogin();
+            }
         });
+
+        window.handleLogout = () => {
+            signOut(auth);
+        };
+
+        // Chat Logic
+        function setupChat() {
+            const q = query(collection(db, "messages"), orderBy("timestamp", "asc"), limit(50));
+            
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('chat-messages');
+                container.innerHTML = '';
+                
+                snapshot.forEach((doc) => {
+                    const msg = { id: doc.id, ...doc.data() };
+                    addMessageToUI(msg);
+                });
+                
+                if (!isChatOpen && snapshot.docChanges().some(change => change.type === 'added')) {
+                    unreadCount++;
+                    updateBadge();
+                }
+                scrollToBottom();
+            }, (error) => {
+                console.error("Chat error:", error);
+            });
+        }
 
         function addMessageToUI(msg) {
             const container = document.getElementById('chat-messages');
             const wrapper = document.createElement('div');
-            const isMine = msg.user === myUsername;
+            const isMine = msg.uid === currentUser?.uid;
             
             wrapper.id = `msg-${msg.id}`;
             wrapper.className = `message-container ${isMine ? 'items-end' : 'items-start'}`;
             
+            const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...';
             const now = Date.now();
             const canDelete = isMine && (now - msg.timestamp <= 10000);
 
@@ -379,7 +486,7 @@
                 <div class="message-bubble ${isMine ? 'mine' : 'others'}">
                     <div class="flex justify-between items-baseline mb-1 gap-4">
                         <span class="text-[10px] font-bold ${isMine ? 'text-blue-100' : 'text-blue-400'} uppercase tracking-wider">${isMine ? 'You' : msg.user}</span>
-                        <span class="text-[9px] ${isMine ? 'text-blue-200' : 'text-zinc-500'}">${msg.time}</span>
+                        <span class="text-[9px] ${isMine ? 'text-blue-200' : 'text-zinc-500'}">${time}</span>
                     </div>
                     <p class="text-sm ${isMine ? 'text-white' : 'text-zinc-200'}">${msg.text}</p>
                 </div>
@@ -388,7 +495,6 @@
             
             container.appendChild(wrapper);
 
-            // Set a timer to hide the delete button after 10 seconds
             if (canDelete) {
                 const timeLeft = 10000 - (now - msg.timestamp);
                 setTimeout(() => {
@@ -398,27 +504,37 @@
             }
         }
 
-        function deleteMessage(id) {
-            socket.emit('delete_message', id);
-        }
+        window.deleteMessage = async (id) => {
+            try {
+                await deleteDoc(doc(db, "messages", id));
+            } catch (error) {
+                console.error("Delete failed:", error);
+            }
+        };
 
-        function sendMessage() {
+        window.sendMessage = async () => {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
-            if (text) {
-                socket.emit('send_message', {
-                    user: myUsername,
-                    text: text
-                });
-                input.value = '';
+            if (text && currentUser) {
+                try {
+                    await addDoc(collection(db, "messages"), {
+                        user: currentUser.displayName || 'Anonymous',
+                        text: text,
+                        timestamp: Date.now(),
+                        uid: currentUser.uid
+                    });
+                    input.value = '';
+                } catch (error) {
+                    console.error("Send failed:", error);
+                }
             }
-        }
+        };
 
         document.getElementById('chat-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+            if (e.key === 'Enter') window.sendMessage();
         });
 
-        function toggleChat() {
+        window.toggleChat = () => {
             const panel = document.getElementById('chat-panel');
             isChatOpen = !isChatOpen;
             panel.classList.toggle('open', isChatOpen);
@@ -428,7 +544,7 @@
                 updateBadge();
                 setTimeout(scrollToBottom, 300);
             }
-        }
+        };
 
         function updateBadge() {
             const badge = document.getElementById('chat-badge');
@@ -445,49 +561,7 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // Login Logic
-        function checkAuth() {
-            const isLoggedIn = localStorage.getItem('nexus_logged_in') === 'true';
-            if (isLoggedIn) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-ui').style.display = 'block';
-                render();
-            }
-        }
-
-        function handleLogin() {
-            const user = document.getElementById('login-user').value;
-            const pass = document.getElementById('login-pass').value;
-            const error = document.getElementById('login-error');
-
-            if (user === 'kyler' && pass === 'k') {
-                localStorage.setItem('nexus_logged_in', 'true');
-                localStorage.setItem('nexus_user_name', user);
-                myUsername = user;
-                document.getElementById('login-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('main-ui').style.display = 'block';
-                    render();
-                }, 300);
-            } else {
-                error.classList.remove('hidden');
-                setTimeout(() => error.classList.add('hidden'), 3000);
-            }
-        }
-
-        function handleLogout() {
-            localStorage.removeItem('nexus_logged_in');
-            localStorage.removeItem('nexus_user_name');
-            location.reload();
-        }
-
-        // Listen for enter key on login
-        document.getElementById('login-pass').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
-        });
-
-        // Initialize votes from localStorage or default to 0
+        // Game Logic
         const savedVotes = JSON.parse(localStorage.getItem('nexus_votes') || '{}');
         const userVotes = JSON.parse(localStorage.getItem('nexus_user_votes') || '{}');
 
@@ -506,9 +580,8 @@
 
         const CATEGORIES = ['All', ...new Set(GAMES.map(g => g.category))];
         let currentCategory = 'All';
-        let currentUrl = '';
 
-        function render() {
+        window.render = () => {
             const query = document.getElementById('search').value.toLowerCase();
             const grid = document.getElementById('grid');
             const featuredSection = document.getElementById('featured-section');
@@ -516,7 +589,6 @@
             const categoriesContainer = document.getElementById('categories');
             const sectionTitle = document.getElementById('section-title');
 
-            // Render Categories
             categoriesContainer.innerHTML = CATEGORIES.map(cat => `
                 <button onclick="setCategory('${cat}')" class="px-4 py-2 rounded-full text-sm font-bold transition-all ${currentCategory === cat ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'}">
                     ${cat}
@@ -525,7 +597,6 @@
 
             sectionTitle.innerText = currentCategory === 'All' ? 'All Games' : `${currentCategory} Games`;
 
-            // Find featured game (highest votes, must be > 0)
             const sortedByVotes = [...GAMES].sort((a, b) => b.votes - a.votes);
             const topGame = sortedByVotes[0];
 
@@ -602,67 +673,58 @@
                 </div>
             `}).join('');
             lucide.createIcons();
-        }
+        };
 
-        function setCategory(cat) {
+        window.setCategory = (cat) => {
             currentCategory = cat;
             render();
-        }
+        };
 
-        function vote(title, delta) {
+        window.vote = (title, delta) => {
             const game = GAMES.find(g => g.title === title);
             if (game) {
                 const currentVote = userVotes[title] || 0;
-                
                 if (currentVote === delta) {
-                    // Toggle off
                     game.votes -= delta;
                     delete userVotes[title];
                 } else if (currentVote === 0) {
-                    // New vote
                     game.votes += delta;
                     userVotes[title] = delta;
                 } else {
-                    // Switch vote
                     game.votes += (delta * 2);
                     userVotes[title] = delta;
                 }
-                
-                // Save to localStorage
                 const votesToSave = {};
                 GAMES.forEach(g => {
                     if (g.votes !== 0) votesToSave[g.title] = g.votes;
                 });
                 localStorage.setItem('nexus_votes', JSON.stringify(votesToSave));
                 localStorage.setItem('nexus_user_votes', JSON.stringify(userVotes));
-                
                 render();
             }
-        }
+        };
 
-        function play(url) {
-            currentUrl = url;
+        window.play = (url) => {
             document.getElementById('game-iframe').src = url;
             document.getElementById('game-container').style.display = 'block';
             document.getElementById('main-ui').style.display = 'none';
-        }
+        };
 
-        function closeGame() {
+        window.closeGame = () => {
             document.getElementById('game-iframe').src = '';
             document.getElementById('game-container').style.display = 'none';
             document.getElementById('main-ui').style.display = 'block';
-        }
+        };
 
-        function reloadGame() {
+        window.reloadGame = () => {
             const iframe = document.getElementById('game-iframe');
             if (iframe.src) {
                 const url = iframe.src;
                 iframe.src = '';
                 iframe.src = url;
             }
-        }
+        };
 
-        checkAuth();
         render();
         lucide.createIcons();
     </script>
