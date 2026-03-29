@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unblocked Games</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/index.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -335,11 +335,13 @@
     </div>
 
     <script>
-        // Socket.io setup
-        const socket = io();
+        // Global state
+        let myUsername = localStorage.getItem('nexus_user_name') || 'Guest';
         let unreadCount = 0;
         let isChatOpen = false;
-        let myUsername = localStorage.getItem('nexus_user_name') || 'Guest';
+
+        // Socket.io setup
+        const socket = io();
 
         socket.on('chat_history', (messages) => {
             const container = document.getElementById('chat-messages');
