@@ -986,7 +986,7 @@
                     <div id="reel3" class="slot-reel">🍒</div>
                 </div>
                 <div class="mb-6">
-                    <p class="text-zinc-400 text-sm mb-2">Bet: 10 Points</p>
+                    <p class="text-zinc-400 text-sm mb-2">Low hit chance, high payouts on triple matches.</p>
                     <button id="spin-btn" onclick="spinSlots()" class="login-btn bg-yellow-600 hover:bg-yellow-500">SPIN</button>
                 </div>
             </div>
@@ -1093,7 +1093,7 @@
                         </div>
                         <label class="flex items-center gap-2 text-xs text-zinc-400">
                             <input type="checkbox" id="profile-mini-controls-toggle" class="rounded">
-                            Use Mini Theme color for profile buttons/icons
+                            Use Theme color for profile buttons/icons
                         </label>
                         <div>
                             <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block mb-1">Showcase Game</label>
@@ -1147,7 +1147,6 @@
                 <div class="flex flex-wrap gap-2 mb-3 text-xs">
                     <button onclick="setShopTab('showcases')" id="shop-tab-showcases" class="category-btn active !px-2 !py-1">Showcases</button>
                     <button onclick="setShopTab('colors')" id="shop-tab-colors" class="category-btn !px-2 !py-1">Colors</button>
-                    <button onclick="setShopTab('miniThemes')" id="shop-tab-miniThemes" class="category-btn !px-2 !py-1">Mini</button>
                     <button onclick="setShopTab('themes')" id="shop-tab-themes" class="category-btn !px-2 !py-1">Themes</button>
                 </div>
                 <div id="profile-shop-items" class="space-y-2"></div>
@@ -1322,7 +1321,6 @@
                             avatarUrl: `https://picsum.photos/seed/${user.displayName || 'user'}/200`,
                             blockedUsers: [],
                             profileColor: '#3b82f6',
-                            miniThemeColor: '#3b82f6',
                             miniThemeControls: false,
                             friends: [],
                             ownedCosmetics: [],
@@ -1534,7 +1532,6 @@
                     avatarUrl: `https://picsum.photos/seed/kyler/200`,
                     blockedUsers: [],
                     profileColor: '#3b82f6',
-                    miniThemeColor: '#3b82f6',
                     miniThemeControls: false,
                     ownedCosmetics: [],
                     activeBackground: 'default'
@@ -2440,7 +2437,7 @@
         };
 
         // Slots
-        const SLOT_ITEMS = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+        const SLOT_ITEMS = ['🍒', '🍋', '🔔', '⭐', '💎', '7️⃣'];
         function getBetAmount(defaultBet = 10) {
             const val = parseInt(document.getElementById('gamble-bet')?.value || defaultBet);
             return Math.max(5, Math.min(500, isNaN(val) ? defaultBet : val));
@@ -2481,9 +2478,15 @@
 
             let win = -bet;
             if (results[0] && results[1] && results[2] && results[0] === results[1] && results[1] === results[2]) {
-                win = results[0] === '💎' ? Math.floor(bet * 8) : Math.floor(bet * 3);
-            } else if (results.filter(Boolean).filter(v => v === '7️⃣').length >= 2) {
-                win = Math.floor(bet * 0.8);
+                const triplePayouts = {
+                    '🍒': 6,
+                    '🍋': 9,
+                    '🔔': 14,
+                    '⭐': 20,
+                    '7️⃣': 28,
+                    '💎': 60
+                };
+                win = Math.floor(bet * (triplePayouts[results[0]] || 6));
             }
 
             const newPoints = currentUserProfile.points + win;
@@ -3002,17 +3005,8 @@
             { id: 'showcase_extra_19', name: 'Weekend Pick Spotlight', cost: 534, tab: 'showcases' },
             { id: 'showcase_extra_20', name: 'Hall of Fame Spotlight', cost: 540, tab: 'showcases' },
         ];
-        const baseColorCosmetics = PROFILE_COSMETICS.filter(item => item.tab === 'colors' && item.color);
-        PROFILE_COSMETICS.push(...baseColorCosmetics.map(item => ({
-            id: `mini_${item.id}`,
-            name: `${item.name} Mini Theme`,
-            cost: Math.max(220, (item.cost || 220) + 40),
-            tab: 'miniThemes',
-            miniThemeColor: item.color,
-        })));
-
         function cosmeticPreviewMarkup(item) {
-            const previewColor = item.color || item.miniThemeColor;
+            const previewColor = item.color;
             if (previewColor) {
                 return `
                     <div class="relative group inline-block mt-1">
@@ -3073,16 +3067,16 @@
         function applyMiniThemeStyling(data = {}) {
             const card = document.getElementById('profile-card');
             if (!card) return;
-            const miniThemeColor = data.miniThemeColor || '#3b82f6';
-            const [r, g, b] = cssColorToRgb(miniThemeColor);
-            card.style.setProperty('--profile-mini-color', miniThemeColor);
+            const accentColor = data.profileColor || '#3b82f6';
+            const [r, g, b] = cssColorToRgb(accentColor);
+            card.style.setProperty('--profile-mini-color', accentColor);
             card.style.setProperty('--profile-mini-rgb', `${r} ${g} ${b}`);
             card.classList.toggle('profile-mini-controls-enabled', !!data.miniThemeControls);
         }
 
         window.setShopTab = (tab) => {
             currentShopTab = tab;
-            ['showcases','colors','miniThemes','themes'].forEach(t => document.getElementById(`shop-tab-${t}`)?.classList.toggle('active', t===tab));
+            ['showcases','colors','themes'].forEach(t => document.getElementById(`shop-tab-${t}`)?.classList.toggle('active', t===tab));
             renderProfileShop();
         };
 
@@ -3108,11 +3102,6 @@
                 await updateDoc(doc(db, 'users', currentUser.uid), { profileColor: item.color });
                 currentUserProfile.profileColor = item.color;
                 document.getElementById('profile-card').style.setProperty('--profile-color', item.color);
-            }
-            if (item.miniThemeColor) {
-                await updateDoc(doc(db, 'users', currentUser.uid), { miniThemeColor: item.miniThemeColor });
-                currentUserProfile.miniThemeColor = item.miniThemeColor;
-                applyMiniThemeStyling(currentUserProfile);
             }
             if (item.bg) {
                 await updateDoc(doc(db, 'users', currentUser.uid), { activeBackground: id });
