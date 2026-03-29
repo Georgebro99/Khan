@@ -1261,16 +1261,13 @@
                     await signInWithEmailAndPassword(auth, `kyler@nexus.games`, 'k');
                     return;
                 } catch (e) {
-                    // If legacy Kyler account has a different password, use guaranteed fallback admin account.
-                    try {
-                        await signInWithEmailAndPassword(auth, `kyler_admin@nexus.games`, 'k');
-                        return;
-                    } catch {
+                    const code = e?.code || '';
+                    if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
                         try {
-                            const res = await createUserWithEmailAndPassword(auth, `kyler_admin@nexus.games`, 'k');
+                            const res = await createUserWithEmailAndPassword(auth, `kyler@nexus.games`, 'k');
                             await setDoc(doc(db, "users", res.user.uid), {
                                 username: 'kyler',
-                                email: `kyler_admin@nexus.games`,
+                                email: `kyler@nexus.games`,
                                 approved: true,
                                 role: 'admin',
                                 points: 100,
@@ -1288,14 +1285,22 @@
                             });
                             await updateProfile(res.user, { displayName: 'kyler' });
                             return;
-                        } catch {
+                        } catch (createErr) {
                             if (loginErr) {
-                                loginErr.innerText = 'Kyler login failed. Try again in a moment.';
+                                loginErr.innerText = `Kyler account setup failed: ${createErr?.code || 'unknown error'}`;
                                 loginErr.classList.remove('hidden');
                             }
                             return;
                         }
                     }
+
+                    if (loginErr) {
+                        loginErr.innerText = code === 'auth/wrong-password'
+                            ? 'Kyler account exists with a different password in Firebase Auth. Reset/delete that auth user, then use k.'
+                            : `Kyler login error: ${code || 'unknown error'}`;
+                        loginErr.classList.remove('hidden');
+                    }
+                    return;
                 }
             }
 
