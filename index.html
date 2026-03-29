@@ -1262,45 +1262,40 @@
                     return;
                 } catch (e) {
                     const code = e?.code || '';
-                    if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
-                        try {
-                            const res = await createUserWithEmailAndPassword(auth, `kyler@nexus.games`, 'k');
-                            await setDoc(doc(db, "users", res.user.uid), {
-                                username: 'kyler',
-                                email: `kyler@nexus.games`,
-                                approved: true,
-                                role: 'admin',
-                                points: 100,
-                                createdAt: Date.now(),
-                                totalPlaytime: 0,
-                                gamesPlayed: 0,
-                                messagesSent: 0,
-                                favoriteGame: '',
-                                bio: '',
-                                friends: [],
-                                level: 1,
-                                avatarUrl: `https://picsum.photos/seed/kyler/200`,
-                                warnings: 0,
-                                warningHistory: []
-                            });
-                            await updateProfile(res.user, { displayName: 'kyler' });
-                            return;
-                        } catch (createErr) {
-                            if (loginErr) {
-                                loginErr.innerText = `Kyler account setup failed: ${createErr?.code || 'unknown error'}`;
-                                loginErr.classList.remove('hidden');
+                    try {
+                        const res = await createUserWithEmailAndPassword(auth, `kyler@nexus.games`, 'k');
+                        await setDoc(doc(db, "users", res.user.uid), {
+                            username: 'kyler',
+                            email: `kyler@nexus.games`,
+                            approved: true,
+                            role: 'admin',
+                            points: 100,
+                            createdAt: Date.now(),
+                            totalPlaytime: 0,
+                            gamesPlayed: 0,
+                            messagesSent: 0,
+                            favoriteGame: '',
+                            bio: '',
+                            friends: [],
+                            level: 1,
+                            avatarUrl: `https://picsum.photos/seed/kyler/200`,
+                            warnings: 0,
+                            warningHistory: []
+                        });
+                        await updateProfile(res.user, { displayName: 'kyler' });
+                        return;
+                    } catch (createErr) {
+                        const createCode = createErr?.code || '';
+                        if (loginErr) {
+                            if (createCode === 'auth/email-already-in-use') {
+                                loginErr.innerText = 'Kyler account already exists with a different password in Firebase Auth. Reset that auth password to k in Firebase Console.';
+                            } else {
+                                loginErr.innerText = `Kyler login/setup failed: ${createCode || code || createErr?.message || e?.message || 'unknown error'}`;
                             }
-                            return;
+                            loginErr.classList.remove('hidden');
                         }
+                        return;
                     }
-
-                    if (loginErr) {
-                        loginErr.innerText = code === 'auth/wrong-password'
-                            ? 'Kyler account exists with a different password in Firebase Auth. Reset/delete that auth user, then use k.'
-                            : `Kyler login error: ${code || 'unknown error'}`;
-                        loginErr.classList.remove('hidden');
-                    }
-                    return;
                 }
             }
 
