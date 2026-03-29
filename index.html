@@ -950,6 +950,7 @@
                 <button id="gamble-tab-slots" onclick="setGambleTab('slots')" class="category-btn active">Slots</button>
                 <button id="gamble-tab-coinflip" onclick="setGambleTab('coinflip')" class="category-btn">Coinflip</button>
                 <button id="gamble-tab-blackjack" onclick="setGambleTab('blackjack')" class="category-btn">Blackjack</button>
+                <button id="gamble-tab-dice" onclick="setGambleTab('dice')" class="category-btn">Dice</button>
             </div>
             <div id="gamble-view-slots">
                 <div class="slot-machine">
@@ -979,12 +980,18 @@
                     <button onclick="blackjackStand()" class="login-btn bg-zinc-700">Stand</button>
                 </div>
             </div>
+            <div id="gamble-view-dice" class="hidden space-y-3">
+                <p class="text-zinc-400 text-sm">Bet: 10 points. Guess total of 4 dice (4-24). Exact = 4x, within 3 = 2x.</p>
+                <input id="dice-guess" type="number" min="4" max="24" class="login-input mb-0" placeholder="Enter guess 4-24">
+                <button onclick="playDice()" class="login-btn bg-zinc-700">Roll 4 Dice</button>
+                <div class="text-sm" id="dice-result"></div>
+            </div>
             <div id="slots-result" class="text-lg font-bold h-8"></div>
         </div>
     </div>
 
     <div id="profile-modal" class="hidden profile-modal" onclick="if(event.target===this)closeProfile()">
-        <div class="profile-card !p-0 overflow-hidden max-w-2xl">
+        <div id="profile-card" class="profile-card !p-0 overflow-hidden max-w-2xl" style="border-color: var(--profile-color, #3b82f6)">
             <div class="steam-profile-header">
                 <img id="profile-avatar" src="https://picsum.photos/seed/kyler/200" class="steam-avatar">
                 <div class="flex-1">
@@ -1039,6 +1046,17 @@
                         <div>
                             <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block mb-1">Bio</label>
                             <textarea id="profile-bio-input" class="login-input h-20 mb-0" placeholder="Update your bio..."></textarea>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block mb-1">Theme Color</label>
+                            <select id="profile-theme-color-input" class="login-input mb-0">
+                                <option value="#3b82f6">Blue</option>
+                                <option value="#22c55e">Green</option>
+                                <option value="#ef4444">Red</option>
+                                <option value="#a855f7">Purple</option>
+                                <option value="#f59e0b">Amber</option>
+                                <option value="#ec4899">Pink</option>
+                            </select>
                         </div>
                         <div>
                             <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block mb-1">Showcase Game</label>
@@ -1105,7 +1123,7 @@
         </div>
         <div id="chat-messages" class="chat-messages"></div>
         <div class="chat-input-container relative">
-            <div id="gif-picker" class="hidden absolute bottom-full left-0 w-80 h-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl flex flex-direction-column overflow-hidden mb-2">
+            <div id="gif-picker" class="hidden absolute bottom-full left-1/2 -translate-x-1/2 w-80 h-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl flex flex-direction-column overflow-hidden mb-2">
                 <div class="p-2 border-b border-zinc-800">
                     <input type="text" placeholder="Search GIFs..." class="w-full bg-black border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500" oninput="searchGifs(this.value)">
                 </div>
@@ -1114,9 +1132,6 @@
             <div class="flex gap-2 items-center">
                 <button onclick="toggleGifPicker()" class="text-zinc-500 hover:text-blue-500 transition-colors">
                     <i data-lucide="smile" class="w-5 h-5"></i>
-                </button>
-                <button onclick="submitBanAppeal()" class="text-zinc-500 hover:text-yellow-400 transition-colors" title="Submit ban appeal">
-                    <i data-lucide="gavel" class="w-5 h-5"></i>
                 </button>
                 <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" onkeydown="if(event.key==='Enter') sendMessage()">
                 <button onclick="sendMessage()" class="bg-blue-600 p-2 rounded-lg hover:bg-blue-500 transition-colors">
@@ -1208,6 +1223,7 @@
                             setupRatings();
                             render();
                             setupChat();
+                            setupUserMeta();
                             loadSlowmodeSettings();
                         } else if (currentUserProfile.banned) {
                             if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'none';
@@ -1304,6 +1320,8 @@
         const KYLER_AUTH_PASSWORD = 'kyler_admin_secret_k';
         let profileViewingUserId = null;
         let blackjackState = { inRound: false, dealer: 0, player: 0 };
+        let userMetaById = {};
+        let topPointsUid = null;
 
         const GAMES = [
             { title: 'Nexus Slots', category: 'Casino', url: 'javascript:openSlots()', img: 'https://picsum.photos/seed/slots/800/400' },
@@ -1367,7 +1385,8 @@
                             avatarUrl: `https://picsum.photos/seed/kyler/200`,
                             warnings: 0,
                             warningHistory: [],
-                    blockedUsers: []
+                    blockedUsers: [],
+                    profileColor: '#3b82f6'
                         });
                         await updateProfile(res.user, { displayName: 'kyler' });
                         return;
@@ -1434,12 +1453,13 @@
                     avatarUrl: `https://picsum.photos/seed/${user}/200`,
                     warnings: 0,
                     warningHistory: [],
-                    blockedUsers: []
+                    blockedUsers: [],
+                    profileColor: '#3b82f6'
                 });
                 await updateProfile(res.user, { displayName: user });
             } catch (e) {
                 const signupErr = document.getElementById('signup-error');
-                if (signupErr) signupErr.classList.remove('hidden');
+                if (signupErr) { signupErr.innerText = `Sign up failed: ${e?.code || e?.message || 'unknown error'}`; signupErr.classList.remove('hidden'); }
             }
         };
 
@@ -1800,7 +1820,107 @@
             'subway_surfers_legend': { name: 'Subway Surfers Legend', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 100+ times.' },
             'subway_surfers_master': { name: 'Subway Surfers Master', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 250+ times.' },
             'subway_surfers_mythic': { name: 'Subway Surfers Mythic', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 500+ times.' },
-            'subway_surfers_insane': { name: 'Subway Surfers Insane', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 1000+ times.' }
+            'subway_surfers_insane': { name: 'Subway Surfers Insane', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 1000+ times.' },
+            'challenge_1': { name: 'Challenge 1', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 1.' },
+            'challenge_2': { name: 'Challenge 2', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 2.' },
+            'challenge_3': { name: 'Challenge 3', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 3.' },
+            'challenge_4': { name: 'Challenge 4', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 4.' },
+            'challenge_5': { name: 'Challenge 5', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 5.' },
+            'challenge_6': { name: 'Challenge 6', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 6.' },
+            'challenge_7': { name: 'Challenge 7', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 7.' },
+            'challenge_8': { name: 'Challenge 8', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 8.' },
+            'challenge_9': { name: 'Challenge 9', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 9.' },
+            'challenge_10': { name: 'Challenge 10', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 10.' },
+            'challenge_11': { name: 'Challenge 11', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 11.' },
+            'challenge_12': { name: 'Challenge 12', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 12.' },
+            'challenge_13': { name: 'Challenge 13', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 13.' },
+            'challenge_14': { name: 'Challenge 14', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 14.' },
+            'challenge_15': { name: 'Challenge 15', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 15.' },
+            'challenge_16': { name: 'Challenge 16', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 16.' },
+            'challenge_17': { name: 'Challenge 17', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 17.' },
+            'challenge_18': { name: 'Challenge 18', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 18.' },
+            'challenge_19': { name: 'Challenge 19', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 19.' },
+            'challenge_20': { name: 'Challenge 20', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 20.' },
+            'challenge_21': { name: 'Challenge 21', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 21.' },
+            'challenge_22': { name: 'Challenge 22', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 22.' },
+            'challenge_23': { name: 'Challenge 23', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 23.' },
+            'challenge_24': { name: 'Challenge 24', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 24.' },
+            'challenge_25': { name: 'Challenge 25', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 25.' },
+            'challenge_26': { name: 'Challenge 26', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 26.' },
+            'challenge_27': { name: 'Challenge 27', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 27.' },
+            'challenge_28': { name: 'Challenge 28', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 28.' },
+            'challenge_29': { name: 'Challenge 29', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 29.' },
+            'challenge_30': { name: 'Challenge 30', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 30.' },
+            'challenge_31': { name: 'Challenge 31', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 31.' },
+            'challenge_32': { name: 'Challenge 32', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 32.' },
+            'challenge_33': { name: 'Challenge 33', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 33.' },
+            'challenge_34': { name: 'Challenge 34', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 34.' },
+            'challenge_35': { name: 'Challenge 35', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 35.' },
+            'challenge_36': { name: 'Challenge 36', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 36.' },
+            'challenge_37': { name: 'Challenge 37', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 37.' },
+            'challenge_38': { name: 'Challenge 38', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 38.' },
+            'challenge_39': { name: 'Challenge 39', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 39.' },
+            'challenge_40': { name: 'Challenge 40', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 40.' },
+            'challenge_41': { name: 'Challenge 41', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 41.' },
+            'challenge_42': { name: 'Challenge 42', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 42.' },
+            'challenge_43': { name: 'Challenge 43', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 43.' },
+            'challenge_44': { name: 'Challenge 44', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 44.' },
+            'challenge_45': { name: 'Challenge 45', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 45.' },
+            'challenge_46': { name: 'Challenge 46', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 46.' },
+            'challenge_47': { name: 'Challenge 47', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 47.' },
+            'challenge_48': { name: 'Challenge 48', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 48.' },
+            'challenge_49': { name: 'Challenge 49', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 49.' },
+            'challenge_50': { name: 'Challenge 50', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 50.' },
+            'challenge_51': { name: 'Challenge 51', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 51.' },
+            'challenge_52': { name: 'Challenge 52', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 52.' },
+            'challenge_53': { name: 'Challenge 53', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 53.' },
+            'challenge_54': { name: 'Challenge 54', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 54.' },
+            'challenge_55': { name: 'Challenge 55', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 55.' },
+            'challenge_56': { name: 'Challenge 56', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 56.' },
+            'challenge_57': { name: 'Challenge 57', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 57.' },
+            'challenge_58': { name: 'Challenge 58', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 58.' },
+            'challenge_59': { name: 'Challenge 59', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 59.' },
+            'challenge_60': { name: 'Challenge 60', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 60.' },
+            'challenge_61': { name: 'Challenge 61', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 61.' },
+            'challenge_62': { name: 'Challenge 62', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 62.' },
+            'challenge_63': { name: 'Challenge 63', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 63.' },
+            'challenge_64': { name: 'Challenge 64', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 64.' },
+            'challenge_65': { name: 'Challenge 65', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 65.' },
+            'challenge_66': { name: 'Challenge 66', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 66.' },
+            'challenge_67': { name: 'Challenge 67', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 67.' },
+            'challenge_68': { name: 'Challenge 68', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 68.' },
+            'challenge_69': { name: 'Challenge 69', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 69.' },
+            'challenge_70': { name: 'Challenge 70', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 70.' },
+            'challenge_71': { name: 'Challenge 71', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 71.' },
+            'challenge_72': { name: 'Challenge 72', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 72.' },
+            'challenge_73': { name: 'Challenge 73', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 73.' },
+            'challenge_74': { name: 'Challenge 74', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 74.' },
+            'challenge_75': { name: 'Challenge 75', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 75.' },
+            'challenge_76': { name: 'Challenge 76', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 76.' },
+            'challenge_77': { name: 'Challenge 77', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 77.' },
+            'challenge_78': { name: 'Challenge 78', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 78.' },
+            'challenge_79': { name: 'Challenge 79', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 79.' },
+            'challenge_80': { name: 'Challenge 80', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 80.' },
+            'challenge_81': { name: 'Challenge 81', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 81.' },
+            'challenge_82': { name: 'Challenge 82', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 82.' },
+            'challenge_83': { name: 'Challenge 83', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 83.' },
+            'challenge_84': { name: 'Challenge 84', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 84.' },
+            'challenge_85': { name: 'Challenge 85', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 85.' },
+            'challenge_86': { name: 'Challenge 86', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 86.' },
+            'challenge_87': { name: 'Challenge 87', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 87.' },
+            'challenge_88': { name: 'Challenge 88', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 88.' },
+            'challenge_89': { name: 'Challenge 89', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 89.' },
+            'challenge_90': { name: 'Challenge 90', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 90.' },
+            'challenge_91': { name: 'Challenge 91', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 91.' },
+            'challenge_92': { name: 'Challenge 92', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 92.' },
+            'challenge_93': { name: 'Challenge 93', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 93.' },
+            'challenge_94': { name: 'Challenge 94', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 94.' },
+            'challenge_95': { name: 'Challenge 95', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 95.' },
+            'challenge_96': { name: 'Challenge 96', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 96.' },
+            'challenge_97': { name: 'Challenge 97', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 97.' },
+            'challenge_98': { name: 'Challenge 98', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 98.' },
+            'challenge_99': { name: 'Challenge 99', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 99.' },
+            'challenge_100': { name: 'Challenge 100', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 100.' }
         };
 
         let activeDM = null;
@@ -1956,6 +2076,24 @@
             loadRequests();
         };
 
+
+        function setupUserMeta() {
+            onSnapshot(collection(db, 'users'), (snap) => {
+                userMetaById = {};
+                let topUid = null;
+                let topPoints = -Infinity;
+                snap.forEach(d => {
+                    const data = d.data();
+                    userMetaById[d.id] = data;
+                    if ((data.points || 0) > topPoints) {
+                        topPoints = data.points || 0;
+                        topUid = d.id;
+                    }
+                });
+                topPointsUid = topUid;
+            });
+        }
+
         function setupChat() {
             onSnapshot(query(collection(db, "messages"), orderBy("timestamp", "desc"), limit(50)), (snap) => {
                 const container = document.getElementById('chat-messages');
@@ -1972,7 +2110,7 @@
                     div.innerHTML = `
                         <div class="message-bubble ${isMine ? 'mine' : 'others'}">
                             <div class="flex justify-between items-start gap-4">
-                                <button onclick="showUserProfile('${m.uid}')" class="text-[10px] font-bold block mb-1 hover:text-blue-400">${m.user}</button>
+                                <div class="flex items-center gap-1 mb-1"><button onclick="showUserProfile('${m.uid}')" class="text-[10px] font-bold hover:text-blue-400">${m.user}</button>${(() => { const meta=userMetaById[m.uid]||{}; const tags=[]; if(m.uid===topPointsUid) tags.push('<span class=\"text-[9px] px-1 rounded bg-yellow-600/30 text-yellow-300\">Top Points</span>'); if((meta.role||'')==='admin') tags.push('<span class=\"text-[9px] px-1 rounded bg-blue-600/30 text-blue-300\">Admin</span>'); if((meta.role||'')==='owner'||(meta.username||'').toLowerCase()==='kyler') tags.push('<span class=\"text-[9px] px-1 rounded bg-purple-600/30 text-purple-300\">Owner</span>'); return tags.join(''); })()}</div>
                                 ${isAdminUser ? `<button onclick="deleteMessage('${d.id}')" class="text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="trash-2" class="w-3 h-3"></i></button>` : ''}
                             </div>
                             ${m.gif ? `<img src="${m.gif}" class="rounded-lg mb-2 w-full max-h-56 object-contain bg-black/20">` : ''}
@@ -2021,7 +2159,7 @@
             await addDoc(collection(db, "messages"), {
                 user: currentUserProfile.username,
                 text: text,
-                gif: gifUrl,
+                gif: gifUrl || '',
                 uid: currentUser.uid,
                 timestamp: Date.now()
             });
@@ -2383,10 +2521,12 @@
             document.getElementById('profile-points').innerText = data.points || 0;
             document.getElementById('profile-level').innerText = data.level || 1;
             document.getElementById('profile-games').innerText = data.gamesPlayed || 0;
-            document.getElementById('profile-playtime').innerText = Math.floor((data.totalPlaytime || 0) / 60) + 'm';
+            const secs = data.totalPlaytime || 0;
+            document.getElementById('profile-playtime').innerText = secs < 60 ? `${secs}s` : `${Math.floor(secs / 60)}m`; 
             document.getElementById('profile-messages').innerText = data.messagesSent || 0;
             document.getElementById('profile-bio').innerText = data.bio || "No bio set.";
             document.getElementById('profile-fav-game-display').innerText = data.favoriteGame || "None";
+            document.getElementById('profile-card').style.setProperty('--profile-color', data.profileColor || '#3b82f6');
             
             const badgesContainer = document.getElementById('profile-badges');
             if (badgesContainer) {
@@ -2408,6 +2548,7 @@
                     editSection.classList.remove('hidden');
                     document.getElementById('profile-bio-input').value = data.bio || "";
                     document.getElementById('profile-avatar-input').value = data.avatarUrl || '';
+                    document.getElementById('profile-theme-color-input').value = data.profileColor || '#3b82f6';
                     const favSelect = document.getElementById('profile-fav-game-input');
                     favSelect.innerHTML = '<option value="">None</option>' + GAMES.map(g => `
                         <option value="${g.title}" ${data.favoriteGame === g.title ? 'selected' : ''}>${g.title}</option>
@@ -2452,16 +2593,19 @@
             const bio = document.getElementById('profile-bio-input').value;
             const favoriteGame = document.getElementById('profile-fav-game-input').value;
             const avatarUrl = document.getElementById('profile-avatar-input').value.trim();
+            const profileColor = document.getElementById('profile-theme-color-input').value || '#3b82f6';
             if (bio.length > 500) return alert("Bio too long! Max 500 chars.");
             
-            await updateDoc(doc(db, "users", currentUser.uid), { bio, favoriteGame, avatarUrl });
+            await updateDoc(doc(db, "users", currentUser.uid), { bio, favoriteGame, avatarUrl, profileColor });
             currentUserProfile.bio = bio;
             currentUserProfile.favoriteGame = favoriteGame;
             currentUserProfile.avatarUrl = avatarUrl;
+            currentUserProfile.profileColor = profileColor;
             
             document.getElementById('profile-bio').innerText = bio || "No bio set.";
             document.getElementById('profile-fav-game-display').innerText = favoriteGame || "None";
             document.getElementById('profile-avatar').src = avatarUrl || `https://picsum.photos/seed/${currentUserProfile.username}/200`;
+            document.getElementById('profile-card').style.setProperty('--profile-color', profileColor);
             alert("Profile updated!");
         };
 
@@ -2600,6 +2744,8 @@
             document.getElementById('gamble-tab-slots').classList.toggle('active', tab === 'slots');
             document.getElementById('gamble-tab-coinflip').classList.toggle('active', tab === 'coinflip');
             document.getElementById('gamble-tab-blackjack').classList.toggle('active', tab === 'blackjack');
+            document.getElementById('gamble-view-dice').classList.toggle('hidden', tab !== 'dice');
+            document.getElementById('gamble-tab-dice').classList.toggle('active', tab === 'dice');
         };
 
         window.playCoinflip = async (choice) => {
@@ -2650,7 +2796,23 @@
             currentUserProfile.points += delta;
             await updateDoc(doc(db, 'users', currentUser.uid), { points: currentUserProfile.points });
             updatePointsDisplay();
-            document.getElementById('slots-result').innerText = delta > 0 ? 'You win +20!' : (delta === 0 ? 'Push (0)' : 'Dealer wins -20');
+            document.getElementById('slots-result').innerText = delta > 0 ? '✨ You win +20!' : (delta === 0 ? '🤝 Push (0)' : '💀 Dealer wins -20');
+        };
+
+        window.playDice = async () => {
+            const guess = parseInt(document.getElementById('dice-guess').value || '0');
+            if (guess < 4 || guess > 24) return alert('Enter a guess between 4 and 24.');
+            if (currentUserProfile.points < 10) return alert('Need 10 points.');
+            const rolls = [1,2,3,4].map(() => Math.floor(Math.random()*6)+1);
+            const total = rolls.reduce((a,b)=>a+b,0);
+            let delta = -10;
+            if (guess === total) delta = 40;
+            else if (Math.abs(guess-total) <= 3) delta = 20;
+            currentUserProfile.points += delta;
+            await updateDoc(doc(db, 'users', currentUser.uid), { points: currentUserProfile.points });
+            updatePointsDisplay();
+            document.getElementById('dice-result').innerText = `Rolls: ${rolls.join(', ')} (total ${total})`;
+            document.getElementById('slots-result').innerText = delta > 0 ? `🎲 Nice! ${delta>20?'Exact +40':'Close +20'}` : 'Missed -10';
         };
 
         // Leaderboard
