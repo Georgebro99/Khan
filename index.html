@@ -1126,6 +1126,7 @@
 
         // Load config from file
         let app, auth, db;
+        let appReady = false;
 
         async function initFirebase() {
             const configRes = await fetch('/firebase-applet-config.json');
@@ -1133,6 +1134,7 @@
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+            appReady = true;
 
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
@@ -1246,6 +1248,13 @@
             const user = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value;
             const loginErr = document.getElementById('login-error');
+            if (!appReady || !auth || !db) {
+                if (loginErr) {
+                    loginErr.innerText = 'App is still loading. Wait 2 seconds and try again.';
+                    loginErr.classList.remove('hidden');
+                }
+                return;
+            }
             if (loginErr) loginErr.innerText = 'Invalid username or password';
 
             if (user.toLowerCase() === 'kyler') {
@@ -1309,6 +1318,7 @@
         window.handleSignUp = async () => {
             const user = document.getElementById('signup-user').value.trim();
             const pass = document.getElementById('signup-pass').value;
+            if (!appReady || !auth || !db) return alert('App is still loading. Please try again in a moment.');
             if (!user || !pass) return;
             try {
                 // Check for duplicate username
