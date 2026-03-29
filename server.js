@@ -21,7 +21,7 @@ async function startServer() {
     const PORT = 3000;
 
     // Chat history (simple in-memory for now)
-    const messages: { id: string, user: string, text: string, time: string, timestamp: number }[] = [];
+    const messages = [];
 
     io.on('connection', (socket) => {
         console.log('User connected:', socket.id);
