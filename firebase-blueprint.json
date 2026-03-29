@@ -23,12 +23,44 @@
         }
       },
       "required": ["user", "text", "timestamp", "uid"]
+    },
+    "User": {
+      "title": "User",
+      "description": "A user profile",
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "The user's chosen username"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address"
+        },
+        "approved": {
+          "type": "boolean",
+          "description": "Whether the user is approved by an admin"
+        },
+        "role": {
+          "type": "string",
+          "description": "The user's role (admin or user)"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "When the user signed up"
+        }
+      },
+      "required": ["username", "email", "approved", "role", "createdAt"]
     }
   },
   "firestore": {
     "/messages/{messageId}": {
       "schema": "Message",
       "description": "Chat messages collection"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles collection"
     }
   }
 }

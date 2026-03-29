@@ -245,7 +245,7 @@
 </head>
 <body>
     <div id="login-screen">
-        <div class="login-card">
+        <div class="login-card" id="login-view">
             <div class="text-center mb-8">
                 <h1 class="text-4xl font-black tracking-tighter mb-2">Nexus<span class="text-blue-500">Games</span></h1>
                 <p class="text-zinc-500 text-sm">Please sign in to continue</p>
@@ -255,18 +255,73 @@
             </div>
             <input type="text" id="login-user" placeholder="Username" class="login-input">
             <input type="password" id="login-pass" placeholder="Password" class="login-input">
-            <div class="flex gap-2">
-                <button onclick="handleLogin()" class="login-btn flex-1">Sign In</button>
-                <button onclick="handleSignUp()" class="login-btn flex-1 bg-zinc-800 hover:bg-zinc-700">Sign Up</button>
-            </div>
+            <button onclick="handleLogin()" class="login-btn mb-4">Sign In</button>
+            <p class="text-center text-zinc-500 text-xs">
+                Don't have an account? 
+                <button onclick="toggleAuthMode('signup')" class="text-blue-500 font-bold hover:underline">Sign Up</button>
+            </p>
             <p class="text-center mt-6 text-[10px] text-zinc-600 uppercase tracking-widest">Authorized Personnel Only</p>
+        </div>
+
+        <div class="login-card hidden" id="signup-view">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-black tracking-tighter mb-2">Join <span class="text-blue-500">Nexus</span></h1>
+                <p class="text-zinc-500 text-sm">Create an account for access</p>
+            </div>
+            <div id="signup-error" class="hidden bg-red-500/10 border border-red-500/50 text-red-500 text-xs p-3 rounded-lg mb-4 text-center">
+                Sign up failed
+            </div>
+            <input type="text" id="signup-user" placeholder="Choose Username" class="login-input">
+            <input type="password" id="signup-pass" placeholder="Choose Password" class="login-input">
+            <button onclick="handleSignUp()" class="login-btn mb-4 bg-blue-600">Create Account</button>
+            <p class="text-center text-zinc-500 text-xs">
+                Already have an account? 
+                <button onclick="toggleAuthMode('login')" class="text-blue-500 font-bold hover:underline">Sign In</button>
+            </p>
+            <p class="text-center mt-6 text-[10px] text-zinc-600 uppercase tracking-widest">Approval Required for Access</p>
+        </div>
+    </div>
+
+    <div id="pending-screen" class="hidden fixed inset-0 bg-[#050505] z-[2000] flex items-center justify-center p-8">
+        <div class="login-card text-center">
+            <i data-lucide="clock" class="w-16 h-16 text-blue-500 mx-auto mb-6 animate-pulse"></i>
+            <h2 class="text-2xl font-black mb-4">Approval Pending</h2>
+            <p class="text-zinc-400 text-sm mb-8">Your account has been created, but it needs to be approved by an administrator before you can access the games.</p>
+            <button onclick="handleLogout()" class="login-btn bg-zinc-800 hover:bg-zinc-700">Back to Login</button>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="hidden fixed inset-0 bg-black/90 backdrop-blur-xl z-[3000] p-8 overflow-y-auto">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-12">
+                <h2 class="text-4xl font-black tracking-tighter">Admin <span class="text-blue-500">Panel</span></h2>
+                <button onclick="toggleAdminPanel()" class="bg-zinc-900 p-3 rounded-full text-zinc-400 hover:text-white transition-all">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            
+            <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
+                <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    <i data-lucide="users" class="text-blue-500"></i>
+                    Pending Approvals
+                </h3>
+                <div id="pending-users-list" class="space-y-4">
+                    <!-- Pending users will appear here -->
+                    <p class="text-zinc-500 italic">No pending approvals at the moment.</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="main-ui">
         <header class="bg-black p-6 border-b border-blue-500/20 shadow-xl">
             <div class="max-w-6xl mx-auto flex justify-between items-center">
-                <h1 class="text-3xl font-black tracking-tighter">Nexus<span class="text-blue-500">Games</span></h1>
+                <div class="flex items-center gap-6">
+                    <h1 class="text-3xl font-black tracking-tighter">Nexus<span class="text-blue-500">Games</span></h1>
+                    <button id="admin-toggle-btn" onclick="toggleAdminPanel()" class="hidden bg-blue-600/10 text-blue-500 border border-blue-500/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600/20 transition-all">
+                        Admin Panel
+                    </button>
+                </div>
                 <div class="flex items-center gap-4">
                     <input type="text" id="search" placeholder="Search games..." oninput="render()" class="bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 text-white">
                     <button onclick="handleLogout()" class="text-zinc-500 hover:text-white transition-colors p-2" title="Logout">
@@ -339,7 +394,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, deleteDoc, doc, serverTimestamp, getDocFromServer, getDoc, setDoc, updateDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -357,26 +412,163 @@
         const auth = getAuth(app);
         const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
+        // Test connection
+        async function testConnection() {
+            try {
+                await getDocFromServer(doc(db, 'test', 'connection'));
+            } catch (error) {
+                if (error instanceof Error && error.message.includes('the client is offline')) {
+                    console.error("Please check your Firebase configuration. The client is offline.");
+                }
+            }
+        }
+        testConnection();
+
         // Global state
         let currentUser = null;
+        let currentUserProfile = null;
         let unreadCount = 0;
         let isChatOpen = false;
+        let isAdminPanelOpen = false;
+
+        // Error Handling Spec for Firestore Operations
+        const OperationType = {
+            CREATE: 'create',
+            UPDATE: 'update',
+            DELETE: 'delete',
+            LIST: 'list',
+            GET: 'get',
+            WRITE: 'write',
+        };
+
+        function handleFirestoreError(error, operationType, path) {
+            const errInfo = {
+                error: error instanceof Error ? error.message : String(error),
+                authInfo: {
+                    userId: auth.currentUser?.uid,
+                    email: auth.currentUser?.email,
+                    emailVerified: auth.currentUser?.emailVerified,
+                    isAnonymous: auth.currentUser?.isAnonymous,
+                    tenantId: auth.currentUser?.tenantId,
+                    providerInfo: auth.currentUser?.providerData.map(provider => ({
+                        providerId: provider.providerId,
+                        displayName: provider.displayName,
+                        email: provider.email,
+                        photoUrl: provider.photoURL
+                    })) || []
+                },
+                operationType,
+                path
+            };
+            console.error('Firestore Error: ', JSON.stringify(errInfo));
+            
+            // Show user-friendly message in UI
+            const chatMessages = document.getElementById('chat-messages');
+            if (chatMessages) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'p-2 mb-2 text-xs bg-red-500/20 text-red-400 rounded border border-red-500/30';
+                errorDiv.textContent = `Chat error: ${errInfo.error}. Please try again.`;
+                chatMessages.appendChild(errorDiv);
+                scrollToBottom();
+            }
+            
+            throw new Error(JSON.stringify(errInfo));
+        }
 
         // Auth state listener
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-ui').style.display = 'block';
-                render();
-                setupChat();
-            } else {
-                currentUser = null;
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('main-ui').style.display = 'none';
+        onAuthStateChanged(auth, async (user) => {
+            try {
+                if (user) {
+                    currentUser = user;
+                    await fetchUserProfile(user.uid);
+                    
+                    // If profile is still missing and it's kyler, try to create it
+                    if (!currentUserProfile && user.email === 'kyler@nexus.games') {
+                        console.log("Bootstrapping missing admin profile...");
+                        currentUserProfile = {
+                            username: 'kyler',
+                            email: 'kyler@nexus.games',
+                            approved: true,
+                            role: 'admin',
+                            createdAt: Date.now()
+                        };
+                        await setDoc(doc(db, "users", user.uid), currentUserProfile);
+                    }
+                    
+                    if (currentUserProfile) {
+                        if (currentUserProfile.approved || currentUserProfile.role === 'admin') {
+                            document.getElementById('login-screen').style.display = 'none';
+                            document.getElementById('pending-screen').classList.add('hidden');
+                            document.getElementById('main-ui').style.display = 'block';
+                            
+                            if (currentUserProfile.role === 'admin') {
+                                const adminBtn = document.getElementById('admin-toggle-btn');
+                                if (adminBtn) adminBtn.classList.remove('hidden');
+                                fetchPendingUsers();
+                            } else {
+                                const adminBtn = document.getElementById('admin-toggle-btn');
+                                if (adminBtn) adminBtn.classList.add('hidden');
+                            }
+                            
+                            render();
+                            setupChat();
+                        } else {
+                            document.getElementById('login-screen').style.display = 'none';
+                            document.getElementById('pending-screen').classList.remove('hidden');
+                            document.getElementById('main-ui').style.display = 'none';
+                        }
+                    } else {
+                        // Profile missing and not kyler - show error or sign out
+                        console.error("User profile missing for non-admin user");
+                        document.getElementById('login-error').textContent = "Account error. Please contact admin.";
+                        document.getElementById('login-error').classList.remove('hidden');
+                        signOut(auth);
+                    }
+                } else {
+                    currentUser = null;
+                    currentUserProfile = null;
+                    document.getElementById('login-screen').style.display = 'flex';
+                    document.getElementById('pending-screen').classList.add('hidden');
+                    document.getElementById('main-ui').style.display = 'none';
+                    const adminPanel = document.getElementById('admin-panel');
+                    if (adminPanel) adminPanel.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error("Auth state change error:", error);
             }
             lucide.createIcons();
         });
+
+        async function fetchUserProfile(uid, retryCount = 0) {
+            const path = `users/${uid}`;
+            try {
+                const userDoc = await getDoc(doc(db, "users", uid));
+                if (userDoc.exists()) {
+                    currentUserProfile = userDoc.data();
+                } else if (retryCount < 5) {
+                    // Retry after a short delay to handle race condition during sign-up
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    return fetchUserProfile(uid, retryCount + 1);
+                } else {
+                    console.warn("User profile not found in Firestore for UID:", uid);
+                    currentUserProfile = null;
+                }
+            } catch (error) {
+                handleFirestoreError(error, OperationType.GET, path);
+            }
+        }
+
+        window.toggleAuthMode = (mode) => {
+            const loginView = document.getElementById('login-view');
+            const signupView = document.getElementById('signup-view');
+            if (mode === 'signup') {
+                loginView.classList.add('hidden');
+                signupView.classList.remove('hidden');
+            } else {
+                loginView.classList.remove('hidden');
+                signupView.classList.add('hidden');
+            }
+        };
 
         window.handleLogin = async () => {
             const user = document.getElementById('login-user').value.trim().toLowerCase();
@@ -399,6 +591,17 @@
                 if (user === 'kyler' && pass === 'k' && (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential')) {
                     try {
                         const userCredential = await createUserWithEmailAndPassword(auth, email, firebasePass);
+                        const uid = userCredential.user.uid;
+                        
+                        // Create admin profile in Firestore
+                        await setDoc(doc(db, "users", uid), {
+                            username: user,
+                            email: email,
+                            approved: true,
+                            role: 'admin',
+                            createdAt: Date.now()
+                        });
+                        
                         await updateProfile(userCredential.user, { displayName: user });
                         return;
                     } catch (createError) {
@@ -418,28 +621,114 @@
         };
 
         window.handleSignUp = async () => {
-            const user = document.getElementById('login-user').value.trim().toLowerCase();
-            const pass = document.getElementById('login-pass').value;
-            const errorEl = document.getElementById('login-error');
+            const user = document.getElementById('signup-user').value.trim().toLowerCase();
+            const pass = document.getElementById('signup-pass').value;
+            const errorEl = document.getElementById('signup-error');
 
             if (!user || !pass) return;
             
+            if (user === 'kyler') {
+                errorEl.textContent = "Admin account already exists. Please sign in.";
+                errorEl.classList.remove('hidden');
+                setTimeout(() => errorEl.classList.add('hidden'), 3000);
+                return;
+            }
+
             const email = `${user}@nexus.games`;
             const firebasePass = pass.length < 6 ? pass.padEnd(6, '_') : pass;
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, firebasePass);
+                const uid = userCredential.user.uid;
+                
+                // Create user profile in Firestore
+                const isDefaultAdmin = email === "kyler@nexus.games";
+                
+                await setDoc(doc(db, "users", uid), {
+                    username: user,
+                    email: email,
+                    approved: isDefaultAdmin, 
+                    role: isDefaultAdmin ? 'admin' : 'user',
+                    createdAt: Date.now()
+                });
+                
                 await updateProfile(userCredential.user, { displayName: user });
             } catch (error) {
                 console.error("Sign up failed:", error);
-                errorEl.textContent = error.code === 'auth/email-already-in-use' ? "Username already taken" : "Sign up failed";
+                if (error.code === 'auth/email-already-in-use') {
+                    errorEl.textContent = "Username already taken. Try signing in!";
+                } else if (error.code === 'auth/weak-password') {
+                    errorEl.textContent = "Password is too weak.";
+                } else {
+                    errorEl.textContent = "Sign up failed. Please try again.";
+                }
                 errorEl.classList.remove('hidden');
                 setTimeout(() => errorEl.classList.add('hidden'), 3000);
             }
         };
+
+        // Admin Logic
+        window.toggleAdminPanel = () => {
+            isAdminPanelOpen = !isAdminPanelOpen;
+            const panel = document.getElementById('admin-panel');
+            panel.classList.toggle('hidden', !isAdminPanelOpen);
+            if (isAdminPanelOpen) fetchPendingUsers();
+        };
+
+        async function fetchPendingUsers() {
+            const path = "users";
+            const q = query(collection(db, path), where("approved", "==", false));
+            
+            try {
+                const snapshot = await getDocs(q);
+                const list = document.getElementById('pending-users-list');
+                
+                if (snapshot.empty) {
+                    list.innerHTML = '<p class="text-zinc-500 italic">No pending approvals at the moment.</p>';
+                    return;
+                }
+                
+                list.innerHTML = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return `
+                        <div class="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl border border-zinc-700">
+                            <div>
+                                <h4 class="font-bold text-white">${data.username}</h4>
+                                <p class="text-xs text-zinc-500">${data.email}</p>
+                            </div>
+                            <button onclick="approveUser('${doc.id}')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all">
+                                Approve
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                handleFirestoreError(error, OperationType.LIST, path);
+            }
+        }
+
+        window.approveUser = async (uid) => {
+            const path = `users/${uid}`;
+            try {
+                await updateDoc(doc(db, "users", uid), {
+                    approved: true
+                });
+                fetchPendingUsers();
+            } catch (error) {
+                handleFirestoreError(error, OperationType.UPDATE, path);
+            }
+        };
         document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') {
-                window.handleLogin();
+            if (e.key === 'Enter') {
+                const loginScreen = document.getElementById('login-screen');
+                if (loginScreen && loginScreen.style.display !== 'none') {
+                    const signupView = document.getElementById('signup-view');
+                    if (signupView && !signupView.classList.contains('hidden')) {
+                        window.handleSignUp();
+                    } else {
+                        window.handleLogin();
+                    }
+                }
             }
         });
 
@@ -449,7 +738,8 @@
 
         // Chat Logic
         function setupChat() {
-            const q = query(collection(db, "messages"), orderBy("timestamp", "asc"), limit(50));
+            const path = "messages";
+            const q = query(collection(db, path), orderBy("timestamp", "asc"), limit(50));
             
             onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('chat-messages');
@@ -466,7 +756,7 @@
                 }
                 scrollToBottom();
             }, (error) => {
-                console.error("Chat error:", error);
+                handleFirestoreError(error, OperationType.GET, path);
             });
         }
 
@@ -505,19 +795,21 @@
         }
 
         window.deleteMessage = async (id) => {
+            const path = `messages/${id}`;
             try {
                 await deleteDoc(doc(db, "messages", id));
             } catch (error) {
-                console.error("Delete failed:", error);
+                handleFirestoreError(error, OperationType.DELETE, path);
             }
         };
 
         window.sendMessage = async () => {
+            const path = "messages";
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (text && currentUser) {
                 try {
-                    await addDoc(collection(db, "messages"), {
+                    await addDoc(collection(db, path), {
                         user: currentUser.displayName || 'Anonymous',
                         text: text,
                         timestamp: Date.now(),
@@ -525,7 +817,7 @@
                     });
                     input.value = '';
                 } catch (error) {
-                    console.error("Send failed:", error);
+                    handleFirestoreError(error, OperationType.WRITE, path);
                 }
             }
         };
@@ -567,8 +859,8 @@
 
         const GAMES = [
             { title: 'Basket Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/basket-random', img: 'https://i.ibb.co/Zp4gNTsb/basket-random.png' },
-            { title: 'Soccer Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/soccer-random', img: 'https://picsum.photos/seed/soccer/400/250' },
-            { title: 'Boxing Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/boxing-random', img: 'https://picsum.photos/seed/boxing/400/250' },
+            { title: 'Soccer Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/soccer-random', img: 'https://ibb.co/9kPsdTr0' },
+            { title: 'Boxing Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/boxing-random', img: 'https://ibb.co/h1sp7Qp8' },
             { title: 'Retro Bowl', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/retro-bowl', img: 'https://picsum.photos/seed/retro/400/250' },
             { title: 'BitLife', category: 'Simulation', url: 'https://www.twoplayergames.org/gameframe/bitlife', img: 'https://picsum.photos/seed/bitlife/400/250' },
             { title: '1v1.lol', category: 'Action', url: 'https://www.twoplayergames.org/gameframe/1v1-lol', img: 'https://picsum.photos/seed/1v1/400/250' },

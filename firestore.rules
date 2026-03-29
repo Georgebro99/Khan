@@ -1,6 +1,29 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: messages
+    // Document ID: auto-generated
+    // Fields:
+    //   - user: string (required, 1-50 chars) - Display name of the sender
+    //   - text: string (required, 1-1000 chars) - Message content
+    //   - timestamp: number (required) - Milliseconds since epoch
+    //   - uid: string (required) - UID of the sender
+    //
+    // Collection: users
+    // Document ID: user UID
+    // Fields:
+    //   - username: string (required)
+    //   - email: string (required)
+    //   - approved: boolean (required)
+    //   - role: string (required, 'admin' or 'user')
+    //   - createdAt: number (required)
+    //
+    // ===============================================================
+
     // Helper Functions
     function isAuthenticated() {
       return request.auth != null;
@@ -10,6 +33,21 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    function isAdmin() {
+      return isAuthenticated() &&
+        (
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+          (request.auth.token.email == "kyler@nexus.games")
+        );
+    }
+
+    function isApproved() {
+      return isAuthenticated() && 
+        (isAdmin() || (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.approved == true));
+    }
+
     function isValidMessage(data) {
       return data.user is string && data.user.size() > 0 && data.user.size() < 50 &&
              data.text is string && data.text.size() > 0 && data.text.size() < 1000 &&
@@ -17,14 +55,32 @@ service cloud.firestore {
              data.uid == request.auth.uid;
     }
 
+    function isValidUser(data) {
+      return data.username is string && data.username.size() > 0 && data.username.size() < 50 &&
+             data.email is string && data.email.size() < 100 &&
+             data.approved is bool &&
+             data.role in ['admin', 'user'] &&
+             data.createdAt is number;
+    }
+
     match /messages/{messageId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidMessage(request.resource.data);
-      allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow read: if isApproved();
+      allow create: if isApproved() && isValidMessage(request.resource.data);
+      allow delete: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
     }
     
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(userId) && 
+                      isValidUser(request.resource.data) && 
+                      (
+                        (request.resource.data.approved == false && request.resource.data.role == 'user') ||
+                        (request.auth.token.email == "kyler@nexus.games" && request.resource.data.role == 'admin' && request.resource.data.approved == true)
+                      );
+      allow update: if isAuthenticated() && (
+        (isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.approved == resource.data.approved && request.resource.data.role == resource.data.role) ||
+        (isAdmin() && isValidUser(request.resource.data))
+      );
     }
   }
 }
