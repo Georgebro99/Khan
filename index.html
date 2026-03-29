@@ -946,7 +946,7 @@
                 <h2 class="text-2xl font-black">Nexus <span class="text-yellow-500">Casino</span></h2>
                 <button onclick="closeSlots()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-            <div class="flex gap-2 mb-4">
+            <div class="flex gap-2 mb-4 justify-center flex-wrap">
                 <button id="gamble-tab-slots" onclick="setGambleTab('slots')" class="category-btn active">Slots</button>
                 <button id="gamble-tab-coinflip" onclick="setGambleTab('coinflip')" class="category-btn">Coinflip</button>
                 <button id="gamble-tab-blackjack" onclick="setGambleTab('blackjack')" class="category-btn">Blackjack</button>
@@ -965,7 +965,10 @@
             </div>
             <div id="gamble-view-coinflip" class="hidden space-y-3">
                 <p class="text-zinc-400 text-sm">Bet: 10 points. Guess heads or tails. Win doubles your bet.</p>
-                <div class="flex gap-2">
+                <div class="text-center">
+                    <div id="coinflip-coin" class="mx-auto w-20 h-20 rounded-full bg-yellow-500/20 border border-yellow-400 flex items-center justify-center text-3xl">🪙</div>
+                </div>
+                <div class="flex gap-2 justify-center">
                     <button onclick="playCoinflip('heads')" class="login-btn bg-zinc-700">Heads</button>
                     <button onclick="playCoinflip('tails')" class="login-btn bg-zinc-700">Tails</button>
                 </div>
@@ -973,7 +976,9 @@
             <div id="gamble-view-blackjack" class="hidden space-y-3">
                 <p class="text-zinc-400 text-sm">Bet: 20 points. Try to hit 21 without busting.</p>
                 <div class="text-sm">Dealer: <span id="bj-dealer">?</span></div>
+                <div id="bj-dealer-cards" class="flex gap-2 flex-wrap"></div>
                 <div class="text-sm">You: <span id="bj-player">0</span></div>
+                <div id="bj-player-cards" class="flex gap-2 flex-wrap"></div>
                 <div class="flex gap-2">
                     <button onclick="startBlackjack()" class="login-btn bg-zinc-700">Deal</button>
                     <button onclick="blackjackHit()" class="login-btn bg-zinc-700">Hit</button>
@@ -981,9 +986,10 @@
                 </div>
             </div>
             <div id="gamble-view-dice" class="hidden space-y-3">
-                <p class="text-zinc-400 text-sm">Bet: 10 points. Guess total of 4 dice (4-24). Exact = 4x, within 3 = 2x.</p>
-                <input id="dice-guess" type="number" min="4" max="24" class="login-input mb-0" placeholder="Enter guess 4-24">
-                <button onclick="playDice()" class="login-btn bg-zinc-700">Roll 4 Dice</button>
+                <p class="text-zinc-400 text-sm">Bet: 10 points. Guess total of 5 dice (5-30). Exact = 4x, within 1 = 2x.</p>
+                <input id="dice-guess" type="number" min="5" max="30" class="login-input mb-0" placeholder="Enter guess 5-30">
+                <button onclick="playDice()" class="login-btn bg-zinc-700">Roll 5 Dice</button>
+                <div id="dice-visual" class="flex gap-2 justify-center text-2xl"></div>
                 <div class="text-sm" id="dice-result"></div>
             </div>
             <div id="slots-result" class="text-lg font-bold h-8"></div>
@@ -1319,7 +1325,7 @@
         let gambleTab = 'slots';
         const KYLER_AUTH_PASSWORD = 'kyler_admin_secret_k';
         let profileViewingUserId = null;
-        let blackjackState = { inRound: false, dealer: 0, player: 0 };
+        let blackjackState = { inRound: false, dealer: 0, player: 0, dealerCards: [], playerCards: [] };
         let userMetaById = {};
         let topPointsUid = null;
 
@@ -1821,106 +1827,106 @@
             'subway_surfers_master': { name: 'Subway Surfers Master', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 250+ times.' },
             'subway_surfers_mythic': { name: 'Subway Surfers Mythic', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 500+ times.' },
             'subway_surfers_insane': { name: 'Subway Surfers Insane', icon: 'gamepad-2', color: 'text-blue-300', description: 'Played Subway Surfers 1000+ times.' },
-            'challenge_1': { name: 'Challenge 1', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 1.' },
-            'challenge_2': { name: 'Challenge 2', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 2.' },
-            'challenge_3': { name: 'Challenge 3', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 3.' },
-            'challenge_4': { name: 'Challenge 4', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 4.' },
-            'challenge_5': { name: 'Challenge 5', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 5.' },
-            'challenge_6': { name: 'Challenge 6', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 6.' },
-            'challenge_7': { name: 'Challenge 7', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 7.' },
-            'challenge_8': { name: 'Challenge 8', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 8.' },
-            'challenge_9': { name: 'Challenge 9', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 9.' },
-            'challenge_10': { name: 'Challenge 10', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 10.' },
-            'challenge_11': { name: 'Challenge 11', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 11.' },
-            'challenge_12': { name: 'Challenge 12', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 12.' },
-            'challenge_13': { name: 'Challenge 13', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 13.' },
-            'challenge_14': { name: 'Challenge 14', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 14.' },
-            'challenge_15': { name: 'Challenge 15', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 15.' },
-            'challenge_16': { name: 'Challenge 16', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 16.' },
-            'challenge_17': { name: 'Challenge 17', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 17.' },
-            'challenge_18': { name: 'Challenge 18', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 18.' },
-            'challenge_19': { name: 'Challenge 19', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 19.' },
-            'challenge_20': { name: 'Challenge 20', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 20.' },
-            'challenge_21': { name: 'Challenge 21', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 21.' },
-            'challenge_22': { name: 'Challenge 22', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 22.' },
-            'challenge_23': { name: 'Challenge 23', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 23.' },
-            'challenge_24': { name: 'Challenge 24', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 24.' },
-            'challenge_25': { name: 'Challenge 25', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 25.' },
-            'challenge_26': { name: 'Challenge 26', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 26.' },
-            'challenge_27': { name: 'Challenge 27', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 27.' },
-            'challenge_28': { name: 'Challenge 28', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 28.' },
-            'challenge_29': { name: 'Challenge 29', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 29.' },
-            'challenge_30': { name: 'Challenge 30', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 30.' },
-            'challenge_31': { name: 'Challenge 31', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 31.' },
-            'challenge_32': { name: 'Challenge 32', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 32.' },
-            'challenge_33': { name: 'Challenge 33', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 33.' },
-            'challenge_34': { name: 'Challenge 34', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 34.' },
-            'challenge_35': { name: 'Challenge 35', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 35.' },
-            'challenge_36': { name: 'Challenge 36', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 36.' },
-            'challenge_37': { name: 'Challenge 37', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 37.' },
-            'challenge_38': { name: 'Challenge 38', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 38.' },
-            'challenge_39': { name: 'Challenge 39', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 39.' },
-            'challenge_40': { name: 'Challenge 40', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 40.' },
-            'challenge_41': { name: 'Challenge 41', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 41.' },
-            'challenge_42': { name: 'Challenge 42', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 42.' },
-            'challenge_43': { name: 'Challenge 43', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 43.' },
-            'challenge_44': { name: 'Challenge 44', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 44.' },
-            'challenge_45': { name: 'Challenge 45', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 45.' },
-            'challenge_46': { name: 'Challenge 46', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 46.' },
-            'challenge_47': { name: 'Challenge 47', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 47.' },
-            'challenge_48': { name: 'Challenge 48', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 48.' },
-            'challenge_49': { name: 'Challenge 49', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 49.' },
-            'challenge_50': { name: 'Challenge 50', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 50.' },
-            'challenge_51': { name: 'Challenge 51', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 51.' },
-            'challenge_52': { name: 'Challenge 52', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 52.' },
-            'challenge_53': { name: 'Challenge 53', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 53.' },
-            'challenge_54': { name: 'Challenge 54', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 54.' },
-            'challenge_55': { name: 'Challenge 55', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 55.' },
-            'challenge_56': { name: 'Challenge 56', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 56.' },
-            'challenge_57': { name: 'Challenge 57', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 57.' },
-            'challenge_58': { name: 'Challenge 58', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 58.' },
-            'challenge_59': { name: 'Challenge 59', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 59.' },
-            'challenge_60': { name: 'Challenge 60', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 60.' },
-            'challenge_61': { name: 'Challenge 61', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 61.' },
-            'challenge_62': { name: 'Challenge 62', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 62.' },
-            'challenge_63': { name: 'Challenge 63', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 63.' },
-            'challenge_64': { name: 'Challenge 64', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 64.' },
-            'challenge_65': { name: 'Challenge 65', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 65.' },
-            'challenge_66': { name: 'Challenge 66', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 66.' },
-            'challenge_67': { name: 'Challenge 67', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 67.' },
-            'challenge_68': { name: 'Challenge 68', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 68.' },
-            'challenge_69': { name: 'Challenge 69', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 69.' },
-            'challenge_70': { name: 'Challenge 70', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 70.' },
-            'challenge_71': { name: 'Challenge 71', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 71.' },
-            'challenge_72': { name: 'Challenge 72', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 72.' },
-            'challenge_73': { name: 'Challenge 73', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 73.' },
-            'challenge_74': { name: 'Challenge 74', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 74.' },
-            'challenge_75': { name: 'Challenge 75', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 75.' },
-            'challenge_76': { name: 'Challenge 76', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 76.' },
-            'challenge_77': { name: 'Challenge 77', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 77.' },
-            'challenge_78': { name: 'Challenge 78', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 78.' },
-            'challenge_79': { name: 'Challenge 79', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 79.' },
-            'challenge_80': { name: 'Challenge 80', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 80.' },
-            'challenge_81': { name: 'Challenge 81', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 81.' },
-            'challenge_82': { name: 'Challenge 82', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 82.' },
-            'challenge_83': { name: 'Challenge 83', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 83.' },
-            'challenge_84': { name: 'Challenge 84', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 84.' },
-            'challenge_85': { name: 'Challenge 85', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 85.' },
-            'challenge_86': { name: 'Challenge 86', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 86.' },
-            'challenge_87': { name: 'Challenge 87', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 87.' },
-            'challenge_88': { name: 'Challenge 88', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 88.' },
-            'challenge_89': { name: 'Challenge 89', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 89.' },
-            'challenge_90': { name: 'Challenge 90', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 90.' },
-            'challenge_91': { name: 'Challenge 91', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 91.' },
-            'challenge_92': { name: 'Challenge 92', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 92.' },
-            'challenge_93': { name: 'Challenge 93', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 93.' },
-            'challenge_94': { name: 'Challenge 94', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 94.' },
-            'challenge_95': { name: 'Challenge 95', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 95.' },
-            'challenge_96': { name: 'Challenge 96', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 96.' },
-            'challenge_97': { name: 'Challenge 97', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 97.' },
-            'challenge_98': { name: 'Challenge 98', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 98.' },
-            'challenge_99': { name: 'Challenge 99', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 99.' },
-            'challenge_100': { name: 'Challenge 100', icon: 'medal', color: 'text-emerald-300', description: 'Completed community challenge tier 100.' }
+            'achievement_1_1': { name: 'Achievement 1-1', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 1, tier 1.' },
+            'achievement_1_2': { name: 'Achievement 1-2', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 1, tier 2.' },
+            'achievement_1_3': { name: 'Achievement 1-3', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 1, tier 3.' },
+            'achievement_1_4': { name: 'Achievement 1-4', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 1, tier 4.' },
+            'achievement_1_5': { name: 'Achievement 1-5', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 1, tier 5.' },
+            'achievement_1_6': { name: 'Achievement 1-6', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 1, tier 6.' },
+            'achievement_1_7': { name: 'Achievement 1-7', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 1, tier 7.' },
+            'achievement_1_8': { name: 'Achievement 1-8', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 1, tier 8.' },
+            'achievement_1_9': { name: 'Achievement 1-9', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 1, tier 9.' },
+            'achievement_1_10': { name: 'Achievement 1-10', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 1, tier 10.' },
+            'achievement_2_1': { name: 'Achievement 2-1', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 2, tier 1.' },
+            'achievement_2_2': { name: 'Achievement 2-2', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 2, tier 2.' },
+            'achievement_2_3': { name: 'Achievement 2-3', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 2, tier 3.' },
+            'achievement_2_4': { name: 'Achievement 2-4', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 2, tier 4.' },
+            'achievement_2_5': { name: 'Achievement 2-5', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 2, tier 5.' },
+            'achievement_2_6': { name: 'Achievement 2-6', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 2, tier 6.' },
+            'achievement_2_7': { name: 'Achievement 2-7', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 2, tier 7.' },
+            'achievement_2_8': { name: 'Achievement 2-8', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 2, tier 8.' },
+            'achievement_2_9': { name: 'Achievement 2-9', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 2, tier 9.' },
+            'achievement_2_10': { name: 'Achievement 2-10', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 2, tier 10.' },
+            'achievement_3_1': { name: 'Achievement 3-1', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 3, tier 1.' },
+            'achievement_3_2': { name: 'Achievement 3-2', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 3, tier 2.' },
+            'achievement_3_3': { name: 'Achievement 3-3', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 3, tier 3.' },
+            'achievement_3_4': { name: 'Achievement 3-4', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 3, tier 4.' },
+            'achievement_3_5': { name: 'Achievement 3-5', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 3, tier 5.' },
+            'achievement_3_6': { name: 'Achievement 3-6', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 3, tier 6.' },
+            'achievement_3_7': { name: 'Achievement 3-7', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 3, tier 7.' },
+            'achievement_3_8': { name: 'Achievement 3-8', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 3, tier 8.' },
+            'achievement_3_9': { name: 'Achievement 3-9', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 3, tier 9.' },
+            'achievement_3_10': { name: 'Achievement 3-10', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 3, tier 10.' },
+            'achievement_4_1': { name: 'Achievement 4-1', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 4, tier 1.' },
+            'achievement_4_2': { name: 'Achievement 4-2', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 4, tier 2.' },
+            'achievement_4_3': { name: 'Achievement 4-3', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 4, tier 3.' },
+            'achievement_4_4': { name: 'Achievement 4-4', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 4, tier 4.' },
+            'achievement_4_5': { name: 'Achievement 4-5', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 4, tier 5.' },
+            'achievement_4_6': { name: 'Achievement 4-6', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 4, tier 6.' },
+            'achievement_4_7': { name: 'Achievement 4-7', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 4, tier 7.' },
+            'achievement_4_8': { name: 'Achievement 4-8', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 4, tier 8.' },
+            'achievement_4_9': { name: 'Achievement 4-9', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 4, tier 9.' },
+            'achievement_4_10': { name: 'Achievement 4-10', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 4, tier 10.' },
+            'achievement_5_1': { name: 'Achievement 5-1', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 5, tier 1.' },
+            'achievement_5_2': { name: 'Achievement 5-2', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 5, tier 2.' },
+            'achievement_5_3': { name: 'Achievement 5-3', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 5, tier 3.' },
+            'achievement_5_4': { name: 'Achievement 5-4', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 5, tier 4.' },
+            'achievement_5_5': { name: 'Achievement 5-5', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 5, tier 5.' },
+            'achievement_5_6': { name: 'Achievement 5-6', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 5, tier 6.' },
+            'achievement_5_7': { name: 'Achievement 5-7', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 5, tier 7.' },
+            'achievement_5_8': { name: 'Achievement 5-8', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 5, tier 8.' },
+            'achievement_5_9': { name: 'Achievement 5-9', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 5, tier 9.' },
+            'achievement_5_10': { name: 'Achievement 5-10', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 5, tier 10.' },
+            'achievement_6_1': { name: 'Achievement 6-1', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 6, tier 1.' },
+            'achievement_6_2': { name: 'Achievement 6-2', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 6, tier 2.' },
+            'achievement_6_3': { name: 'Achievement 6-3', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 6, tier 3.' },
+            'achievement_6_4': { name: 'Achievement 6-4', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 6, tier 4.' },
+            'achievement_6_5': { name: 'Achievement 6-5', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 6, tier 5.' },
+            'achievement_6_6': { name: 'Achievement 6-6', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 6, tier 6.' },
+            'achievement_6_7': { name: 'Achievement 6-7', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 6, tier 7.' },
+            'achievement_6_8': { name: 'Achievement 6-8', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 6, tier 8.' },
+            'achievement_6_9': { name: 'Achievement 6-9', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 6, tier 9.' },
+            'achievement_6_10': { name: 'Achievement 6-10', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 6, tier 10.' },
+            'achievement_7_1': { name: 'Achievement 7-1', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 7, tier 1.' },
+            'achievement_7_2': { name: 'Achievement 7-2', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 7, tier 2.' },
+            'achievement_7_3': { name: 'Achievement 7-3', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 7, tier 3.' },
+            'achievement_7_4': { name: 'Achievement 7-4', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 7, tier 4.' },
+            'achievement_7_5': { name: 'Achievement 7-5', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 7, tier 5.' },
+            'achievement_7_6': { name: 'Achievement 7-6', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 7, tier 6.' },
+            'achievement_7_7': { name: 'Achievement 7-7', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 7, tier 7.' },
+            'achievement_7_8': { name: 'Achievement 7-8', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 7, tier 8.' },
+            'achievement_7_9': { name: 'Achievement 7-9', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 7, tier 9.' },
+            'achievement_7_10': { name: 'Achievement 7-10', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 7, tier 10.' },
+            'achievement_8_1': { name: 'Achievement 8-1', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 8, tier 1.' },
+            'achievement_8_2': { name: 'Achievement 8-2', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 8, tier 2.' },
+            'achievement_8_3': { name: 'Achievement 8-3', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 8, tier 3.' },
+            'achievement_8_4': { name: 'Achievement 8-4', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 8, tier 4.' },
+            'achievement_8_5': { name: 'Achievement 8-5', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 8, tier 5.' },
+            'achievement_8_6': { name: 'Achievement 8-6', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 8, tier 6.' },
+            'achievement_8_7': { name: 'Achievement 8-7', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 8, tier 7.' },
+            'achievement_8_8': { name: 'Achievement 8-8', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 8, tier 8.' },
+            'achievement_8_9': { name: 'Achievement 8-9', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 8, tier 9.' },
+            'achievement_8_10': { name: 'Achievement 8-10', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 8, tier 10.' },
+            'achievement_9_1': { name: 'Achievement 9-1', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 9, tier 1.' },
+            'achievement_9_2': { name: 'Achievement 9-2', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 9, tier 2.' },
+            'achievement_9_3': { name: 'Achievement 9-3', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 9, tier 3.' },
+            'achievement_9_4': { name: 'Achievement 9-4', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 9, tier 4.' },
+            'achievement_9_5': { name: 'Achievement 9-5', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 9, tier 5.' },
+            'achievement_9_6': { name: 'Achievement 9-6', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 9, tier 6.' },
+            'achievement_9_7': { name: 'Achievement 9-7', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 9, tier 7.' },
+            'achievement_9_8': { name: 'Achievement 9-8', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 9, tier 8.' },
+            'achievement_9_9': { name: 'Achievement 9-9', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 9, tier 9.' },
+            'achievement_9_10': { name: 'Achievement 9-10', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 9, tier 10.' },
+            'achievement_10_1': { name: 'Achievement 10-1', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 10, tier 1.' },
+            'achievement_10_2': { name: 'Achievement 10-2', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 10, tier 2.' },
+            'achievement_10_3': { name: 'Achievement 10-3', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 10, tier 3.' },
+            'achievement_10_4': { name: 'Achievement 10-4', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 10, tier 4.' },
+            'achievement_10_5': { name: 'Achievement 10-5', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 10, tier 5.' },
+            'achievement_10_6': { name: 'Achievement 10-6', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 10, tier 6.' },
+            'achievement_10_7': { name: 'Achievement 10-7', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 10, tier 7.' },
+            'achievement_10_8': { name: 'Achievement 10-8', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 10, tier 8.' },
+            'achievement_10_9': { name: 'Achievement 10-9', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 10, tier 9.' },
+            'achievement_10_10': { name: 'Achievement 10-10', icon: 'medal', color: 'text-emerald-300', description: 'Completed milestone set 10, tier 10.' }
         };
 
         let activeDM = null;
@@ -2751,6 +2757,8 @@
         window.playCoinflip = async (choice) => {
             if (currentUserProfile.points < 10) return alert('Not enough points!');
             const flip = Math.random() > 0.5 ? 'heads' : 'tails';
+            const coin = document.getElementById('coinflip-coin');
+            if (coin) coin.innerText = flip === 'heads' ? '🟡' : '⚪';
             const win = flip === choice ? 10 : -10;
             currentUserProfile.points += win;
             await updateDoc(doc(db, 'users', currentUser.uid), { points: currentUserProfile.points });
@@ -2764,18 +2772,34 @@
             return Math.floor(Math.random() * 10) + 1;
         }
 
+        function renderBlackjackCards() {
+            const dealerEl = document.getElementById('bj-dealer-cards');
+            const playerEl = document.getElementById('bj-player-cards');
+            const toCard = (n) => `<div class="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-sm font-bold">${n}</div>`;
+            if (dealerEl) dealerEl.innerHTML = blackjackState.dealerCards.map(toCard).join('');
+            if (playerEl) playerEl.innerHTML = blackjackState.playerCards.map(toCard).join('');
+        }
+
         window.startBlackjack = async () => {
             if (currentUserProfile.points < 20) return alert('Need 20 points.');
-            blackjackState = { inRound: true, dealer: drawCard() + drawCard(), player: drawCard() + drawCard() };
+            blackjackState.dealerCards = [drawCard(), drawCard()];
+            blackjackState.playerCards = [drawCard(), drawCard()];
+            blackjackState.dealer = blackjackState.dealerCards.reduce((a,b)=>a+b,0);
+            blackjackState.player = blackjackState.playerCards.reduce((a,b)=>a+b,0);
+            blackjackState.inRound = true;
             document.getElementById('bj-dealer').innerText = blackjackState.dealer;
             document.getElementById('bj-player').innerText = blackjackState.player;
+            renderBlackjackCards();
             document.getElementById('slots-result').innerText = 'Round started.';
         };
 
         window.blackjackHit = async () => {
             if (!blackjackState.inRound) return;
-            blackjackState.player += drawCard();
+            const card = drawCard();
+            blackjackState.playerCards.push(card);
+            blackjackState.player += card;
             document.getElementById('bj-player').innerText = blackjackState.player;
+            renderBlackjackCards();
             if (blackjackState.player > 21) {
                 blackjackState.inRound = false;
                 currentUserProfile.points -= 20;
@@ -2787,7 +2811,8 @@
 
         window.blackjackStand = async () => {
             if (!blackjackState.inRound) return;
-            while (blackjackState.dealer < 17) blackjackState.dealer += drawCard();
+            while (blackjackState.dealer < 17) { const c = drawCard(); blackjackState.dealerCards.push(c); blackjackState.dealer += c; }
+            renderBlackjackCards();
             document.getElementById('bj-dealer').innerText = blackjackState.dealer;
             blackjackState.inRound = false;
             let delta = -20;
@@ -2801,17 +2826,19 @@
 
         window.playDice = async () => {
             const guess = parseInt(document.getElementById('dice-guess').value || '0');
-            if (guess < 4 || guess > 24) return alert('Enter a guess between 4 and 24.');
+            if (guess < 5 || guess > 30) return alert('Enter a guess between 5 and 30.');
             if (currentUserProfile.points < 10) return alert('Need 10 points.');
-            const rolls = [1,2,3,4].map(() => Math.floor(Math.random()*6)+1);
+            const rolls = [1,2,3,4,5].map(() => Math.floor(Math.random()*6)+1);
             const total = rolls.reduce((a,b)=>a+b,0);
             let delta = -10;
             if (guess === total) delta = 40;
-            else if (Math.abs(guess-total) <= 3) delta = 20;
+            else if (Math.abs(guess-total) <= 1) delta = 20;
             currentUserProfile.points += delta;
             await updateDoc(doc(db, 'users', currentUser.uid), { points: currentUserProfile.points });
             updatePointsDisplay();
-            document.getElementById('dice-result').innerText = `Rolls: ${rolls.join(', ')} (total ${total})`;
+            const diceFaces=['⚀','⚁','⚂','⚃','⚄','⚅'];
+            document.getElementById('dice-visual').innerText = rolls.map(r=>diceFaces[r-1]).join(' ');
+            document.getElementById('dice-result').innerText = `Rolls: ${rolls.join(', ')} (total ${total})`; 
             document.getElementById('slots-result').innerText = delta > 0 ? `🎲 Nice! ${delta>20?'Exact +40':'Close +20'}` : 'Missed -10';
         };
 
