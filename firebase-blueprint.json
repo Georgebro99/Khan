@@ -20,6 +20,14 @@
         "uid": {
           "type": "string",
           "description": "The user's unique ID"
+        },
+        "reactions": {
+          "type": "object",
+          "description": "Emoji reactions map (emoji -> list of UIDs)"
+        },
+        "gif": {
+          "type": "string",
+          "description": "Optional GIF URL"
         }
       },
       "required": ["user", "text", "timestamp", "uid"]
@@ -73,9 +81,42 @@
           "type": "array",
           "items": { "type": "string" },
           "description": "List of game titles in wishlist"
+        },
+        "totalPlaytime": {
+          "type": "number",
+          "description": "Total playtime in seconds"
+        },
+        "gamesPlayed": {
+          "type": "number",
+          "description": "Number of unique games played"
+        },
+        "messagesSent": {
+          "type": "number",
+          "description": "Total messages sent in chat"
+        },
+        "favoriteGame": {
+          "type": "string",
+          "description": "The user's favorite game to show off"
+        },
+        "badges": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of badge IDs earned by the user"
         }
       },
       "required": ["username", "email", "approved", "role", "createdAt"]
+    },
+    "Rating": {
+      "title": "Rating",
+      "description": "A user's rating for a game",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "gameTitle": { "type": "string" },
+        "rating": { "type": "number", "minimum": 1, "maximum": 5 },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["uid", "gameTitle", "rating", "timestamp"]
     },
     "Suggestion": {
       "title": "Suggestion",
@@ -108,14 +149,25 @@
       "description": "A private message between two users",
       "type": "object",
       "properties": {
-        "participants": { "type": "array", "items": { "type": "string" } },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
         "text": { "type": "string" },
-        "senderId": { "type": "string" },
-        "senderName": { "type": "string" },
         "timestamp": { "type": "number" },
-        "channelId": { "type": "string" }
+        "participants": { "type": "array", "items": { "type": "string" } }
       },
-      "required": ["participants", "text", "senderId", "senderName", "timestamp", "channelId"]
+      "required": ["from", "to", "text", "timestamp", "participants"]
+    },
+    "UpdateLog": {
+      "title": "UpdateLog",
+      "description": "A system update log entry",
+      "type": "object",
+      "properties": {
+        "version": { "type": "string" },
+        "date": { "type": "string" },
+        "content": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["version", "date", "content", "timestamp"]
     }
   },
   "firestore": {
@@ -131,13 +183,21 @@
       "schema": "FriendRequest",
       "description": "Friend requests collection"
     },
-    "/direct_messages/{messageId}": {
+    "/dms/{messageId}": {
       "schema": "DirectMessage",
       "description": "Direct messages collection"
     },
     "/suggestions/{suggestionId}": {
       "schema": "Suggestion",
       "description": "Game suggestions collection"
+    },
+    "/ratings/{ratingId}": {
+      "schema": "Rating",
+      "description": "Game ratings collection"
+    },
+    "/update_logs/{logId}": {
+      "schema": "UpdateLog",
+      "description": "System update logs"
     }
   }
 }

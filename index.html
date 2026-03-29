@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unblocked Games</title>
+    <title>Nexus Games Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -85,18 +85,198 @@
         .game-card .overlay {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 0.3s ease;
-            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
             pointer-events: none;
+            z-index: 5;
         }
         .game-card:hover .overlay {
             opacity: 1;
             pointer-events: auto;
+        }
+        .featured-hero {
+            background: linear-gradient(to right, rgba(0,0,0,0.9), rgba(0,0,0,0.4)), url('https://picsum.photos/seed/featured/1200/600');
+            background-size: cover;
+            background-position: center;
+            border-radius: 1.5rem;
+            padding: 4rem;
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .featured-hero::before {
+            content: 'FEATURED GAME';
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            background: #eab308;
+            color: black;
+            font-size: 12px;
+            font-weight: 900;
+            padding: 4px 12px;
+            border-radius: 4px;
+            letter-spacing: 0.1em;
+        }
+        .steam-profile-header {
+            background: linear-gradient(to bottom, #1b2838, #171a21);
+            padding: 2rem;
+            border-radius: 1rem 1rem 0 0;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            border-bottom: 1px solid #3b82f633;
+        }
+        .steam-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 4px;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            object-fit: cover;
+        }
+        .steam-lvl-badge {
+            background: #1b2838;
+            border: 2px solid #4c6b22;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            box-shadow: 0 0 10px rgba(76, 107, 34, 0.5);
+        }
+        .dm-window {
+            position: fixed;
+            bottom: 0;
+            right: 400px;
+            width: 300px;
+            height: 400px;
+            background: #171a21;
+            border: 1px solid #3b82f633;
+            border-radius: 0.5rem 0.5rem 0 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+        }
+        .category-btn {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            color: #888;
+        }
+        .category-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.3);
+        }
+        .wishlist-heart {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 20;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .featured-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 20;
+            background: #eab308;
+            color: black;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(234, 179, 8, 0.4);
+        }
+        .rating-stars {
+            display: flex;
+            gap: 2px;
+            color: #eab308;
+        }
+        .update-log-item {
+            border-left: 2px solid #3b82f6;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .update-log-item::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 0;
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+        }
+        .gif-picker {
+            position: absolute;
+            bottom: calc(100% + 15px);
+            right: 0;
+            background: #09090b;
+            border: 1px solid #3b82f644;
+            border-radius: 1.25rem;
+            width: 300px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            overflow: hidden;
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .gif-results {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+        .gif-item {
+            width: 100%;
+            height: 80px;
+            object-cover: cover;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .gif-item:hover {
+            transform: scale(1.05);
         }
         .play-btn {
             background: #3b82f6;
@@ -151,11 +331,6 @@
         .chat-panel.open {
             right: 0;
         }
-        .chat-panel.fullscreen {
-            width: 100%;
-            right: 0;
-            border-left: none;
-        }
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -175,7 +350,6 @@
             border-radius: 1rem;
             max-width: 85%;
             animation: slideIn 0.2s ease-out;
-            position: relative;
         }
         .message-bubble.mine {
             align-self: flex-end;
@@ -192,158 +366,23 @@
             gap: 2px;
             position: relative;
         }
-        .message-actions {
-            display: flex;
-            gap: 8px;
-            opacity: 0;
-            transition: opacity 0.2s;
-            margin-top: 2px;
-        }
-        .message-container:hover .message-actions {
-            opacity: 1;
-        }
-        .admin-action-btn {
-            font-size: 9px;
-            color: #ef4444;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 0.05em;
-            padding: 2px 4px;
-            background: rgba(239, 68, 68, 0.1);
-            border-radius: 4px;
-        }
-        .admin-action-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
         .delete-btn {
             font-size: 9px;
             color: #ef4444;
             cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
             text-transform: uppercase;
             font-weight: bold;
             letter-spacing: 0.05em;
+            margin-top: 2px;
             padding: 2px 4px;
+        }
+        .message-container:hover .delete-btn {
+            opacity: 1;
         }
         .delete-btn.disabled {
             display: none;
-        }
-        .gif-container {
-            max-width: 200px;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            margin-top: 0.5rem;
-        }
-        .gif-container img {
-            width: 100%;
-            height: auto;
-        }
-        .profile-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(8px);
-            z-index: 4000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        .profile-card {
-            background: #09090b;
-            border: 1px solid #27272a;
-            border-radius: 1.5rem;
-            width: 100%;
-            max-width: 500px;
-            overflow: hidden;
-            animation: scaleIn 0.3s ease-out;
-        }
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.75rem;
-            background: #18181b;
-            border-radius: 0.75rem;
-            border: 1px solid #27272a;
-        }
-        .leaderboard-rank {
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .rank-1 { background: #fbbf24; color: #000; }
-        .rank-2 { background: #94a3b8; color: #000; }
-        .rank-3 { background: #b45309; color: #fff; }
-        
-        .gamble-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 5000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .slot-machine {
-            background: #18181b;
-            padding: 2rem;
-            border-radius: 2rem;
-            border: 4px solid #3b82f6;
-            text-align: center;
-        }
-        .slot-reel {
-            display: inline-block;
-            width: 80px;
-            height: 80px;
-            background: #09090b;
-            border-radius: 1rem;
-            margin: 0 0.5rem;
-            line-height: 80px;
-            font-size: 40px;
-            border: 2px solid #27272a;
-        }
-        .gif-picker {
-            position: absolute;
-            bottom: 100%;
-            right: 0;
-            width: 300px;
-            height: 400px;
-            background: #09090b;
-            border: 1px solid #27272a;
-            border-radius: 1rem;
-            display: none;
-            flex-direction: column;
-            z-index: 100;
-            box-shadow: 0 -10px 25px rgba(0,0,0,0.5);
-        }
-        .gif-picker.open {
-            display: flex;
-        }
-        .gif-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
-            padding: 0.5rem;
-            overflow-y: auto;
-        }
-        .gif-item {
-            cursor: pointer;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            transition: transform 0.2s;
-        }
-        .gif-item:hover {
-            transform: scale(1.05);
         }
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -382,9 +421,325 @@
             border-radius: 10px;
             border: 2px solid #09090b;
         }
+        .overlay-panel {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(12px);
+            z-index: 3000;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 2rem;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .overlay-panel .panel-card {
+            background: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 1.5rem;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        .admin-tab-btn {
+            padding: 0.5rem 1rem;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .admin-tab-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+        .admin-tab-btn:not(.active) {
+            background: transparent;
+            color: #71717a;
+        }
+        .admin-tab-btn:not(.active):hover {
+            color: #d4d4d8;
+            background: #18181b;
+        }
+        .profile-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 4000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .profile-card {
+            background: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 1.5rem;
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+        }
+        .stat-box {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            text-align: center;
+        }
+        .stat-box .stat-val {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #3b82f6;
+        }
+        .stat-box .stat-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #71717a;
+            margin-top: 2px;
+        }
+        .leaderboard-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+        }
+        .leaderboard-row:hover {
+            border-color: #3b82f6;
+        }
+        .leaderboard-rank {
+            font-weight: 900;
+            font-size: 1.1rem;
+            min-width: 2rem;
+            text-align: center;
+        }
+        .rank-1 { color: #fbbf24; }
+        .rank-2 { color: #94a3b8; }
+        .rank-3 { color: #cd7f32; }
+        .wishlist-heart {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 10;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .wishlist-heart:hover {
+            transform: scale(1.15);
+            background: rgba(239,68,68,0.3);
+        }
+        .wishlist-heart.active {
+            color: #ef4444;
+        }
+        .suggestion-card {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: border-color 0.2s;
+        }
+        .suggestion-card:hover {
+            border-color: #3b82f6;
+        }
+        .cmd-help-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #27272a;
+            font-size: 12px;
+        }
+        .cmd-help-row:last-child { border-bottom: none; }
+        .points-badge {
+            background: linear-gradient(135deg, #1e3a5f, #1e40af);
+            border: 1px solid #3b82f6;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #93c5fd;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .points-badge:hover {
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+            transform: translateY(-1px);
+        }
+        .announcement-bar {
+            background: linear-gradient(90deg, #1e3a5f, #1e40af, #1e3a5f);
+            border-bottom: 1px solid #3b82f6;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #93c5fd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .reaction-bar {
+            display: flex;
+            gap: 2px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+        .reaction-btn {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 9999px;
+            padding: 1px 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            line-height: 1.4;
+        }
+        .reaction-btn:hover {
+            border-color: #3b82f6;
+            background: #1e3a5f;
+        }
+        .reaction-btn.reacted {
+            border-color: #3b82f6;
+            background: #1e3a5f40;
+        }
+        .reaction-btn .r-count {
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+        .reaction-add {
+            background: transparent;
+            border: 1px dashed #27272a;
+            border-radius: 9999px;
+            padding: 1px 5px;
+            font-size: 11px;
+            cursor: pointer;
+            color: #52525b;
+            transition: all 0.15s;
+        }
+        .reaction-add:hover {
+            border-color: #3b82f6;
+            color: #93c5fd;
+        }
+        .reaction-picker {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 0.75rem;
+            padding: 6px;
+            display: flex;
+            gap: 2px;
+            flex-wrap: wrap;
+            width: 180px;
+            z-index: 100;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .reaction-picker button {
+            font-size: 16px;
+            padding: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: background 0.15s;
+        }
+        .reaction-picker button:hover {
+            background: #27272a;
+        }
+        .profile-color-border {
+            border-left: 3px solid var(--profile-color, #3b82f6);
+        }
+        /* Slots Styles */
+        .slots-container {
+            background: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .slot-machine {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .slot-reel {
+            width: 80px;
+            height: 100px;
+            background: #18181b;
+            border: 2px solid #27272a;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            overflow: hidden;
+            position: relative;
+        }
+        .slot-reel.spinning {
+            animation: reelSpin 0.1s linear infinite;
+        }
+        @keyframes reelSpin {
+            0% { transform: translateY(-10px); }
+            100% { transform: translateY(10px); }
+        }
+        .gif-picker {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 1rem;
+            width: 250px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
+    <div id="error-boundary" class="hidden fixed inset-0 bg-black/90 z-[10000] flex items-center justify-center p-8">
+        <div class="login-card text-center border-red-500">
+            <i data-lucide="alert-triangle" class="w-16 h-16 text-red-500 mx-auto mb-6"></i>
+            <h2 class="text-2xl font-black mb-4">Something went wrong</h2>
+            <p id="error-message" class="text-zinc-400 text-sm mb-8"></p>
+            <button onclick="location.reload()" class="login-btn">Reload Application</button>
+        </div>
+    </div>
+
     <div id="login-screen">
         <div class="login-card" id="login-view">
             <div class="text-center mb-8">
@@ -401,7 +756,6 @@
                 Don't have an account? 
                 <button onclick="toggleAuthMode('signup')" class="text-blue-500 font-bold hover:underline">Sign Up</button>
             </p>
-            <p class="text-center mt-6 text-[10px] text-zinc-600 uppercase tracking-widest">Authorized Personnel Only</p>
         </div>
 
         <div class="login-card hidden" id="signup-view">
@@ -419,7 +773,6 @@
                 Already have an account? 
                 <button onclick="toggleAuthMode('login')" class="text-blue-500 font-bold hover:underline">Sign In</button>
             </p>
-            <p class="text-center mt-6 text-[10px] text-zinc-600 uppercase tracking-widest">Approval Required for Access</p>
         </div>
     </div>
 
@@ -432,164 +785,37 @@
         </div>
     </div>
 
-    <div id="admin-panel" class="hidden fixed inset-0 bg-black/90 backdrop-blur-xl z-[3000] p-8 overflow-y-auto">
-        <div class="max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-12">
-                <h2 class="text-4xl font-black tracking-tighter">Admin <span class="text-blue-500">Panel</span></h2>
-                <button onclick="toggleAdminPanel()" class="bg-zinc-900 p-3 rounded-full text-zinc-400 hover:text-white transition-all">
-                    <i data-lucide="x"></i>
-                </button>
-            </div>
-            
-            <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 mb-8">
-                <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
-                    <i data-lucide="users" class="text-blue-500"></i>
-                    Pending Approvals
-                </h3>
-                <div id="pending-users-list" class="space-y-4">
-                    <!-- Pending users will appear here -->
-                    <p class="text-zinc-500 italic">No pending approvals at the moment.</p>
-                </div>
-            </div>
-
-            <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 mb-8">
-                <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
-                    <i data-lucide="shield-alert" class="text-red-500"></i>
-                    User Management
-                </h3>
-                <div class="flex gap-2 mb-6">
-                    <input type="text" id="admin-user-search" placeholder="Search username to manage..." class="flex-1 bg-black border border-zinc-800 rounded-lg px-4 py-2 text-sm focus:border-blue-500 outline-none">
-                    <button onclick="adminSearchUser()" class="bg-blue-600 px-4 py-2 rounded-lg text-sm font-bold">Search</button>
-                </div>
-                <div id="admin-user-results" class="space-y-4"></div>
-            </div>
-
-            <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
-                <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
-                    <i data-lucide="terminal" class="text-green-500"></i>
-                    Server Commands
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button onclick="serverCommand('clear_chat')" class="flex items-center gap-3 p-4 bg-black border border-zinc-800 rounded-xl hover:border-red-500 transition-all group">
-                        <i data-lucide="trash-2" class="text-red-500"></i>
-                        <div class="text-left">
-                            <div class="font-bold text-sm">Clear Global Chat</div>
-                            <div class="text-[10px] text-zinc-500">Deletes all messages for everyone</div>
-                        </div>
-                    </button>
-                    <button onclick="serverCommand('broadcast')" class="flex items-center gap-3 p-4 bg-black border border-zinc-800 rounded-xl hover:border-blue-500 transition-all group">
-                        <i data-lucide="megaphone" class="text-blue-500"></i>
-                        <div class="text-left">
-                            <div class="font-bold text-sm">Send Broadcast</div>
-                            <div class="text-[10px] text-zinc-500">Send a message as SYSTEM</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- User Profile Modal -->
-    <div id="profile-modal" class="profile-modal hidden">
-        <div class="profile-card">
-            <div class="h-32 bg-gradient-to-r from-blue-600 to-purple-600 relative">
-                <button onclick="closeProfile()" class="absolute top-4 right-4 bg-black/50 p-2 rounded-full text-white hover:bg-black/70">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
-            <div class="px-8 pb-8 -mt-12 relative">
-                <div class="w-24 h-24 bg-zinc-900 border-4 border-[#09090b] rounded-2xl flex items-center justify-center mb-4 overflow-hidden">
-                    <i data-lucide="user" class="w-12 h-12 text-zinc-500"></i>
-                </div>
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <h2 id="profile-username" class="text-3xl font-black tracking-tighter">Username</h2>
-                        <p id="profile-role" class="text-blue-500 text-xs font-bold uppercase tracking-widest">User</p>
-                    </div>
-                    <div id="profile-actions" class="flex gap-2">
-                        <!-- Action buttons like Add Friend -->
-                    </div>
-                </div>
-                
-                <div class="space-y-6">
-                    <div>
-                        <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Biography</h3>
-                        <div id="profile-bio-container">
-                            <p id="profile-bio" class="text-zinc-300 text-sm leading-relaxed italic">No bio yet.</p>
-                            <button id="edit-bio-btn" onclick="startEditBio()" class="hidden text-blue-500 text-[10px] font-bold uppercase mt-2 hover:underline">Edit Bio</button>
-                        </div>
-                        <div id="edit-bio-container" class="hidden">
-                            <textarea id="bio-input" class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none h-24 mb-2"></textarea>
-                            <div class="flex gap-2">
-                                <button onclick="saveBio()" class="bg-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold">Save</button>
-                                <button onclick="cancelEditBio()" class="bg-zinc-800 px-3 py-1.5 rounded-lg text-xs font-bold">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-                            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Points</div>
-                            <div id="profile-points" class="text-2xl font-black text-blue-400">0</div>
-                        </div>
-                        <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-                            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Joined</div>
-                            <div id="profile-joined" class="text-sm font-bold text-white">...</div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Game Wishlist</h3>
-                        <div id="profile-wishlist" class="flex flex-wrap gap-2">
-                            <!-- Wishlist items -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gambling Game Modal -->
-    <div id="gamble-modal" class="gamble-modal hidden">
-        <div class="slot-machine">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-black italic tracking-tighter text-blue-500">NEXUS SLOTS</h2>
-                <button onclick="closeGamble()" class="text-zinc-500 hover:text-white"><i data-lucide="x"></i></button>
-            </div>
-            
-            <div class="mb-8">
-                <div id="reel-1" class="slot-reel">🍒</div>
-                <div id="reel-2" class="slot-reel">🍒</div>
-                <div id="reel-3" class="slot-reel">🍒</div>
-            </div>
-            
-            <div class="bg-black/50 p-4 rounded-xl mb-8 border border-zinc-800">
-                <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Your Balance</div>
-                <div id="gamble-balance" class="text-2xl font-black text-blue-400">0 pts</div>
-            </div>
-            
-            <div class="space-y-4">
-                <div class="flex gap-2 justify-center">
-                    <button onclick="spin(10)" class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-xl font-bold transition-all active:scale-95">BET 10</button>
-                    <button onclick="spin(50)" class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-xl font-bold transition-all active:scale-95">BET 50</button>
-                    <button onclick="spin(100)" class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-xl font-bold transition-all active:scale-95">BET 100</button>
-                </div>
-                <div id="gamble-status" class="text-sm font-bold text-zinc-400 h-6">Ready to play?</div>
-            </div>
-        </div>
-    </div>
-
     <div id="main-ui">
+        <div id="announcement-bar" class="hidden announcement-bar"></div>
         <header class="bg-black p-6 border-b border-blue-500/20 shadow-xl">
             <div class="max-w-6xl mx-auto flex justify-between items-center">
-                <div class="flex items-center gap-6">
-                    <h1 class="text-3xl font-black tracking-tighter">Nexus<span class="text-blue-500">Games</span></h1>
+                <div class="flex items-center gap-4">
+                    <h1 class="text-3xl font-black tracking-tighter cursor-pointer" onclick="showOwnProfile()">Nexus<span class="text-blue-500">Games</span></h1>
                     <button id="admin-toggle-btn" onclick="toggleAdminPanel()" class="hidden bg-blue-600/10 text-blue-500 border border-blue-500/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600/20 transition-all">
-                        Admin Panel
+                        Admin
                     </button>
                 </div>
-                <div class="flex items-center gap-4">
-                    <input type="text" id="search" placeholder="Search games..." oninput="render()" class="bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 text-white">
+                <div class="flex items-center gap-3">
+                    <div id="points-display" class="points-badge" onclick="toggleLeaderboard()" title="View Leaderboard">
+                        <i data-lucide="zap" class="w-3 h-3"></i>
+                        <span id="my-points">0</span> pts
+                    </div>
+                    <input type="text" id="search" placeholder="Search games..." oninput="render()" class="bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-lg focus:outline-none focus:border-blue-500 text-white w-40">
+                    <button onclick="toggleWishlist()" class="text-zinc-500 hover:text-red-400 transition-colors p-2" title="My Favorites">
+                        <i data-lucide="heart" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="openSlots()" class="text-zinc-500 hover:text-yellow-400 transition-colors p-2" title="Nexus Slots">
+                        <i data-lucide="coins" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="toggleSocialModal()" class="text-zinc-500 hover:text-blue-400 transition-colors p-2" title="Social Hub">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="showOwnProfile()" class="text-zinc-500 hover:text-blue-400 transition-colors p-2" title="My Profile">
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="showUpdateLog()" class="text-zinc-500 hover:text-green-400 transition-colors p-2" title="Update Log">
+                        <i data-lucide="scroll-text" class="w-5 h-5"></i>
+                    </button>
                     <button onclick="handleLogout()" class="text-zinc-500 hover:text-white transition-colors p-2" title="Logout">
                         <i data-lucide="log-out" class="w-5 h-5"></i>
                     </button>
@@ -598,148 +824,238 @@
         </header>
 
         <main class="max-w-6xl mx-auto p-8">
-            <div id="featured-section" class="mb-12 hidden">
-                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                    <i data-lucide="star" class="text-yellow-400 fill-yellow-400"></i>
-                    FEATURED GAME
-                </h2>
-                <div id="featured-game" class="w-full"></div>
-            </div>
-
-            <div id="categories" class="flex flex-wrap gap-2 mb-8">
-                <!-- Categories here -->
-            </div>
-
-            <h2 class="text-xl font-bold mb-6 text-zinc-400 uppercase tracking-widest text-sm" id="section-title">All Games</h2>
-            <div id="grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                <!-- Games here -->
-            </div>
+            <div id="featured-hero-container"></div>
+            <div id="categories" class="flex flex-wrap gap-2 mb-8"></div>
+            <div id="grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
         </main>
     </div>
 
-    <div id="game-container">
-        <div class="absolute top-4 left-4 z-50 flex gap-2">
-            <button onclick="closeGame()" class="bg-zinc-900/80 hover:bg-zinc-900 p-3 rounded-full text-blue-500 backdrop-blur-sm transition-all hover:scale-110 active:scale-95" title="Close Game">
-                <i data-lucide="arrow-left"></i>
-            </button>
-            <button onclick="reloadGame()" class="bg-zinc-900/80 hover:bg-zinc-900 p-3 rounded-full text-blue-500 backdrop-blur-sm transition-all hover:scale-110 active:scale-95" title="Reload Game">
-                <i data-lucide="refresh-cw"></i>
-            </button>
+    <!-- Modals & Overlays -->
+    <div id="admin-panel" class="hidden overlay-panel">
+        <div class="panel-card">
+            <div class="flex justify-between items-center p-6 border-b border-zinc-800">
+                <h2 class="text-2xl font-black tracking-tighter">Admin <span class="text-blue-500">Panel</span></h2>
+                <button onclick="toggleAdminPanel()" class="bg-zinc-900 p-2 rounded-full text-zinc-400 hover:text-white transition-all"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="flex gap-1 p-4 border-b border-zinc-800 flex-wrap">
+                <button onclick="setAdminTab('approvals')" class="admin-tab-btn active" id="atab-approvals">Approvals</button>
+                <button onclick="setAdminTab('users')" class="admin-tab-btn" id="atab-users">Users</button>
+                <button onclick="setAdminTab('logs')" class="admin-tab-btn" id="atab-logs">Logs</button>
+                <button onclick="setAdminTab('commands')" class="admin-tab-btn" id="atab-commands">Commands</button>
+            </div>
+            <div class="p-6">
+                <div id="admin-view-approvals">
+                    <div id="pending-users-list" class="space-y-3"></div>
+                </div>
+                <div id="admin-view-users" class="hidden">
+                    <div id="all-users-list" class="space-y-3"></div>
+                </div>
+                <div id="admin-view-logs" class="hidden">
+                    <div class="space-y-4">
+                        <div class="flex gap-2">
+                            <input type="text" id="log-version" placeholder="v1.0.0" class="login-input mb-0 flex-1">
+                            <input type="text" id="log-date" placeholder="March 29, 2026" class="login-input mb-0 flex-1">
+                        </div>
+                        <textarea id="log-content" placeholder="Update details (HTML allowed)..." class="login-input h-32 mb-0"></textarea>
+                        <button onclick="addUpdateLog()" class="login-btn">Add Log Entry</button>
+                        <div id="admin-logs-list" class="space-y-3 mt-6"></div>
+                    </div>
+                </div>
+                <div id="admin-view-commands" class="hidden">
+                    <div class="space-y-4">
+                        <button onclick="serverCommand('clear_chat')" class="login-btn bg-red-600">Clear All Chat</button>
+                        <button onclick="serverCommand('broadcast')" class="login-btn bg-blue-600">Broadcast Message</button>
+                        <button onclick="serverCommand('mute_all')" class="login-btn bg-yellow-600">Mute All Users</button>
+                        <button onclick="serverCommand('unmute_all')" class="login-btn bg-green-600">Unmute All Users</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <iframe id="game-iframe" src=""></iframe>
+    </div>
+
+    <div id="social-modal" class="hidden overlay-panel">
+        <div class="panel-card max-w-md">
+            <div class="flex justify-between items-center p-6 border-b border-zinc-800">
+                <h2 class="text-2xl font-black tracking-tighter">Social<span class="text-blue-500">Hub</span></h2>
+                <button onclick="toggleSocialModal()" class="text-zinc-500 hover:text-white transition-all"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="flex gap-2 mb-6 bg-zinc-900 p-1 rounded-xl">
+                    <button onclick="setSocialTab('friends')" id="stab-friends" class="flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all active">Friends</button>
+                    <button onclick="setSocialTab('requests')" id="stab-requests" class="flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all text-zinc-500">Requests</button>
+                    <button onclick="setSocialTab('search')" id="stab-search" class="flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all text-zinc-500">Find</button>
+                </div>
+                
+                <div id="social-view-friends" class="space-y-3">
+                    <div id="friends-list" class="space-y-2"></div>
+                </div>
+                
+                <div id="social-view-requests" class="hidden space-y-3">
+                    <div id="requests-list" class="space-y-2"></div>
+                </div>
+                
+                <div id="social-view-search" class="hidden space-y-3">
+                    <div class="relative">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"></i>
+                        <input type="text" id="user-search-input" placeholder="Search by username..." class="login-input pl-10 mb-4" oninput="searchUsers()">
+                    </div>
+                    <div id="user-search-results" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="slots-modal" class="hidden overlay-panel">
+        <div class="slots-container">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black">Nexus <span class="text-yellow-500">Slots</span></h2>
+                <button onclick="closeSlots()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="slot-machine">
+                <div id="reel1" class="slot-reel">🍒</div>
+                <div id="reel2" class="slot-reel">🍒</div>
+                <div id="reel3" class="slot-reel">🍒</div>
+            </div>
+            <div class="mb-6">
+                <p class="text-zinc-400 text-sm mb-2">Bet: 10 Points</p>
+                <button id="spin-btn" onclick="spinSlots()" class="login-btn bg-yellow-600 hover:bg-yellow-500">SPIN</button>
+            </div>
+            <div id="slots-result" class="text-lg font-bold h-8"></div>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="hidden profile-modal" onclick="if(event.target===this)closeProfile()">
+        <div class="profile-card !p-0 overflow-hidden max-w-2xl">
+            <div class="steam-profile-header">
+                <img id="profile-avatar" src="https://picsum.photos/seed/kyler/200" class="steam-avatar">
+                <div class="flex-1">
+                    <div class="flex items-center gap-4 mb-2">
+                        <h2 id="profile-username" class="text-3xl font-black"></h2>
+                        <div class="steam-lvl-badge" id="profile-level">1</div>
+                    </div>
+                    <span id="profile-role" class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-blue-600/20 text-blue-400"></span>
+                    <p id="profile-bio" class="text-zinc-400 text-sm mt-4 italic line-clamp-2"></p>
+                </div>
+                <div class="text-right">
+                    <button onclick="closeProfile()" class="text-zinc-500 hover:text-white mb-8 block ml-auto"><i data-lucide="x" class="w-6 h-6"></i></button>
+                    <div class="text-blue-500 font-black text-xl" id="profile-points">0 <span class="text-[10px] text-zinc-500 uppercase">Points</span></div>
+                </div>
+            </div>
+            
+            <div class="p-8 grid grid-cols-3 gap-8">
+                <div class="col-span-2 space-y-6">
+                    <div>
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4">Recent Activity</h3>
+                        <div class="space-y-3">
+                            <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 flex justify-between items-center">
+                                <div>
+                                    <div class="font-bold text-sm">Games Played</div>
+                                    <div class="text-xs text-zinc-500" id="profile-games">0 games</div>
+                                </div>
+                                <i data-lucide="gamepad-2" class="w-5 h-5 text-blue-500"></i>
+                            </div>
+                            <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 flex justify-between items-center">
+                                <div>
+                                    <div class="font-bold text-sm">Total Playtime</div>
+                                    <div class="text-xs text-zinc-500" id="profile-playtime">0m</div>
+                                </div>
+                                <i data-lucide="clock" class="w-5 h-5 text-blue-500"></i>
+                            </div>
+                            <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 flex justify-between items-center">
+                                <div>
+                                    <div class="font-bold text-sm">Messages Sent</div>
+                                    <div class="text-xs text-zinc-500" id="profile-messages">0 messages</div>
+                                </div>
+                                <i data-lucide="message-square" class="w-5 h-5 text-blue-500"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="profile-edit-section" class="hidden space-y-4 bg-zinc-900/50 p-6 rounded-xl border border-blue-500/20">
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-blue-500">Edit Profile</h3>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block mb-1">Bio</label>
+                            <textarea id="profile-bio-input" class="login-input h-20 mb-0" placeholder="Update your bio..."></textarea>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block mb-1">Showcase Game</label>
+                            <select id="profile-fav-game-input" class="login-input mb-0">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <button onclick="saveProfile()" class="login-btn">Save Changes</button>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4">Showcase</h3>
+                        <div class="bg-blue-600/10 border border-blue-500/20 p-4 rounded-xl text-center">
+                            <div class="text-[10px] font-bold text-blue-500 uppercase mb-2">Favorite Game</div>
+                            <div id="profile-fav-game-display" class="font-black text-lg">None</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4">Badges</h3>
+                        <div id="profile-badges" class="flex flex-wrap gap-2">
+                            <!-- Badges rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div id="update-log-modal" class="hidden overlay-panel">
+            <div class="panel-card max-w-lg">
+                <div class="flex justify-between items-center p-6 border-b border-zinc-800">
+                    <h2 class="text-2xl font-black tracking-tighter">Update <span class="text-blue-500">Log</span></h2>
+                    <button onclick="toggleUpdateLog()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                <div id="update-logs-container" class="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+                    <div class="text-center text-zinc-500 py-8">Loading updates...</div>
+                </div>
+            </div>
+        </div>
+    <div id="leaderboard-panel" class="hidden overlay-panel">
+        <div class="panel-card max-w-md">
+            <div class="flex justify-between items-center p-6 border-b border-zinc-800">
+                <h2 class="text-2xl font-black">Leaderboard</h2>
+                <button onclick="toggleLeaderboard()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="leaderboard-list" class="p-6 space-y-2"></div>
+        </div>
     </div>
 
     <div id="chat-panel" class="chat-panel">
-        <div class="p-4 border-b border-zinc-800 flex flex-col gap-4 bg-zinc-900/50">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="message-square" class="text-blue-500 w-5 h-5"></i>
-                    <h2 class="font-bold text-white" id="chat-title">Live Chat</h2>
-                </div>
+        <div class="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50 backdrop-blur-md">
+            <h2 class="font-black text-lg tracking-tighter">Nexus<span class="text-blue-500">Chat</span></h2>
+            <div class="flex gap-2">
+                <button onclick="toggleChatFullscreen()" class="text-zinc-500 hover:text-white transition-colors" title="Toggle Fullscreen">
+                    <i data-lucide="maximize-2" class="w-4 h-4"></i>
+                </button>
                 <button onclick="toggleChat()" class="text-zinc-500 hover:text-white transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            <div class="flex gap-1 bg-black/40 p-1 rounded-lg">
-                <button onclick="setChatTab('global')" id="tab-global" class="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all bg-blue-600 text-white">Global</button>
-                <button onclick="setChatTab('friends')" id="tab-friends" class="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all text-zinc-500 hover:text-zinc-300">Friends</button>
-                <button onclick="setChatTab('dms')" id="tab-dms" class="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all text-zinc-500 hover:text-zinc-300">DMs</button>
-                <button onclick="setChatTab('leaderboard')" id="tab-leaderboard" class="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all text-zinc-500 hover:text-zinc-300">Top</button>
-            </div>
         </div>
-
-        <!-- Global Chat View -->
-        <div id="view-global" class="flex-1 flex flex-col overflow-hidden">
-            <div class="p-2 border-b border-zinc-800 flex justify-end">
-                <button onclick="toggleFullscreenChat()" class="text-zinc-500 hover:text-white p-1">
-                    <i data-lucide="maximize" class="w-4 h-4" id="fullscreen-icon"></i>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-container relative">
+            <div id="gif-picker" class="hidden absolute bottom-full right-0 w-64 h-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl flex flex-direction-column overflow-hidden mb-2">
+                <div class="p-2 border-b border-zinc-800">
+                    <input type="text" placeholder="Search GIFs..." class="w-full bg-black border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500" oninput="searchGifs(this.value)">
+                </div>
+                <div id="gif-results" class="flex-1 overflow-y-auto p-2 grid grid-cols-2 gap-2"></div>
+            </div>
+            <div class="flex gap-2 items-center">
+                <button onclick="toggleGifPicker()" class="text-zinc-500 hover:text-blue-500 transition-colors">
+                    <i data-lucide="smile" class="w-5 h-5"></i>
                 </button>
-            </div>
-            <div id="chat-messages" class="chat-messages flex-1"></div>
-            <div class="chat-input-container relative">
-                <div id="gif-picker" class="gif-picker">
-                    <div class="p-3 border-b border-zinc-800 flex justify-between items-center">
-                        <span class="text-xs font-bold uppercase tracking-widest">Select GIF</span>
-                        <button onclick="toggleGifPicker()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
-                    </div>
-                    <div class="p-2">
-                        <input type="text" id="gif-search" placeholder="Search GIFs..." oninput="searchGifs()" class="w-full bg-black border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-blue-500">
-                    </div>
-                    <div id="gif-grid" class="gif-grid"></div>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="toggleGifPicker()" class="text-zinc-500 hover:text-blue-500 p-2">
-                        <i data-lucide="image" class="w-5 h-5"></i>
-                    </button>
-                    <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
-                    <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg transition-colors">
-                        <i data-lucide="send" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Friends View -->
-        <div id="view-friends" class="hidden flex-1 flex flex-col overflow-hidden">
-            <div class="p-4 border-b border-zinc-800">
-                <div class="relative">
-                    <input type="text" id="user-search" placeholder="Search users..." oninput="searchUsers()" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                    <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-zinc-500"></i>
-                </div>
-            </div>
-            <div id="friends-content" class="flex-1 overflow-y-auto p-4 space-y-6">
-                <div>
-                    <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Friend Requests</h3>
-                    <div id="friend-requests-list" class="space-y-2"></div>
-                </div>
-                <div>
-                    <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Your Friends</h3>
-                    <div id="friends-list" class="space-y-2"></div>
-                </div>
-                <div id="search-results-section" class="hidden">
-                    <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Search Results</h3>
-                    <div id="search-results-list" class="space-y-2"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- DM View -->
-        <div id="view-dms" class="hidden flex-1 flex flex-col overflow-hidden">
-            <div id="dm-list-view" class="flex-1 overflow-y-auto p-4 space-y-2">
-                <!-- DM channels list -->
-            </div>
-            <div id="dm-chat-view" class="hidden flex-1 flex flex-col overflow-hidden">
-                <div class="p-3 border-b border-zinc-800 flex items-center gap-3">
-                    <button onclick="backToDMList()" class="text-zinc-500 hover:text-white">
-                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                    </button>
-                    <span id="dm-target-name" class="font-bold text-sm"></span>
-                </div>
-                <div id="dm-messages" class="chat-messages flex-1"></div>
-                <div class="chat-input-container">
-                    <div class="flex gap-2">
-                        <input type="text" id="dm-input" placeholder="Type a message..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
-                        <button onclick="sendDM()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg transition-colors">
-                            <i data-lucide="send" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Leaderboard View -->
-        <div id="view-leaderboard" class="hidden flex-1 flex flex-col overflow-hidden">
-            <div class="p-4 border-b border-zinc-800 bg-blue-600/10">
-                <div class="flex items-center gap-3">
-                    <i data-lucide="trophy" class="text-yellow-400 w-6 h-6"></i>
-                    <div>
-                        <h3 class="font-black text-sm uppercase tracking-tighter">Global Leaderboard</h3>
-                        <p class="text-[10px] text-zinc-500">Top players by points</p>
-                    </div>
-                </div>
-            </div>
-            <div id="leaderboard-list" class="flex-1 overflow-y-auto p-4 space-y-2">
-                <!-- Leaderboard items -->
+                <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" onkeydown="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()" class="bg-blue-600 p-2 rounded-lg hover:bg-blue-500 transition-colors">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -749,66 +1065,64 @@
         <div id="chat-badge" class="chat-badge hidden">0</div>
     </div>
 
+    <div id="game-container">
+        <div class="absolute top-4 left-4 z-50 flex gap-2">
+            <button onclick="closeGame()" class="bg-zinc-900/80 p-3 rounded-full text-blue-500 hover:bg-zinc-800 transition-colors shadow-xl"><i data-lucide="arrow-left"></i></button>
+            <button onclick="reloadGame()" class="bg-zinc-900/80 p-3 rounded-full text-green-500 hover:bg-zinc-800 transition-colors shadow-xl" title="Reload Game"><i data-lucide="refresh-cw"></i></button>
+        </div>
+        <iframe id="game-iframe" src=""></iframe>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, deleteDoc, doc, serverTimestamp, getDocFromServer, getDoc, setDoc, updateDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, deleteDoc, doc, getDoc, setDoc, updateDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase configuration
-        const firebaseConfig = {
-            projectId: "gen-lang-client-0921564734",
-            appId: "1:596110904964:web:75fccdd48c6411bef87cd1",
-            apiKey: "AIzaSyDy2KA4v_AJWgyhZYB2EVAUrW7juRNJzkI",
-            authDomain: "gen-lang-client-0921564734.firebaseapp.com",
-            firestoreDatabaseId: "ai-studio-2a2b3ac8-093f-4a77-8fe4-9d32b7b3bfba",
-            storageBucket: "gen-lang-client-0921564734.firebasestorage.app",
-            messagingSenderId: "596110904964"
-        };
+        // Load config from file
+        let app, auth, db;
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+        async function initFirebase() {
+            const configRes = await fetch('/firebase-applet-config.json');
+            const firebaseConfig = await configRes.json();
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
-        // Test connection
-        async function testConnection() {
-            try {
-                await getDocFromServer(doc(db, 'test', 'connection'));
-            } catch (error) {
-                if (error instanceof Error && error.message.includes('the client is offline')) {
-                    console.error("Please check your Firebase configuration. The client is offline.");
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        currentUserProfile = userDoc.data();
+                        if (currentUserProfile.approved) {
+                            if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'none';
+                            if (document.getElementById('pending-screen')) document.getElementById('pending-screen').classList.add('hidden');
+                            if (document.getElementById('main-ui')) document.getElementById('main-ui').style.display = 'block';
+                            if (currentUserProfile.role === 'admin') {
+                                const adminBtn = document.getElementById('admin-toggle-btn');
+                                if (adminBtn) adminBtn.classList.remove('hidden');
+                            }
+                            updatePointsDisplay();
+                            setupRatings();
+                            render();
+                            setupChat();
+                        } else {
+                            if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'none';
+                            if (document.getElementById('pending-screen')) document.getElementById('pending-screen').classList.remove('hidden');
+                        }
+                    }
+                } else {
+                    currentUser = null;
+                    currentUserProfile = null;
+                    if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'flex';
+                    if (document.getElementById('main-ui')) document.getElementById('main-ui').style.display = 'none';
+                    if (document.getElementById('pending-screen')) document.getElementById('pending-screen').classList.add('hidden');
                 }
-            }
+                lucide.createIcons();
+            });
         }
-        testConnection();
 
-        // Global state
-        let currentUser = null;
-        let currentUserProfile = null;
-        let unreadCount = 0;
-        let isChatOpen = false;
-        let isAdminPanelOpen = false;
-        let currentChatTab = 'global';
-        let currentDMChannel = null;
-        let friends = [];
-        let friendRequests = [];
-        let dmChannels = [];
-        let unsubscribeDMs = null;
-        let unsubscribeChat = null;
-        let unsubscribeFriends1 = null;
-        let unsubscribeFriends2 = null;
-        let unsubscribeLeaderboard = null;
-        let isFullscreenChat = false;
-        let gifSearchTimeout = null;
-
-        // GIF list (fallback if API is not used, but I'll try to use Tenor/Giphy if possible)
-        // For now, let's use some static ones or a mock search
-        const MOCK_GIFS = [
-            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxxfG9G0Z0I/giphy.gif",
-            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l0HlHFRbmaZtBRhXG/giphy.gif",
-            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKVUn7iM8FMEU24/giphy.gif",
-            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l41lTfuxV3U70609y/giphy.gif"
-        ];
+        initFirebase();
 
         // Error Handling Spec for Firestore Operations
         const OperationType = {
@@ -848,1150 +1162,183 @@
                 errorDiv.className = 'p-2 mb-2 text-xs bg-red-500/20 text-red-400 rounded border border-red-500/30';
                 errorDiv.textContent = `Chat error: ${errInfo.error}. Please try again.`;
                 chatMessages.appendChild(errorDiv);
-                scrollToBottom();
             }
             
             throw new Error(JSON.stringify(errInfo));
         }
 
-        // Auth state listener
-        onAuthStateChanged(auth, async (user) => {
-            try {
-                if (user) {
-                    currentUser = user;
-                    await fetchUserProfile(user.uid);
-                    
-                    // If profile is still missing and it's kyler, try to create it
-                    if (!currentUserProfile && user.email === 'kyler@nexus.games') {
-                        console.log("Bootstrapping missing admin profile...");
-                        currentUserProfile = {
-                            username: 'kyler',
-                            email: 'kyler@nexus.games',
-                            approved: true,
-                            role: 'admin',
-                            createdAt: Date.now(),
-                            points: 1000,
-                            bio: "The creator of Nexus Games.",
-                            banned: false,
-                            muted: false,
-                            muteExpires: 0,
-                            wishlist: []
-                        };
-                        await setDoc(doc(db, "users", user.uid), currentUserProfile);
-                    }
-                    
-                    if (currentUserProfile) {
-                        if (currentUserProfile.banned) {
-                            alert("Your account has been banned.");
-                            signOut(auth);
-                            return;
-                        }
+        let currentUser = null;
+        let currentUserProfile = null;
+        let isChatOpen = false;
+        let unreadCount = 0;
+        let currentAdminTab = 'approvals';
+        let wishlist = JSON.parse(localStorage.getItem('nexus_wishlist') || '[]');
+        let gameRatings = {}; // { title: { avg: 0, count: 0, myRating: 0 } }
+        let playStartTime = null;
+        let currentGameTitle = null;
+        let currentCategory = 'All';
+        let showOnlyWishlist = false;
 
-                        if (currentUserProfile.approved || currentUserProfile.role === 'admin') {
-                            document.getElementById('login-screen').style.display = 'none';
-                            document.getElementById('pending-screen').classList.add('hidden');
-                            document.getElementById('main-ui').style.display = 'block';
-                            
-                            if (currentUserProfile.role === 'admin') {
-                                const adminBtn = document.getElementById('admin-toggle-btn');
-                                if (adminBtn) adminBtn.classList.remove('hidden');
-                                fetchPendingUsers();
-                            } else {
-                                const adminBtn = document.getElementById('admin-toggle-btn');
-                                if (adminBtn) adminBtn.classList.add('hidden');
-                            }
-                            
-                            render();
-                            setupChat();
-                            setupFriends();
-                            setupDMChannels();
-                            setupLeaderboard();
-                        } else {
-                            document.getElementById('login-screen').style.display = 'none';
-                            document.getElementById('pending-screen').classList.remove('hidden');
-                            document.getElementById('main-ui').style.display = 'none';
-                        }
-                    } else {
-                        // Profile missing and not kyler - show error or sign out
-                        console.error("User profile missing for non-admin user");
-                        document.getElementById('login-error').textContent = "Account error. Please contact admin.";
-                        document.getElementById('login-error').classList.remove('hidden');
-                        signOut(auth);
-                    }
-                } else {
-                    currentUser = null;
-                    currentUserProfile = null;
-                    document.getElementById('login-screen').style.display = 'flex';
-                    document.getElementById('pending-screen').classList.add('hidden');
-                    document.getElementById('main-ui').style.display = 'none';
-                    const adminPanel = document.getElementById('admin-panel');
-                    if (adminPanel) adminPanel.classList.add('hidden');
-                    if (unsubscribeLeaderboard) unsubscribeLeaderboard();
-                }
-            } catch (error) {
-                console.error("Auth state change error:", error);
-            }
-            lucide.createIcons();
-        });
+        const GAMES = [
+            { title: 'Nexus Slots', category: 'Casino', url: 'javascript:openSlots()', img: 'https://picsum.photos/seed/slots/800/400' },
+            { title: 'Basket Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/basket-random', img: 'https://picsum.photos/seed/basket/400/250' },
+            { title: 'Retro Bowl', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/retro-bowl', img: 'https://picsum.photos/seed/retro/400/250' },
+            { title: '1v1.lol', category: 'Action', url: 'https://1v1.lol', img: 'https://picsum.photos/seed/1v1/400/250' },
+            { title: 'Slope', category: 'Action', url: 'https://slope.io', img: 'https://picsum.photos/seed/slope/400/250' },
+            { title: 'Drift Hunters', category: 'Driving', url: 'https://drift-hunters.io', img: 'https://picsum.photos/seed/drift/400/250' },
+            { title: 'Shell Shockers', category: 'Action', url: 'https://shellshock.io', img: 'https://picsum.photos/seed/eggs/400/250' },
+            { title: 'Moto X3M', category: 'Driving', url: 'https://moto-x3m.io', img: 'https://picsum.photos/seed/moto/400/250' },
+            { title: 'Subway Surfers', category: 'Action', url: 'https://subwaysurfers.com', img: 'https://picsum.photos/seed/subway/400/250' }
+        ];
 
-        async function fetchUserProfile(uid, retryCount = 0) {
-            const path = `users/${uid}`;
-            try {
-                const userDoc = await getDoc(doc(db, "users", uid));
-                if (userDoc.exists()) {
-                    currentUserProfile = userDoc.data();
-                } else if (retryCount < 5) {
-                    // Retry after a short delay to handle race condition during sign-up
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    return fetchUserProfile(uid, retryCount + 1);
-                } else {
-                    console.warn("User profile not found in Firestore for UID:", uid);
-                    currentUserProfile = null;
-                }
-            } catch (error) {
-                handleFirestoreError(error, OperationType.GET, path);
-            }
-        }
-
-        window.toggleAuthMode = (mode) => {
-            const loginView = document.getElementById('login-view');
-            const signupView = document.getElementById('signup-view');
-            if (mode === 'signup') {
-                loginView.classList.add('hidden');
-                signupView.classList.remove('hidden');
-            } else {
-                loginView.classList.remove('hidden');
-                signupView.classList.add('hidden');
-            }
-        };
 
         window.handleLogin = async () => {
-            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const user = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value;
-            const errorEl = document.getElementById('login-error');
-            errorEl.textContent = "Invalid username or password";
-
-            if (!user || !pass) return;
-
-            // Internal email mapping for Firebase Auth
-            const email = `${user}@nexus.games`;
-            // Firebase requires 6 chars minimum, so we pad it internally
-            const firebasePass = pass.length < 6 ? pass.padEnd(6, '_') : pass;
-
             try {
-                await signInWithEmailAndPassword(auth, email, firebasePass);
-            } catch (error) {
-                // If it's the first time for 'kyler' and 'k', bootstrap the account
-                // Newer Firebase versions return 'auth/invalid-credential' instead of 'auth/user-not-found'
-                if (user === 'kyler' && pass === 'k' && (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential')) {
-                    try {
-                        const userCredential = await createUserWithEmailAndPassword(auth, email, firebasePass);
-                        const uid = userCredential.user.uid;
-                        
-                        // Create admin profile in Firestore
-                        await setDoc(doc(db, "users", uid), {
-                            username: user,
-                            email: email,
-                            approved: true,
-                            role: 'admin',
-                            createdAt: Date.now()
-                        });
-                        
-                        await updateProfile(userCredential.user, { displayName: user });
-                        return;
-                    } catch (createError) {
-                        // If user already exists, the error was likely wrong password
-                        if (createError.code === 'auth/email-already-in-use') {
-                            console.error("Login failed: Incorrect password for kyler");
-                        } else {
-                            console.error("Bootstrap failed:", createError);
-                        }
-                    }
-                }
-                
-                console.error("Login failed:", error.code, error.message);
-                errorEl.classList.remove('hidden');
-                setTimeout(() => errorEl.classList.add('hidden'), 3000);
+                await signInWithEmailAndPassword(auth, `${user}@nexus.games`, pass);
+            } catch (e) {
+                const loginErr = document.getElementById('login-error');
+                if (loginErr) loginErr.classList.remove('hidden');
             }
         };
 
         window.handleSignUp = async () => {
-            const user = document.getElementById('signup-user').value.trim().toLowerCase();
+            const user = document.getElementById('signup-user').value.trim();
             const pass = document.getElementById('signup-pass').value;
-            const errorEl = document.getElementById('signup-error');
-
             if (!user || !pass) return;
-            
-            if (user === 'kyler') {
-                errorEl.textContent = "Admin account already exists. Please sign in.";
-                errorEl.classList.remove('hidden');
-                setTimeout(() => errorEl.classList.add('hidden'), 3000);
-                return;
-            }
-
-            // Check if username already exists in Firestore
             try {
+                // Check for duplicate username
                 const q = query(collection(db, "users"), where("username", "==", user));
                 const snap = await getDocs(q);
                 if (!snap.empty) {
-                    errorEl.textContent = "Username already taken. Try another!";
-                    errorEl.classList.remove('hidden');
-                    setTimeout(() => errorEl.classList.add('hidden'), 3000);
+                    alert("Username already taken!");
                     return;
                 }
-            } catch (e) {
-                console.error("Username check error:", e);
-            }
 
-            const email = `${user}@nexus.games`;
-            const firebasePass = pass.length < 6 ? pass.padEnd(6, '_') : pass;
-
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, firebasePass);
-                const uid = userCredential.user.uid;
-                
-                // Create user profile in Firestore
-                const isDefaultAdmin = email === "kyler@nexus.games";
-                
-                await setDoc(doc(db, "users", uid), {
+                const isAdmin = user.toLowerCase() === 'kyler';
+                const res = await createUserWithEmailAndPassword(auth, `${user}@nexus.games`, pass);
+                await setDoc(doc(db, "users", res.user.uid), {
                     username: user,
-                    email: email,
-                    approved: isDefaultAdmin, 
-                    role: isDefaultAdmin ? 'admin' : 'user',
-                    createdAt: Date.now(),
+                    email: `${user}@nexus.games`,
+                    approved: isAdmin,
+                    role: isAdmin ? 'admin' : 'user',
                     points: 100,
-                    bio: "",
-                    banned: false,
-                    muted: false,
-                    muteExpires: 0,
-                    wishlist: []
+                    createdAt: Date.now(),
+                    totalPlaytime: 0,
+                    gamesPlayed: 0,
+                    messagesSent: 0,
+                    favoriteGame: '',
+                    bio: '',
+                    friends: [],
+                    level: 1
                 });
-                
-                await updateProfile(userCredential.user, { displayName: user });
-            } catch (error) {
-                console.error("Sign up failed:", error);
-                if (error.code === 'auth/email-already-in-use') {
-                    errorEl.textContent = "Username already taken. Try signing in!";
-                } else if (error.code === 'auth/weak-password') {
-                    errorEl.textContent = "Password is too weak.";
-                } else {
-                    errorEl.textContent = "Sign up failed. Please try again.";
-                }
-                errorEl.classList.remove('hidden');
-                setTimeout(() => errorEl.classList.add('hidden'), 3000);
-            }
-        };
-
-        // Admin Logic
-        window.toggleAdminPanel = () => {
-            isAdminPanelOpen = !isAdminPanelOpen;
-            const panel = document.getElementById('admin-panel');
-            panel.classList.toggle('hidden', !isAdminPanelOpen);
-            if (isAdminPanelOpen) fetchPendingUsers();
-        };
-
-        async function fetchPendingUsers() {
-            const path = "users";
-            const q = query(collection(db, path), where("approved", "==", false));
-            
-            try {
-                const snapshot = await getDocs(q);
-                const list = document.getElementById('pending-users-list');
-                
-                if (snapshot.empty) {
-                    list.innerHTML = '<p class="text-zinc-500 italic">No pending approvals at the moment.</p>';
-                    return;
-                }
-                
-                list.innerHTML = snapshot.docs.map(doc => {
-                    const data = doc.data();
-                    return `
-                        <div class="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl border border-zinc-700">
-                            <div>
-                                <h4 class="font-bold text-white">${data.username}</h4>
-                                <p class="text-xs text-zinc-500">${data.email}</p>
-                            </div>
-                            <button onclick="approveUser('${doc.id}')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all">
-                                Approve
-                            </button>
-                        </div>
-                    `;
-                }).join('');
-            } catch (error) {
-                handleFirestoreError(error, OperationType.LIST, path);
-            }
-        }
-
-        window.approveUser = async (uid) => {
-            const path = `users/${uid}`;
-            try {
-                await updateDoc(doc(db, "users", uid), {
-                    approved: true
-                });
-                fetchPendingUsers();
-            } catch (error) {
-                handleFirestoreError(error, OperationType.UPDATE, path);
-            }
-        };
-
-        window.adminSearchUser = async () => {
-            const queryText = document.getElementById('admin-user-search').value.trim().toLowerCase();
-            const results = document.getElementById('admin-user-results');
-            if (!queryText) return;
-
-            try {
-                const q = query(collection(db, "users"), where("username", "==", queryText));
-                const snap = await getDocs(q);
-                if (snap.empty) {
-                    results.innerHTML = '<p class="text-zinc-500 italic">No user found.</p>';
-                } else {
-                    results.innerHTML = snap.docs.map(doc => {
-                        const u = doc.data();
-                        return `
-                            <div class="p-4 bg-black border border-zinc-800 rounded-xl">
-                                <div class="flex justify-between items-center mb-4">
-                                    <div>
-                                        <div class="font-bold text-white">${u.username}</div>
-                                        <div class="text-xs text-zinc-500">${u.email}</div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button onclick="adminAction('ban', '${doc.id}', ${!u.banned})" class="px-3 py-1 rounded bg-red-600/20 text-red-500 text-xs font-bold">${u.banned ? 'Unban' : 'Ban'}</button>
-                                        <button onclick="adminAction('mute', '${doc.id}', ${!u.muted})" class="px-3 py-1 rounded bg-orange-600/20 text-orange-500 text-xs font-bold">${u.muted ? 'Unmute' : 'Mute'}</button>
-                                        <button onclick="adminAction('delete', '${doc.id}')" class="px-3 py-1 rounded bg-red-600 text-white text-xs font-bold">Delete Account</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                }
+                await updateProfile(res.user, { displayName: user });
             } catch (e) {
-                console.error("Admin search error:", e);
+                const signupErr = document.getElementById('signup-error');
+                if (signupErr) signupErr.classList.remove('hidden');
             }
         };
 
-        window.adminAction = async (action, uid, value) => {
-            if (action === 'delete' && !confirm("Are you sure you want to delete this user? This will remove them from everything.")) return;
-            
-            try {
-                if (action === 'ban') {
-                    await updateDoc(doc(db, "users", uid), { banned: value });
-                } else if (action === 'mute') {
-                    await updateDoc(doc(db, "users", uid), { 
-                        muted: value,
-                        muteExpires: value ? Date.now() + (24 * 60 * 60 * 1000) : 0 // 24h default
-                    });
-                } else if (action === 'delete') {
-                    // Mark messages as deleted
-                    const q = query(collection(db, "messages"), where("uid", "==", uid));
-                    const msgs = await getDocs(q);
-                    for (const m of msgs.docs) {
-                        await updateDoc(doc(db, "messages", m.id), { text: "[Account Deleted]", user: "Deleted User" });
-                    }
-                    
-                    // Delete friend requests
-                    const qFr1 = query(collection(db, "friend_requests"), where("fromId", "==", uid));
-                    const qFr2 = query(collection(db, "friend_requests"), where("toId", "==", uid));
-                    const fr1 = await getDocs(qFr1);
-                    const fr2 = await getDocs(qFr2);
-                    for (const f of fr1.docs) await deleteDoc(doc(db, "friend_requests", f.id));
-                    for (const f of fr2.docs) await deleteDoc(doc(db, "friend_requests", f.id));
+        window.handleLogout = () => signOut(auth);
 
-                    await deleteDoc(doc(db, "users", uid));
-                }
-                adminSearchUser();
-                alert(`${action} successful`);
-            } catch (e) {
-                console.error("Admin action error:", e);
-            }
+        window.toggleAuthMode = (mode) => {
+            const loginView = document.getElementById('login-view');
+            const signupView = document.getElementById('signup-view');
+            if (loginView) loginView.classList.toggle('hidden', mode === 'signup');
+            if (signupView) signupView.classList.toggle('hidden', mode === 'login');
         };
-
-        window.serverCommand = async (cmd) => {
-            if (cmd === 'clear_chat') {
-                if (!confirm("Clear ALL global chat messages?")) return;
-                const snap = await getDocs(collection(db, "messages"));
-                for (const d of snap.docs) {
-                    await deleteDoc(doc(db, "messages", d.id));
-                }
-                alert("Chat cleared");
-            } else if (cmd === 'broadcast') {
-                const msg = prompt("Enter broadcast message:");
-                if (msg) {
-                    await addDoc(collection(db, "messages"), {
-                        user: "SYSTEM",
-                        text: `📢 ${msg}`,
-                        timestamp: Date.now(),
-                        uid: "system"
-                    });
-                }
-            }
-        };
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const loginScreen = document.getElementById('login-screen');
-                if (loginScreen && loginScreen.style.display !== 'none') {
-                    const signupView = document.getElementById('signup-view');
-                    if (signupView && !signupView.classList.contains('hidden')) {
-                        window.handleSignUp();
-                    } else {
-                        window.handleLogin();
-                    }
-                }
-            }
-        });
-
-        window.handleLogout = () => {
-            if (unsubscribeChat) unsubscribeChat();
-            if (unsubscribeFriends1) unsubscribeFriends1();
-            if (unsubscribeFriends2) unsubscribeFriends2();
-            if (unsubscribeDMs) unsubscribeDMs();
-            signOut(auth);
-        };
-
-        // Chat Logic
-        window.setChatTab = (tab) => {
-            currentChatTab = tab;
-            const views = ['global', 'friends', 'dms', 'leaderboard'];
-            views.forEach(v => {
-                document.getElementById(`view-${v}`).classList.toggle('hidden', v !== tab);
-                const tabBtn = document.getElementById(`tab-${v}`);
-                if (v === tab) {
-                    tabBtn.classList.add('bg-blue-600', 'text-white');
-                    tabBtn.classList.remove('text-zinc-500');
-                } else {
-                    tabBtn.classList.remove('bg-blue-600', 'text-white');
-                    tabBtn.classList.add('text-zinc-500');
-                }
-            });
-            document.getElementById('chat-title').innerText = tab === 'global' ? 'Live Chat' : (tab === 'friends' ? 'Friends' : (tab === 'dms' ? 'Direct Messages' : 'Leaderboard'));
-            lucide.createIcons();
-        };
-
-        function setupChat() {
-            if (unsubscribeChat) unsubscribeChat();
-            const path = "messages";
-            const q = query(collection(db, path), orderBy("timestamp", "desc"), limit(50));
-            
-            unsubscribeChat = onSnapshot(q, (snapshot) => {
-                const container = document.getElementById('chat-messages');
-                container.innerHTML = '';
-                
-                snapshot.forEach((doc) => {
-                    const msg = { id: doc.id, ...doc.data() };
-                    addMessageToUI(msg);
-                });
-                
-                if (!isChatOpen && snapshot.docChanges().some(change => change.type === 'added')) {
-                    unreadCount++;
-                    updateBadge();
-                }
-                scrollToBottom();
-            }, (error) => {
-                handleFirestoreError(error, OperationType.GET, path);
-            });
-        }
-
-        function addMessageToUI(msg) {
-            const container = document.getElementById('chat-messages');
-            const wrapper = document.createElement('div');
-            const isMine = msg.uid === currentUser?.uid;
-            const isAdminUser = currentUserProfile?.role === 'admin';
-            
-            wrapper.id = `msg-${msg.id}`;
-            wrapper.className = `message-container ${isMine ? 'items-end' : 'items-start'}`;
-            
-            const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...';
-            const now = Date.now();
-            const canDelete = isMine && (now - msg.timestamp <= 10000);
-
-            let content = msg.text;
-            if (msg.gif) {
-                content = `<div class="gif-container"><img src="${msg.gif}" referrerPolicy="no-referrer"></div>`;
-            }
-
-            wrapper.innerHTML = `
-                <div class="message-bubble ${isMine ? 'mine' : 'others'}">
-                    <div class="flex justify-between items-baseline mb-1 gap-4">
-                        <span onclick="viewProfile('${msg.uid}')" class="text-[10px] font-bold ${isMine ? 'text-blue-100' : 'text-blue-400'} uppercase tracking-wider cursor-pointer hover:underline">${isMine ? 'You' : msg.user}</span>
-                        <span class="text-[9px] ${isMine ? 'text-blue-200' : 'text-zinc-500'}">${time}</span>
-                    </div>
-                    <div class="text-sm ${isMine ? 'text-white' : 'text-zinc-200'}">${content}</div>
-                </div>
-                <div class="message-actions">
-                    ${isMine ? `<button id="del-${msg.id}" onclick="deleteMessage('${msg.id}')" class="delete-btn ${!canDelete ? 'disabled' : ''}">Delete</button>` : ''}
-                    ${isAdminUser ? `
-                        <button onclick="deleteMessage('${msg.id}')" class="admin-action-btn">Admin Del</button>
-                        <button onclick="adminDeleteAllMessages('${msg.uid}')" class="admin-action-btn">Del All From User</button>
-                    ` : ''}
-                </div>
-            `;
-            
-            container.appendChild(wrapper);
-
-            if (canDelete) {
-                const timeLeft = 10000 - (now - msg.timestamp);
-                setTimeout(() => {
-                    const btn = document.getElementById(`del-${msg.id}`);
-                    if (btn) btn.classList.add('disabled');
-                }, timeLeft);
-            }
-        }
-
-        window.adminDeleteAllMessages = async (uid) => {
-            if (!confirm("Delete ALL messages from this user?")) return;
-            try {
-                const q = query(collection(db, "messages"), where("uid", "==", uid));
-                const snap = await getDocs(q);
-                for (const d of snap.docs) {
-                    await deleteDoc(doc(db, "messages", d.id));
-                }
-                alert("All messages deleted");
-            } catch (e) {
-                console.error("Bulk delete error:", e);
-            }
-        };
-
-        window.deleteMessage = async (id) => {
-            const path = `messages/${id}`;
-            try {
-                await deleteDoc(doc(db, "messages", id));
-            } catch (error) {
-                handleFirestoreError(error, OperationType.DELETE, path);
-            }
-        };
-
-        // Friends & DM Logic
-        function setupFriends() {
-            if (unsubscribeFriends1) unsubscribeFriends1();
-            if (unsubscribeFriends2) unsubscribeFriends2();
-            
-            const path = "friend_requests";
-            const q = query(collection(db, path), where("toId", "==", currentUser.uid));
-            const q2 = query(collection(db, path), where("fromId", "==", currentUser.uid));
-
-            // Listen for requests to me
-            unsubscribeFriends1 = onSnapshot(q, (snapshot) => {
-                friendRequests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderFriendsUI();
-            });
-
-            // Listen for requests from me (to track accepted status)
-            unsubscribeFriends2 = onSnapshot(q2, (snapshot) => {
-                const acceptedFromMe = snapshot.docs
-                    .map(doc => ({ id: doc.id, ...doc.data() }))
-                    .filter(r => r.status === 'accepted');
-                
-                // Combine with accepted requests to me
-                const qAcceptedToMe = query(collection(db, path), where("toId", "==", currentUser.uid), where("status", "==", "accepted"));
-                getDocs(qAcceptedToMe).then(snap => {
-                    const acceptedToMe = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    friends = [...acceptedFromMe, ...acceptedToMe].map(f => ({
-                        uid: f.fromId === currentUser.uid ? f.toId : f.fromId,
-                        username: f.fromId === currentUser.uid ? f.toName : f.fromName
-                    }));
-                    renderFriendsUI();
-                    renderDMList();
-                });
-            });
-        }
-
-        function renderFriendsUI() {
-            const requestsList = document.getElementById('friend-requests-list');
-            const friendsList = document.getElementById('friends-list');
-
-            const pendingRequests = friendRequests.filter(r => r.status === 'pending');
-            if (pendingRequests.length === 0) {
-                requestsList.innerHTML = '<p class="text-[10px] text-zinc-600 italic">No pending requests</p>';
-            } else {
-                requestsList.innerHTML = pendingRequests.map(r => `
-                    <div class="flex items-center justify-between p-2 bg-zinc-900 rounded-lg border border-zinc-800">
-                        <span class="text-xs font-bold text-white">${r.fromName}</span>
-                        <div class="flex gap-1">
-                            <button onclick="acceptFriendRequest('${r.id}')" class="bg-blue-600 p-1 rounded hover:bg-blue-500"><i data-lucide="check" class="w-3 h-3"></i></button>
-                            <button onclick="deleteFriendRequest('${r.id}')" class="bg-zinc-800 p-1 rounded hover:bg-zinc-700"><i data-lucide="x" class="w-3 h-3"></i></button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            if (friends.length === 0) {
-                friendsList.innerHTML = '<p class="text-[10px] text-zinc-600 italic">No friends yet</p>';
-            } else {
-                friendsList.innerHTML = friends.map(f => `
-                    <div class="flex items-center justify-between p-2 bg-zinc-900 rounded-lg border border-zinc-800 group">
-                        <span class="text-xs font-bold text-white">${f.username}</span>
-                        <button onclick="openDM('${f.uid}', '${f.username}')" class="text-blue-500 opacity-0 group-hover:opacity-100 transition-all">
-                            <i data-lucide="message-circle" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                `).join('');
-            }
-            lucide.createIcons();
-        }
-
-        window.searchUsers = async () => {
-            const queryText = document.getElementById('user-search').value.trim().toLowerCase();
-            const resultsSection = document.getElementById('search-results-section');
-            const resultsList = document.getElementById('search-results-list');
-
-            if (queryText.length < 2) {
-                resultsSection.classList.add('hidden');
-                return;
-            }
-
-            try {
-                const q = query(collection(db, "users"), where("username", ">=", queryText), where("username", "<=", queryText + '\uf8ff'), limit(5));
-                const snapshot = await getDocs(q);
-                
-                resultsSection.classList.remove('hidden');
-                if (snapshot.empty) {
-                    resultsList.innerHTML = '<p class="text-[10px] text-zinc-600 italic">No users found</p>';
-                } else {
-                    resultsList.innerHTML = snapshot.docs
-                        .map(doc => ({ id: doc.id, ...doc.data() }))
-                        .filter(u => u.id !== currentUser.uid)
-                        .map(u => {
-                            const isFriend = friends.some(f => f.uid === u.id);
-                            const hasRequest = friendRequests.some(r => r.fromId === u.id || r.toId === u.id);
-                            
-                            return `
-                                <div class="flex items-center justify-between p-2 bg-zinc-900 rounded-lg border border-zinc-800">
-                                    <span class="text-xs font-bold text-white">${u.username}</span>
-                                    ${isFriend ? '<span class="text-[10px] text-zinc-500">Friends</span>' : 
-                                      (hasRequest ? '<span class="text-[10px] text-zinc-500">Pending</span>' : 
-                                      `<button onclick="sendFriendRequest('${u.id}', '${u.username}')" class="text-blue-500 hover:text-blue-400"><i data-lucide="user-plus" class="w-4 h-4"></i></button>`)}
-                                </div>
-                            `;
-                        }).join('');
-                }
-                lucide.createIcons();
-            } catch (error) {
-                console.error("Search error:", error);
-            }
-        };
-
-        window.sendFriendRequest = async (toId, toName) => {
-            // Rate limiting check
-            const q = query(collection(db, "friend_requests"), where("fromId", "==", currentUser.uid), where("status", "==", "pending"));
-            const snap = await getDocs(q);
-            if (snap.size >= 10) {
-                alert("You have too many pending friend requests. Wait for them to be accepted or declined.");
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "friend_requests"), {
-                    fromId: currentUser.uid,
-                    fromName: currentUserProfile.username,
-                    toId: toId,
-                    toName: toName,
-                    status: 'pending',
-                    timestamp: Date.now()
-                });
-                searchUsers();
-            } catch (error) {
-                handleFirestoreError(error, OperationType.CREATE, "friend_requests");
-            }
-        };
-
-        window.acceptFriendRequest = async (requestId) => {
-            try {
-                await updateDoc(doc(db, "friend_requests", requestId), {
-                    status: 'accepted'
-                });
-            } catch (error) {
-                handleFirestoreError(error, OperationType.UPDATE, "friend_requests");
-            }
-        };
-
-        window.deleteFriendRequest = async (requestId) => {
-            try {
-                await deleteDoc(doc(db, "friend_requests", requestId));
-            } catch (error) {
-                handleFirestoreError(error, OperationType.DELETE, "friend_requests");
-            }
-        };
-
-        // DM Logic
-        function setupDMChannels() {
-            const q = query(collection(db, "direct_messages"), where("participants", "array-contains", currentUser.uid), orderBy("timestamp", "desc"));
-            onSnapshot(q, (snapshot) => {
-                const channels = {};
-                snapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    if (!channels[data.channelId]) {
-                        channels[data.channelId] = {
-                            id: data.channelId,
-                            lastMessage: data.text,
-                            timestamp: data.timestamp,
-                            otherUser: data.participants.find(p => p !== currentUser.uid),
-                            otherName: data.senderId === currentUser.uid ? (data.receiverName || 'User') : data.senderName
-                        };
-                    }
-                });
-                dmChannels = Object.values(channels);
-                renderDMList();
-            });
-        }
-
-        function renderDMList() {
-            const list = document.getElementById('dm-list-view');
-            if (dmChannels.length === 0) {
-                list.innerHTML = '<p class="text-zinc-500 text-center py-8 text-xs italic">No direct messages yet. Add friends to start chatting!</p>';
-                return;
-            }
-
-            list.innerHTML = dmChannels.map(c => `
-                <div onclick="openDM('${c.otherUser}', '${c.otherName}')" class="p-3 bg-zinc-900 rounded-xl border border-zinc-800 hover:border-blue-500 cursor-pointer transition-all">
-                    <div class="flex justify-between items-baseline mb-1">
-                        <span class="font-bold text-white text-sm">${c.otherName}</span>
-                        <span class="text-[9px] text-zinc-500">${new Date(c.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                    <p class="text-xs text-zinc-400 truncate">${c.lastMessage}</p>
-                </div>
-            `).join('');
-        }
-
-        window.openDM = (otherId, otherName) => {
-            const channelId = [currentUser.uid, otherId].sort().join('_');
-            currentDMChannel = { id: channelId, otherId, otherName };
-            
-            setChatTab('dms');
-            document.getElementById('dm-list-view').classList.add('hidden');
-            document.getElementById('dm-chat-view').classList.remove('hidden');
-            document.getElementById('dm-target-name').innerText = otherName;
-            
-            if (unsubscribeDMs) unsubscribeDMs();
-            
-            const q = query(collection(db, "direct_messages"), where("channelId", "==", channelId), orderBy("timestamp", "desc"), limit(50));
-            unsubscribeDMs = onSnapshot(q, (snapshot) => {
-                const container = document.getElementById('dm-messages');
-                container.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const msg = doc.data();
-                    const isMine = msg.senderId === currentUser.uid;
-                    const wrapper = document.createElement('div');
-                    wrapper.className = `message-container ${isMine ? 'items-end' : 'items-start'}`;
-                    const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    
-                    wrapper.innerHTML = `
-                        <div class="message-bubble ${isMine ? 'mine' : 'others'}">
-                            <div class="flex justify-between items-baseline mb-1 gap-4">
-                                <span class="text-[10px] font-bold ${isMine ? 'text-blue-100' : 'text-blue-400'} uppercase tracking-wider">${isMine ? 'You' : msg.senderName}</span>
-                                <span class="text-[9px] ${isMine ? 'text-blue-200' : 'text-zinc-500'}">${time}</span>
-                            </div>
-                            <p class="text-sm ${isMine ? 'text-white' : 'text-zinc-200'}">${msg.text}</p>
-                        </div>
-                    `;
-                    container.appendChild(wrapper);
-                });
-                container.scrollTop = container.scrollHeight;
-            });
-        };
-
-        window.backToDMList = () => {
-            document.getElementById('dm-list-view').classList.remove('hidden');
-            document.getElementById('dm-chat-view').classList.add('hidden');
-            currentDMChannel = null;
-            if (unsubscribeDMs) unsubscribeDMs();
-        };
-
-        window.sendDM = async () => {
-            const input = document.getElementById('dm-input');
-            const text = input.value.trim();
-            if (text && currentDMChannel) {
-                try {
-                    await addDoc(collection(db, "direct_messages"), {
-                        participants: [currentUser.uid, currentDMChannel.otherId],
-                        text: text,
-                        senderId: currentUser.uid,
-                        senderName: currentUserProfile.username,
-                        timestamp: Date.now(),
-                        channelId: currentDMChannel.id
-                    });
-                    input.value = '';
-                } catch (error) {
-                    handleFirestoreError(error, OperationType.CREATE, "direct_messages");
-                }
-            }
-        };
-
-        document.getElementById('dm-input')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') window.sendDM();
-        });
-
-        window.sendMessage = async (gifUrl = null) => {
-            const path = "messages";
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            
-            if ((text || gifUrl) && currentUser) {
-                if (currentUserProfile?.muted && (currentUserProfile.muteExpires === 0 || currentUserProfile.muteExpires > Date.now())) {
-                    alert("You are muted.");
-                    return;
-                }
-
-                try {
-                    await addDoc(collection(db, path), {
-                        user: currentUser.displayName || 'Anonymous',
-                        text: text,
-                        gif: gifUrl,
-                        timestamp: Date.now(),
-                        uid: currentUser.uid
-                    });
-                    input.value = '';
-                    if (gifUrl) toggleGifPicker();
-                    
-                    // Award points for non-spam messages
-                    if (text.length > 5) {
-                        awardPoints(1);
-                    }
-                } catch (error) {
-                    handleFirestoreError(error, OperationType.WRITE, path);
-                }
-            }
-        };
-
-        async function awardPoints(amount) {
-            if (!currentUser) return;
-            try {
-                const newPoints = (currentUserProfile.points || 0) + amount;
-                await updateDoc(doc(db, "users", currentUser.uid), { points: newPoints });
-                currentUserProfile.points = newPoints;
-            } catch (e) {
-                console.error("Point award error:", e);
-            }
-        }
-
-        // Profile Modal Logic
-        window.viewProfile = async (uid) => {
-            try {
-                const userDoc = await getDoc(doc(db, "users", uid));
-                if (!userDoc.exists()) {
-                    alert("User not found.");
-                    return;
-                }
-                const u = userDoc.data();
-                const isMe = uid === currentUser.uid;
-                
-                document.getElementById('profile-username').innerText = u.username;
-                document.getElementById('profile-role').innerText = u.role;
-                document.getElementById('profile-bio').innerText = u.bio || "No bio yet.";
-                document.getElementById('profile-points').innerText = `${u.points || 0} pts`;
-                document.getElementById('profile-joined').innerText = new Date(u.createdAt).toLocaleDateString();
-                
-                const actions = document.getElementById('profile-actions');
-                actions.innerHTML = '';
-                if (!isMe) {
-                    const isFriend = friends.some(f => f.uid === uid);
-                    const hasRequest = friendRequests.some(r => r.fromId === uid || r.toId === uid);
-                    
-                    if (!isFriend && !hasRequest) {
-                        actions.innerHTML = `<button onclick="sendFriendRequest('${uid}', '${u.username}')" class="bg-blue-600 px-4 py-2 rounded-xl text-xs font-bold">Add Friend</button>`;
-                    } else if (isFriend) {
-                        actions.innerHTML = `<button onclick="openDM('${uid}', '${u.username}')" class="bg-zinc-800 px-4 py-2 rounded-xl text-xs font-bold">Message</button>`;
-                    }
-                }
-                
-                document.getElementById('edit-bio-btn').classList.toggle('hidden', !isMe);
-                
-                const wishlist = document.getElementById('profile-wishlist');
-                if (u.wishlist && u.wishlist.length > 0) {
-                    wishlist.innerHTML = u.wishlist.map(item => `
-                        <span class="bg-zinc-800 px-3 py-1 rounded-full text-[10px] text-zinc-300 border border-zinc-700">${item}</span>
-                    `).join('');
-                } else {
-                    wishlist.innerHTML = '<p class="text-[10px] text-zinc-600 italic">Wishlist is empty</p>';
-                }
-
-                document.getElementById('profile-modal').classList.remove('hidden');
-                lucide.createIcons();
-            } catch (e) {
-                console.error("View profile error:", e);
-            }
-        };
-
-        window.closeProfile = () => document.getElementById('profile-modal').classList.add('hidden');
-        
-        window.startEditBio = () => {
-            document.getElementById('profile-bio-container').classList.add('hidden');
-            document.getElementById('edit-bio-container').classList.remove('hidden');
-            document.getElementById('bio-input').value = currentUserProfile.bio || "";
-        };
-
-        window.cancelEditBio = () => {
-            document.getElementById('profile-bio-container').classList.remove('hidden');
-            document.getElementById('edit-bio-container').classList.add('hidden');
-        };
-
-        window.saveBio = async () => {
-            const bio = document.getElementById('bio-input').value.trim();
-            try {
-                await updateDoc(doc(db, "users", currentUser.uid), { bio });
-                currentUserProfile.bio = bio;
-                document.getElementById('profile-bio').innerText = bio || "No bio yet.";
-                cancelEditBio();
-            } catch (e) {
-                console.error("Save bio error:", e);
-            }
-        };
-
-        // Leaderboard Logic
-        function setupLeaderboard() {
-            if (unsubscribeLeaderboard) unsubscribeLeaderboard();
-            const q = query(collection(db, "users"), orderBy("points", "desc"), limit(20));
-            unsubscribeLeaderboard = onSnapshot(q, (snapshot) => {
-                const list = document.getElementById('leaderboard-list');
-                list.innerHTML = snapshot.docs.map((doc, i) => {
-                    const u = doc.data();
-                    const rank = i + 1;
-                    return `
-                        <div class="leaderboard-item">
-                            <div class="leaderboard-rank ${rank <= 3 ? `rank-${rank}` : 'bg-zinc-800 text-zinc-400'}">${rank}</div>
-                            <div class="flex-1">
-                                <div class="font-bold text-sm text-white">${u.username}</div>
-                                <div class="text-[10px] text-zinc-500 uppercase tracking-widest">${u.role}</div>
-                            </div>
-                            <div class="text-blue-400 font-black text-sm">${u.points || 0}</div>
-                        </div>
-                    `;
-                }).join('');
-            });
-        }
-
-        // Gambling Logic
-        window.openGamble = () => {
-            document.getElementById('gamble-modal').classList.remove('hidden');
-            document.getElementById('gamble-balance').innerText = `${currentUserProfile.points || 0} pts`;
-        };
-        window.closeGamble = () => document.getElementById('gamble-modal').classList.add('hidden');
-
-        window.spin = async (bet) => {
-            if ((currentUserProfile.points || 0) < bet) {
-                alert("Not enough points!");
-                return;
-            }
-
-            const status = document.getElementById('gamble-status');
-            status.innerText = "Spinning...";
-            
-            // Deduct bet
-            await awardPoints(-bet);
-            document.getElementById('gamble-balance').innerText = `${currentUserProfile.points} pts`;
-
-            const symbols = ['🍒', '🍋', '🍇', '💎', '7️⃣'];
-            const reels = [
-                document.getElementById('reel-1'),
-                document.getElementById('reel-2'),
-                document.getElementById('reel-3')
-            ];
-
-            let results = [];
-            for (let i = 0; i < 3; i++) {
-                const res = symbols[Math.floor(Math.random() * symbols.length)];
-                results.push(res);
-                reels[i].innerText = res;
-            }
-
-            if (results[0] === results[1] && results[1] === results[2]) {
-                let win = bet * 10;
-                if (results[0] === '💎') win = bet * 50;
-                if (results[0] === '7️⃣') win = bet * 100;
-                
-                await awardPoints(win);
-                status.innerText = `JACKPOT! You won ${win} points!`;
-                status.className = "text-sm font-bold text-yellow-500 h-6";
-            } else if (results[0] === results[1] || results[1] === results[2] || results[0] === results[2]) {
-                const win = bet * 2;
-                await awardPoints(win);
-                status.innerText = `Nice! You won ${win} points!`;
-                status.className = "text-sm font-bold text-blue-400 h-6";
-            } else {
-                status.innerText = "Better luck next time!";
-                status.className = "text-sm font-bold text-zinc-500 h-6";
-            }
-            document.getElementById('gamble-balance').innerText = `${currentUserProfile.points} pts`;
-        };
-
-        // GIF Logic
-        window.toggleGifPicker = () => document.getElementById('gif-picker').classList.toggle('open');
-        
-        window.searchGifs = () => {
-            const query = document.getElementById('gif-search').value.trim().toLowerCase();
-            const grid = document.getElementById('gif-grid');
-            
-            if (gifSearchTimeout) clearTimeout(gifSearchTimeout);
-            gifSearchTimeout = setTimeout(() => {
-                // In a real app, you'd call Giphy API here. 
-                // For this demo, we'll just filter our mock list.
-                grid.innerHTML = MOCK_GIFS.map(url => `
-                    <div class="gif-item" onclick="sendMessage('${url}')">
-                        <img src="${url}" class="w-full h-24 object-cover">
-                    </div>
-                `).join('');
-            }, 300);
-        };
-
-        // Fullscreen logic
-        window.toggleFullscreenChat = () => {
-            const panel = document.getElementById('chat-panel');
-            const icon = document.getElementById('fullscreen-icon');
-            isFullscreenChat = !isFullscreenChat;
-            panel.classList.toggle('fullscreen', isFullscreenChat);
-            icon.setAttribute('data-lucide', isFullscreenChat ? 'minimize' : 'maximize');
-            lucide.createIcons();
-        };
-
-        document.getElementById('chat-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') window.sendMessage();
-        });
-
-        window.toggleChat = () => {
-            const panel = document.getElementById('chat-panel');
-            isChatOpen = !isChatOpen;
-            panel.classList.toggle('open', isChatOpen);
-            
-            if (isChatOpen) {
-                unreadCount = 0;
-                updateBadge();
-                setTimeout(scrollToBottom, 300);
-            }
-        };
-
-        function updateBadge() {
-            const badge = document.getElementById('chat-badge');
-            if (unreadCount > 0) {
-                badge.innerText = unreadCount;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-        }
-
-        function scrollToBottom() {
-            const container = document.getElementById('chat-messages');
-            const dmContainer = document.getElementById('dm-messages');
-            if (container) container.scrollTop = 0;
-            if (dmContainer) dmContainer.scrollTop = 0;
-        }
-
-        // Game Logic
-        const savedVotes = JSON.parse(localStorage.getItem('nexus_votes') || '{}');
-        const userVotes = JSON.parse(localStorage.getItem('nexus_user_votes') || '{}');
-
-        const GAMES = [
-            { title: 'Basket Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/basket-random', img: 'https://i.ibb.co/Zp4gNTsb/basket-random.png' },
-            { title: 'Soccer Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/soccer-random', img: 'https://ibb.co/9kPsdTr0' },
-            { title: 'Boxing Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/boxing-random', img: 'https://ibb.co/h1sp7Qp8' },
-            { title: 'Retro Bowl', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/retro-bowl', img: 'https://picsum.photos/seed/retro/400/250' },
-            { title: 'BitLife', category: 'Simulation', url: 'https://www.twoplayergames.org/gameframe/bitlife', img: 'https://picsum.photos/seed/bitlife/400/250' },
-            { title: '1v1.lol', category: 'Action', url: 'https://www.twoplayergames.org/gameframe/1v1-lol', img: 'https://picsum.photos/seed/1v1/400/250' },
-            { title: 'Slope', category: 'Action', url: 'https://www.twoplayergames.org/gameframe/slope', img: 'https://picsum.photos/seed/slope/400/250' },
-            { title: 'Tunnel Rush', category: 'Action', url: 'https://www.twoplayergames.org/gameframe/tunnel-rush', img: 'https://picsum.photos/seed/tunnel/400/250' },
-            { title: 'Drift Hunters', category: 'Driving', url: 'https://www.twoplayergames.org/gameframe/drift-hunters', img: 'https://picsum.photos/seed/drift/400/250' },
-            { title: 'Moto X3M', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/moto-x3m', img: 'https://picsum.photos/seed/moto/400/250' }
-        ].map(g => ({ ...g, votes: savedVotes[g.title] || 0 }));
-
-        const CATEGORIES = ['All', ...new Set(GAMES.map(g => g.category))];
-        let currentCategory = 'All';
 
         window.render = () => {
-            const query = document.getElementById('search').value.toLowerCase();
+            const queryText = document.getElementById('search').value.toLowerCase();
             const grid = document.getElementById('grid');
-            const featuredSection = document.getElementById('featured-section');
-            const featuredGameContainer = document.getElementById('featured-game');
-            const categoriesContainer = document.getElementById('categories');
-            const sectionTitle = document.getElementById('section-title');
+            const heroContainer = document.getElementById('featured-hero-container');
+            const catContainer = document.getElementById('categories');
+            
+            // Calculate average ratings
+            const gamesWithRatings = GAMES.map(g => {
+                const r = gameRatings[g.title] || { avg: 0, count: 0 };
+                return { ...g, ...r };
+            });
 
-            categoriesContainer.innerHTML = CATEGORIES.map(cat => `
-                <button onclick="setCategory('${cat}')" class="px-4 py-2 rounded-full text-sm font-bold transition-all ${currentCategory === cat ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'}">
-                    ${cat}
-                </button>
+            // Sort by rating to find featured
+            const sorted = [...gamesWithRatings].sort((a, b) => b.avg - a.avg);
+            const featuredGame = sorted[0]?.avg > 0 ? sorted[0] : null;
+
+            // Categories
+            const categories = ['All', ...new Set(GAMES.map(g => g.category))];
+            catContainer.innerHTML = categories.map(cat => `
+                <button onclick="setCategory('${cat}')" class="category-btn ${currentCategory === cat ? 'active' : ''}">${cat}</button>
             `).join('');
 
-            sectionTitle.innerText = currentCategory === 'All' ? 'All Games' : `${currentCategory} Games`;
-
-            const sortedByVotes = [...GAMES].sort((a, b) => b.votes - a.votes);
-            const topGame = sortedByVotes[0];
-
-            if (topGame && topGame.votes > 0 && !query && currentCategory === 'All') {
-                const userVote = userVotes[topGame.title] || 0;
-                const inWishlist = currentUserProfile?.wishlist?.includes(topGame.title);
-                featuredSection.classList.remove('hidden');
-                featuredGameContainer.innerHTML = `
-                    <div class="game-card bg-zinc-900 rounded-2xl overflow-hidden border border-blue-500/30 group flex flex-col md:flex-row h-auto md:h-64 shadow-2xl shadow-blue-500/10">
-                        <div class="relative w-full md:w-1/2 h-48 md:h-full">
-                            <img src="${topGame.img}" class="w-full h-full object-cover" referrerPolicy="no-referrer">
-                            <div class="overlay">
-                                <button class="play-btn" onclick="play('${topGame.url}', '${topGame.title}')">Play Featured Game</button>
-                            </div>
-                        </div>
-                        <div class="p-8 flex flex-col justify-center flex-1 bg-gradient-to-br from-zinc-900 to-black">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <span class="text-blue-500 text-xs font-bold tracking-widest uppercase mb-2 block">Top Rated • ${topGame.category}</span>
-                                    <h3 class="text-3xl font-black tracking-tight text-white">${topGame.title}</h3>
+            // Hero Section
+            if (featuredGame && !queryText && currentCategory === 'All' && !showOnlyWishlist) {
+                heroContainer.innerHTML = `
+                    <div class="featured-hero" style="background-image: linear-gradient(to right, rgba(0,0,0,0.9), rgba(0,0,0,0.4)), url('${featuredGame.img}')">
+                        <div class="max-w-lg">
+                            <h2 class="text-5xl font-black mb-4 tracking-tighter">${featuredGame.title}</h2>
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="flex items-center gap-1 text-yellow-500">
+                                    ${Array(5).fill(0).map((_, i) => `<i data-lucide="star" class="w-5 h-5 ${i < Math.round(featuredGame.avg) ? 'fill-current' : 'text-zinc-800'}"></i>`).join('')}
                                 </div>
-                                <div class="flex flex-col items-center bg-zinc-800/50 p-3 rounded-xl border border-zinc-700">
-                                    <button onclick="vote('${topGame.title}', 1)" class="${userVote === 1 ? 'text-blue-500' : 'text-zinc-400'} hover:text-blue-500 transition-colors">
-                                        <i data-lucide="chevron-up" class="w-6 h-6"></i>
-                                    </button>
-                                    <span class="font-bold text-xl text-blue-400 my-1">${topGame.votes}</span>
-                                    <button onclick="vote('${topGame.title}', -1)" class="${userVote === -1 ? 'text-red-500' : 'text-zinc-400'} hover:text-red-500 transition-colors">
-                                        <i data-lucide="chevron-down" class="w-6 h-6"></i>
-                                    </button>
-                                </div>
+                                <span class="text-zinc-400 font-bold">${featuredGame.count} Ratings</span>
+                                <span class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">${featuredGame.category}</span>
                             </div>
-                            <div class="flex items-center gap-4">
-                                <button onclick="play('${topGame.url}', '${topGame.title}')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl transition-all w-fit flex items-center gap-2">
-                                    <i data-lucide="play" class="fill-current w-4 h-4"></i>
-                                    PLAY NOW
-                                </button>
-                                <button onclick="toggleWishlist('${topGame.title}')" class="text-xs font-bold uppercase tracking-widest ${inWishlist ? 'text-yellow-500' : 'text-zinc-400'} hover:text-white transition-all">
-                                    ${inWishlist ? '★ In Wishlist' : '☆ Add to Wishlist'}
-                                </button>
-                            </div>
+                            <button class="play-btn !px-12 !py-4 !text-lg" onclick="play('${featuredGame.url}', '${featuredGame.title}')">Play Now</button>
                         </div>
                     </div>
                 `;
             } else {
-                featuredSection.classList.add('hidden');
+                heroContainer.innerHTML = '';
             }
 
-            const filteredGames = GAMES.filter(g => {
-                const matchesSearch = g.title.toLowerCase().includes(query);
-                const matchesCategory = currentCategory === 'All' || g.category === currentCategory;
-                return matchesSearch && matchesCategory;
-            });
+            // Filtering
+            let filtered = gamesWithRatings.filter(g => g.title.toLowerCase().includes(queryText));
+            if (currentCategory !== 'All') {
+                filtered = filtered.filter(g => g.category === currentCategory);
+            }
+            if (showOnlyWishlist) {
+                filtered = filtered.filter(g => wishlist.includes(g.title));
+            }
             
-            grid.innerHTML = filteredGames.map((g, index) => {
-                const userVote = userVotes[g.title] || 0;
-                const inWishlist = currentUserProfile?.wishlist?.includes(g.title);
+            grid.innerHTML = filtered.map(g => {
+                const isFeatured = featuredGame && g.title === featuredGame.title;
+                const stars = Math.round(g.avg);
+                const myRating = gameRatings[g.title]?.myRating || 0;
+
                 return `
-                <div class="game-card bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 hover:border-blue-500 group">
-                    <div class="relative">
-                        <img src="${g.img}" class="w-full h-40 object-cover" referrerPolicy="no-referrer">
-                        <div class="overlay">
-                            <div class="flex flex-col gap-2 items-center">
-                                <button class="play-btn" onclick="play('${g.url}', '${g.title}')">Play Game</button>
-                                <button onclick="toggleWishlist('${g.title}')" class="text-[10px] font-bold uppercase tracking-widest ${inWishlist ? 'text-yellow-500' : 'text-zinc-400'} hover:text-white transition-all">
-                                    ${inWishlist ? '★ In Wishlist' : '☆ Add to Wishlist'}
-                                </button>
+                <div class="game-card bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative group">
+                    ${isFeatured ? `<div class="featured-badge">Featured</div>` : ''}
+                    <button onclick="toggleWishlist('${g.title}')" class="wishlist-heart">
+                        <i data-lucide="heart" class="w-4 h-4 ${wishlist.includes(g.title) ? 'fill-current text-red-500' : 'text-zinc-400'}"></i>
+                    </button>
+                    <img src="${g.img}" class="w-full h-40 object-cover">
+                    <div class="overlay">
+                        <div class="flex flex-col items-center gap-2">
+                            <button class="play-btn" onclick="play('${g.url}', '${g.title}')">Play Now</button>
+                            <button class="text-[10px] uppercase font-bold text-zinc-400 hover:text-white transition-colors" onclick="openReviewPrompt('${g.title}')">Write Review</button>
+                            <div class="flex flex-col items-center gap-1 mt-2">
+                                <span class="text-[10px] uppercase font-bold text-zinc-400">Rate this game</span>
+                                <div class="flex gap-1">
+                                    ${[1,2,3,4,5].map(num => `
+                                        <button onclick="rateGame('${g.title}', ${num})" class="hover:scale-125 transition-transform">
+                                            <i data-lucide="star" class="w-4 h-4 ${num <= myRating ? 'fill-current text-yellow-500' : 'text-zinc-600'}"></i>
+                                        </button>
+                                    `).join('')}
+                                </div>
                             </div>
                         </div>
-                        <div class="absolute top-2 left-2">
-                            <span class="bg-black/60 backdrop-blur-md text-[10px] font-bold px-2 py-1 rounded text-blue-400 border border-blue-500/20 uppercase tracking-tighter">${g.category}</span>
-                        </div>
                     </div>
-                    <div class="p-4 flex items-center justify-between">
-                        <h3 class="font-bold text-zinc-100 truncate mr-2">${g.title}</h3>
-                        <div class="flex items-center gap-2 bg-black/40 px-2 py-1 rounded-lg border border-zinc-800">
-                            <button onclick="vote('${g.title}', 1)" class="${userVote === 1 ? 'text-blue-500' : 'text-zinc-500'} hover:text-blue-500 transition-colors">
-                                <i data-lucide="chevron-up" class="w-4 h-4"></i>
-                            </button>
-                            <span class="text-xs font-mono font-bold ${g.votes >= 0 ? 'text-blue-400' : 'text-red-400'} min-w-[1.5rem] text-center">${g.votes}</span>
-                            <button onclick="vote('${g.title}', -1)" class="${userVote === -1 ? 'text-red-500' : 'text-zinc-500'} hover:text-red-500 transition-colors">
-                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                            </button>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-bold text-sm">${g.title}</h3>
+                            <span class="text-[10px] text-zinc-500">${g.category}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="rating-stars">
+                                ${Array(5).fill(0).map((_, i) => `<i data-lucide="star" class="w-3 h-3 ${i < stars ? 'fill-current' : 'text-zinc-800'}"></i>`).join('')}
+                            </div>
+                            <span class="text-[10px] text-zinc-500">(${g.count || 0})</span>
                         </div>
                     </div>
                 </div>
@@ -2004,86 +1351,920 @@
             render();
         };
 
-        window.vote = (title, delta) => {
-            const game = GAMES.find(g => g.title === title);
-            if (game) {
-                const currentVote = userVotes[title] || 0;
-                if (currentVote === delta) {
-                    game.votes -= delta;
-                    delete userVotes[title];
-                } else if (currentVote === 0) {
-                    game.votes += delta;
-                    userVotes[title] = delta;
-                } else {
-                    game.votes += (delta * 2);
-                    userVotes[title] = delta;
-                }
-                const votesToSave = {};
-                GAMES.forEach(g => {
-                    if (g.votes !== 0) votesToSave[g.title] = g.votes;
+        window.rateGame = async (title, rating) => {
+            const q = query(collection(db, "ratings"), where("uid", "==", currentUser.uid), where("gameTitle", "==", title));
+            const snap = await getDocs(q);
+            
+            if (snap.empty) {
+                await addDoc(collection(db, "ratings"), {
+                    uid: currentUser.uid,
+                    gameTitle: title,
+                    rating: rating,
+                    timestamp: Date.now()
                 });
-                localStorage.setItem('nexus_votes', JSON.stringify(votesToSave));
-                localStorage.setItem('nexus_user_votes', JSON.stringify(userVotes));
-                render();
+            } else {
+                await updateDoc(doc(db, "ratings", snap.docs[0].id), {
+                    rating: rating,
+                    timestamp: Date.now()
+                });
+            }
+            // Ratings are updated via onSnapshot in setupRatings()
+        };
+
+        window.openReviewPrompt = async (title) => {
+            const text = prompt(`Write a review for ${title}:`);
+            if (text && text.trim()) {
+                try {
+                    await addDoc(collection(db, "suggestions"), {
+                        uid: currentUser.uid,
+                        username: currentUserProfile.username,
+                        text: `[REVIEW: ${title}] ${text}`,
+                        timestamp: Date.now()
+                    });
+                    alert("Review submitted! Thank you for your feedback.");
+                } catch (e) {
+                    handleFirestoreError(e, OperationType.WRITE, 'suggestions');
+                }
             }
         };
 
-        window.toggleWishlist = async (title) => {
-            if (!currentUser) return;
-            let wishlist = [...(currentUserProfile.wishlist || [])];
-            if (wishlist.includes(title)) {
-                wishlist = wishlist.filter(t => t !== title);
-            } else {
-                wishlist.push(title);
-            }
-            try {
-                await updateDoc(doc(db, "users", currentUser.uid), { wishlist });
-                currentUserProfile.wishlist = wishlist;
+        function setupRatings() {
+            onSnapshot(collection(db, "ratings"), (snap) => {
+                const totals = {};
+                snap.forEach(d => {
+                    const r = d.data();
+                    if (!totals[r.gameTitle]) totals[r.gameTitle] = { sum: 0, count: 0, myRating: 0 };
+                    totals[r.gameTitle].sum += r.rating;
+                    totals[r.gameTitle].count++;
+                    if (r.uid === currentUser.uid) totals[r.gameTitle].myRating = r.rating;
+                });
+
+                gameRatings = {};
+                for (const title in totals) {
+                    gameRatings[title] = {
+                        avg: totals[title].sum / totals[title].count,
+                        count: totals[title].count,
+                        myRating: totals[title].myRating
+                    };
+                }
                 render();
-            } catch (e) {
-                console.error("Wishlist error:", e);
-            }
-        };
+            });
+        }
 
         window.play = (url, title) => {
+            if (url.startsWith('javascript:')) {
+                eval(url.substring(11));
+                return;
+            }
+            currentGameTitle = title;
+            playStartTime = Date.now();
             document.getElementById('game-iframe').src = url;
             document.getElementById('game-container').style.display = 'block';
             document.getElementById('main-ui').style.display = 'none';
-            
-            // Award points for playing
-            awardPoints(5);
-
-            // Add a "Gamble" button to the game UI if it's a gambling game
-            const container = document.getElementById('game-container');
-            let gambleBtn = document.getElementById('gamble-trigger');
-            if (!gambleBtn) {
-                gambleBtn = document.createElement('button');
-                gambleBtn.id = 'gamble-trigger';
-                gambleBtn.className = 'absolute bottom-8 right-8 bg-yellow-500 hover:bg-yellow-400 text-black font-black p-4 rounded-full shadow-2xl z-50 transition-all hover:scale-110 active:scale-95 flex items-center gap-2';
-                gambleBtn.innerHTML = '<i data-lucide="coins"></i> GAMBLE POINTS';
-                gambleBtn.onclick = openGamble;
-                container.appendChild(gambleBtn);
-                lucide.createIcons();
-            }
         };
 
-        window.closeGame = () => {
+        window.closeGame = async () => {
+            if (playStartTime && currentGameTitle) {
+                const duration = Math.floor((Date.now() - playStartTime) / 1000); // seconds
+                const newTotalPlaytime = (currentUserProfile.totalPlaytime || 0) + duration;
+                const gamesPlayed = currentUserProfile.gamesPlayed || 0;
+                
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    totalPlaytime: newTotalPlaytime,
+                    gamesPlayed: gamesPlayed + 1
+                });
+                currentUserProfile.totalPlaytime = newTotalPlaytime;
+                currentUserProfile.gamesPlayed = gamesPlayed + 1;
+            }
+            
             document.getElementById('game-iframe').src = '';
             document.getElementById('game-container').style.display = 'none';
             document.getElementById('main-ui').style.display = 'block';
+            playStartTime = null;
+            currentGameTitle = null;
         };
 
-        window.reloadGame = () => {
-            const iframe = document.getElementById('game-iframe');
-            if (iframe.src) {
-                const url = iframe.src;
-                iframe.src = '';
-                iframe.src = url;
+        const MOCK_GIFS = [
+            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxx66d3195u/giphy.gif",
+            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l0HlHFRbmaZtBRhXG/giphy.gif",
+            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKVUn7iM8FMEU24/giphy.gif",
+            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l41lTfuxyX98l89Xy/giphy.gif",
+            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxx66d3195u/giphy.gif",
+            "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l0HlHFRbmaZtBRhXG/giphy.gif"
+        ];
+
+        window.toggleGifPicker = () => {
+            const picker = document.getElementById('gif-picker');
+            if (picker) {
+                picker.classList.toggle('hidden');
+                if (!picker.classList.contains('hidden')) searchGifs("");
             }
         };
+
+        window.searchGifs = (query = "") => {
+            const results = document.getElementById('gif-results');
+            results.innerHTML = MOCK_GIFS.map(url => `
+                <img src="${url}" class="w-full h-24 object-cover rounded-lg cursor-pointer hover:scale-105 transition-transform" onclick="sendMessage('${url}')">
+            `).join('');
+        };
+
+        window.toggleChatFullscreen = () => {
+            const chat = document.getElementById('chat-panel');
+            if (chat) {
+                chat.classList.toggle('w-full');
+                chat.classList.toggle('max-w-full');
+                chat.classList.toggle('right-0');
+            }
+        };
+        // Social
+        window.toggleSocialModal = () => {
+            const socialModal = document.getElementById('social-modal');
+            if (socialModal) {
+                socialModal.classList.toggle('hidden');
+                if (!socialModal.classList.contains('hidden')) {
+                    setSocialTab('friends');
+                }
+            }
+        };
+
+        window.setSocialTab = (tab) => {
+            ['friends', 'requests', 'search'].forEach(t => {
+                const view = document.getElementById(`social-view-${t}`);
+                const btn = document.getElementById(`stab-${t}`);
+                if (view) view.classList.toggle('hidden', t !== tab);
+                if (btn) {
+                    btn.classList.toggle('active', t === tab);
+                    btn.classList.toggle('text-zinc-500', t !== tab);
+                    btn.classList.toggle('bg-blue-600', t === tab);
+                }
+            });
+            if (tab === 'friends') loadFriends();
+            if (tab === 'requests') loadRequests();
+        };
+
+        window.searchUsers = async () => {
+            const queryText = document.getElementById('user-search-input').value.trim().toLowerCase();
+            if (!queryText) return;
+            const snap = await getDocs(query(collection(db, "users"), limit(20)));
+            const results = document.getElementById('user-search-results');
+            results.innerHTML = snap.docs
+                .filter(d => d.data().username.toLowerCase().includes(queryText) && d.id !== currentUser.uid)
+                .map(d => `
+                    <div class="flex justify-between items-center p-3 bg-zinc-900 rounded-xl border border-zinc-800">
+                        <button onclick="showUserProfile('${d.id}')" class="font-bold hover:text-blue-400 transition-colors">${d.data().username}</button>
+                        <button onclick="sendFriendRequest('${d.id}', '${d.data().username}')" class="bg-blue-600 px-3 py-1 rounded-lg text-xs font-bold">Add Friend</button>
+                    </div>
+                `).join('');
+        };
+
+        window.sendFriendRequest = async (toId, toName) => {
+            const q = query(collection(db, "friend_requests"), where("fromId", "==", currentUser.uid), where("toId", "==", toId), where("status", "==", "pending"));
+            const existing = await getDocs(q);
+            if (!existing.empty) return alert("Request already pending!");
+
+            const q2 = query(collection(db, "friend_requests"), where("fromId", "==", currentUser.uid), where("status", "==", "pending"));
+            const pendingCount = await getDocs(q2);
+            if (pendingCount.size >= 10) return alert("Too many pending requests (max 10)!");
+
+            await addDoc(collection(db, "friend_requests"), {
+                fromId: currentUser.uid,
+                fromName: currentUserProfile.username,
+                toId: toId,
+                toName: toName,
+                status: 'pending',
+                timestamp: Date.now()
+            });
+            alert("Request sent!");
+        };
+
+        const BADGES = {
+            'early_adopter': { name: 'Early Adopter', icon: 'award', color: 'text-blue-500', description: 'Joined Nexus Games during its initial launch phase.' },
+            'verified': { name: 'Verified', icon: 'check-circle', color: 'text-green-500', description: 'Account identity has been verified by the staff.' },
+            'bug_hunter': { name: 'Bug Hunter', icon: 'bug', color: 'text-red-500', description: 'Helped improve the platform by finding and reporting bugs.' },
+            'top_player': { name: 'Top Player', icon: 'trophy', color: 'text-yellow-500', description: 'Consistently ranks high on the leaderboards.' },
+            'staff': { name: 'Nexus Staff', icon: 'shield-check', color: 'text-purple-500', description: 'Official member of the Nexus Games management team.' },
+            'vip': { name: 'VIP', icon: 'crown', color: 'text-orange-500', description: 'Supporter of the platform with exclusive benefits.' },
+            'og': { name: 'OG', icon: 'history', color: 'text-zinc-400', description: 'A long-time member of the community.' },
+            'beta': { name: 'Beta Tester', icon: 'test-tube', color: 'text-cyan-500', description: 'Participated in testing new features before release.' }
+        };
+
+        let activeDM = null;
+        let dmUnsub = null;
+
+        window.openDM = (targetId, targetName) => {
+            activeDM = { id: targetId, name: targetName };
+            const targetNameEl = document.getElementById('dm-target-name');
+            if (targetNameEl) targetNameEl.innerText = targetName;
+            const dmWindow = document.getElementById('dm-window');
+            if (dmWindow) dmWindow.classList.remove('hidden');
+            
+            // Close social hub
+            const socialModal = document.getElementById('social-modal');
+            if (socialModal) socialModal.classList.add('hidden');
+            
+            loadDMs(targetId);
+        };
+
+        window.closeDM = () => {
+            if (dmUnsub) dmUnsub();
+            activeDM = null;
+            const dmWindow = document.getElementById('dm-window');
+            if (dmWindow) dmWindow.classList.add('hidden');
+        };
+
+        window.sendDM = async () => {
+            const input = document.getElementById('dm-input');
+            const text = input.value.trim();
+            if (!text || !activeDM) return;
+            
+            try {
+                const participants = [currentUser.uid, activeDM.id].sort();
+                await addDoc(collection(db, "dms"), {
+                    from: currentUser.uid,
+                    to: activeDM.id,
+                    participants: participants,
+                    text: text,
+                    timestamp: Date.now()
+                });
+                input.value = '';
+            } catch (e) {
+                handleFirestoreError(e, OperationType.WRITE, 'dms');
+            }
+        };
+
+        function loadDMs(targetId) {
+            if (dmUnsub) dmUnsub();
+            const participants = [currentUser.uid, targetId].sort();
+            const q = query(
+                collection(db, "dms"),
+                where("participants", "==", participants),
+                orderBy("timestamp", "asc")
+            );
+            
+            dmUnsub = onSnapshot(q, (snap) => {
+                const container = document.getElementById('dm-messages');
+                container.innerHTML = snap.docs.map(d => {
+                    const data = d.data();
+                    const isMe = data.from === currentUser.uid;
+                    return `
+                        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                            <div class="max-w-[80%] p-2 rounded-lg text-xs ${isMe ? 'bg-blue-600 text-white rounded-br-none' : 'bg-zinc-800 text-zinc-300 rounded-bl-none'}">
+                                ${data.text}
+                            </div>
+                            <span class="text-[8px] text-zinc-600 mt-1">${new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        </div>
+                    `;
+                }).join('');
+                container.scrollTop = container.scrollHeight;
+            }, (e) => handleFirestoreError(e, OperationType.GET, 'dms'));
+        }
+
+        async function loadFriends() {
+            const q1 = query(collection(db, "friend_requests"), where("fromId", "==", currentUser.uid), where("status", "==", "accepted"));
+            const q2 = query(collection(db, "friend_requests"), where("toId", "==", currentUser.uid), where("status", "==", "accepted"));
+            const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+            const list = document.getElementById('friends-list');
+            if (!list) return;
+            const friends = [...s1.docs.map(d => ({ id: d.data().toId, name: d.data().toName })), ...s2.docs.map(d => ({ id: d.data().fromId, name: d.data().fromName }))];
+            
+            if (friends.length === 0) {
+                list.innerHTML = `<p class="text-center text-zinc-500 text-sm py-4">No friends yet. Go find some!</p>`;
+                return;
+            }
+
+            list.innerHTML = friends.map(f => `
+                <div class="flex justify-between items-center p-3 bg-zinc-900 rounded-xl border border-zinc-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">${f.name[0].toUpperCase()}</div>
+                        <button onclick="showUserProfile('${f.id}')" class="font-bold hover:text-blue-400 transition-colors">${f.name}</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openDM('${f.id}', '${f.name}')" class="text-blue-500 hover:text-blue-400 p-2 rounded-lg hover:bg-blue-500/10 transition-colors">
+                            <i data-lucide="message-square" class="w-5 h-5"></i>
+                        </button>
+                        <button onclick="removeFriend('${f.id}')" class="text-red-500 hover:text-red-400 p-2 rounded-lg hover:bg-red-500/10 transition-colors">
+                            <i data-lucide="user-minus" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.removeFriend = async (friendId) => {
+            if (!confirm("Are you sure you want to remove this friend?")) return;
+            try {
+                const q1 = query(collection(db, "friend_requests"), where("fromId", "==", currentUser.uid), where("toId", "==", friendId), where("status", "==", "accepted"));
+                const q2 = query(collection(db, "friend_requests"), where("toId", "==", currentUser.uid), where("fromId", "==", friendId), where("status", "==", "accepted"));
+                const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+                const docs = [...s1.docs, ...s2.docs];
+                for (const d of docs) {
+                    await deleteDoc(doc(db, "friend_requests", d.id));
+                }
+                loadFriends();
+            } catch (e) {
+                handleFirestoreError(e, OperationType.DELETE, 'friend_requests');
+            }
+        };
+
+        async function loadRequests() {
+            const q = query(collection(db, "friend_requests"), where("toId", "==", currentUser.uid), where("status", "==", "pending"));
+            const snap = await getDocs(q);
+            const list = document.getElementById('requests-list');
+            if (!list) return;
+            
+            if (snap.empty) {
+                list.innerHTML = `<p class="text-center text-zinc-500 text-sm py-4">No pending requests.</p>`;
+                return;
+            }
+
+            list.innerHTML = snap.docs.map(d => `
+                <div class="flex justify-between items-center p-3 bg-zinc-900 rounded-xl border border-zinc-800">
+                    <span class="font-bold">${d.data().fromName}</span>
+                    <div class="flex gap-2">
+                        <button onclick="acceptRequest('${d.id}')" class="bg-green-600 p-1.5 rounded-lg"><i data-lucide="check" class="w-4 h-4"></i></button>
+                        <button onclick="rejectRequest('${d.id}')" class="bg-red-600 p-1.5 rounded-lg"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.acceptRequest = async (id) => {
+            await updateDoc(doc(db, "friend_requests", id), { status: 'accepted' });
+            loadRequests();
+        };
+
+        window.rejectRequest = async (id) => {
+            await deleteDoc(doc(db, "friend_requests", id));
+            loadRequests();
+        };
+
+        function setupChat() {
+            onSnapshot(query(collection(db, "messages"), orderBy("timestamp", "desc"), limit(50)), (snap) => {
+                const container = document.getElementById('chat-messages');
+                if (!container) return;
+                container.innerHTML = '';
+                snap.forEach(d => {
+                    const m = d.data();
+                    const isMine = m.uid === currentUser.uid;
+                    const isAdminUser = currentUserProfile.role === 'admin';
+                    const div = document.createElement('div');
+                    div.className = `message-container ${isMine ? 'items-end' : 'items-start'}`;
+                    div.innerHTML = `
+                        <div class="message-bubble ${isMine ? 'mine' : 'others'}">
+                            <div class="flex justify-between items-start gap-4">
+                                <span class="text-[10px] font-bold block mb-1">${m.user}</span>
+                                ${isAdminUser ? `<button onclick="deleteMessage('${d.id}')" class="text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="trash-2" class="w-3 h-3"></i></button>` : ''}
+                            </div>
+                            ${m.gif ? `<img src="${m.gif}" class="rounded-lg mb-2">` : ''}
+                            <p class="text-sm">${m.text || ''}</p>
+                        </div>
+                    `;
+                    div.classList.add('group');
+                    container.appendChild(div);
+                });
+                lucide.createIcons();
+            });
+        }
+
+        window.deleteMessage = async (id) => {
+            if (confirm("Delete this message?")) {
+                await deleteDoc(doc(db, "messages", id));
+            }
+        };
+
+        window.sendMessage = async (gifUrl = null) => {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if ((text || gifUrl) && currentUser) {
+                if (text.startsWith('/') && currentUserProfile.role === 'admin') {
+                    handleAdminCommand(text);
+                    input.value = '';
+                    return;
+                }
+                await addDoc(collection(db, "messages"), {
+                    user: currentUserProfile.username,
+                    text: text,
+                    gif: gifUrl,
+                    uid: currentUser.uid,
+                    timestamp: Date.now()
+                });
+                
+                // Increment messages sent
+                const newCount = (currentUserProfile.messagesSent || 0) + 1;
+                await updateDoc(doc(db, "users", currentUser.uid), { messagesSent: newCount });
+                currentUserProfile.messagesSent = newCount;
+
+                input.value = '';
+                if (gifUrl) {
+                    const picker = document.getElementById('gif-picker');
+                    if (picker) picker.classList.add('hidden');
+                }
+            }
+        };
+
+        async function handleAdminCommand(cmd) {
+            const parts = cmd.split(' ');
+            if (parts[0] === '/clear') {
+                const snap = await getDocs(collection(db, "messages"));
+                snap.forEach(async d => await deleteDoc(doc(db, "messages", d.id)));
+            } else if (parts[0] === '/broadcast') {
+                await addDoc(collection(db, "messages"), {
+                    user: "SYSTEM",
+                    text: "📢 " + parts.slice(1).join(' '),
+                    uid: "system",
+                    timestamp: Date.now()
+                });
+            }
+        }
+
+        window.toggleChat = () => {
+            isChatOpen = !isChatOpen;
+            const chatPanel = document.getElementById('chat-panel');
+            if (chatPanel) chatPanel.classList.toggle('open', isChatOpen);
+        };
+
+        // Slots
+        const SLOT_ITEMS = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+        window.openSlots = () => {
+            const slotsModal = document.getElementById('slots-modal');
+            if (slotsModal) slotsModal.classList.remove('hidden');
+        };
+        window.closeSlots = () => {
+            const slotsModal = document.getElementById('slots-modal');
+            if (slotsModal) slotsModal.classList.add('hidden');
+        };
+        window.spinSlots = async () => {
+            if (currentUserProfile.points < 10) return alert("Not enough points!");
+            
+            const btn = document.getElementById('spin-btn');
+            if (btn) btn.disabled = true;
+            const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+            reels.forEach(r => {
+                if (r) r.classList.add('spinning');
+            });
+            
+            await new Promise(r => setTimeout(r, 1000));
+            
+            const results = reels.map(r => {
+                if (r) {
+                    r.classList.remove('spinning');
+                    const res = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+                    r.innerText = res;
+                    return res;
+                }
+                return null;
+            });
+
+            let win = -10;
+            if (results[0] && results[1] && results[2] && results[0] === results[1] && results[1] === results[2]) {
+                win = results[0] === '💎' ? 500 : 100;
+            } else if (results[0] && results[1] && results[2] && (results[0] === results[1] || results[1] === results[2] || results[0] === results[2])) {
+                win = 20;
+            }
+
+            const newPoints = currentUserProfile.points + win;
+            await updateDoc(doc(db, "users", currentUser.uid), { points: newPoints });
+            currentUserProfile.points = newPoints;
+            updatePointsDisplay();
+            
+            const resDiv = document.getElementById('slots-result');
+            if (resDiv) {
+                resDiv.innerText = win > 0 ? `WIN! +${win} pts` : "Try again!";
+                resDiv.className = win > 0 ? "text-green-500 font-bold" : "text-red-500";
+            }
+            if (btn) btn.disabled = false;
+        };
+
+        // Admin
+        window.toggleAdminPanel = () => {
+            const adminPanel = document.getElementById('admin-panel');
+            if (adminPanel) adminPanel.classList.toggle('hidden');
+        };
+        window.setAdminTab = (tab) => {
+            currentAdminTab = tab;
+            ['approvals', 'users', 'logs', 'commands'].forEach(t => {
+                const view = document.getElementById(`admin-view-${t}`);
+                const btn = document.getElementById(`atab-${t}`);
+                if (view) view.classList.toggle('hidden', t !== tab);
+                if (btn) btn.classList.toggle('active', t === tab);
+            });
+            if (tab === 'approvals') loadApprovals();
+            if (tab === 'users') loadUsers();
+            if (tab === 'logs') loadAdminLogs();
+        };
+
+        async function loadAdminLogs() {
+            const snap = await getDocs(query(collection(db, "update_logs"), orderBy("timestamp", "desc")));
+            const list = document.getElementById('admin-logs-list');
+            if (!list) return;
+            list.innerHTML = snap.docs.map(d => {
+                const log = d.data();
+                return `
+                    <div class="p-3 bg-zinc-900 border border-zinc-800 rounded-lg flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-blue-500">${log.version}</span>
+                            <span class="text-xs text-zinc-500 ml-2">${log.date}</span>
+                        </div>
+                        <button onclick="deleteLog('${d.id}')" class="text-red-500 hover:text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        window.addUpdateLog = async () => {
+            const version = document.getElementById('log-version').value;
+            const date = document.getElementById('log-date').value;
+            const content = document.getElementById('log-content').value;
+            if (!version || !date || !content) return alert("Fill all fields!");
+            
+            await addDoc(collection(db, "update_logs"), {
+                version, date, content, timestamp: Date.now()
+            });
+            
+            document.getElementById('log-version').value = '';
+            document.getElementById('log-date').value = '';
+            document.getElementById('log-content').value = '';
+            loadAdminLogs();
+            alert("Log added!");
+        };
+
+        window.deleteLog = async (id) => {
+            if (confirm("Delete this log entry?")) {
+                await deleteDoc(doc(db, "update_logs", id));
+                loadAdminLogs();
+            }
+        };
+
+        async function loadApprovals() {
+            const snap = await getDocs(query(collection(db, "users"), where("approved", "==", false)));
+            const list = document.getElementById('pending-users-list');
+            list.innerHTML = snap.docs.map(d => `
+                <div class="flex justify-between items-center p-3 bg-zinc-800 rounded-lg">
+                    <span>${d.data().username}</span>
+                    <button onclick="approveUser('${d.id}')" class="bg-blue-600 px-3 py-1 rounded">Approve</button>
+                </div>
+            `).join('');
+        }
+
+        window.approveUser = async (id) => {
+            await updateDoc(doc(db, "users", id), { approved: true });
+            loadApprovals();
+        };
+
+        window.serverCommand = async (cmd) => {
+            if (cmd === 'mute_all') {
+                const snap = await getDocs(collection(db, "users"));
+                snap.forEach(async d => {
+                    if (d.data().role !== 'admin') await updateDoc(doc(db, "users", d.id), { muted: true });
+                });
+                alert("All non-admin users muted.");
+            } else if (cmd === 'unmute_all') {
+                const snap = await getDocs(collection(db, "users"));
+                snap.forEach(async d => {
+                    await updateDoc(doc(db, "users", d.id), { muted: false });
+                });
+                alert("All users unmuted.");
+            } else if (cmd === 'broadcast') {
+                const msg = prompt("Enter broadcast message:");
+                if (msg) {
+                    await addDoc(collection(db, "messages"), {
+                        user: "SYSTEM",
+                        text: "📢 " + msg,
+                        uid: "system",
+                        timestamp: Date.now()
+                    });
+                }
+            }
+        };
+
+        async function loadUsers() {
+            const snap = await getDocs(collection(db, "users"));
+            const list = document.getElementById('all-users-list');
+            if (!list) return;
+            list.innerHTML = snap.docs.map(d => {
+                const data = d.data();
+                const userBadges = data.badges || [];
+                return `
+                    <div class="flex flex-col gap-3 p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
+                        <div class="flex justify-between items-start">
+                            <div class="flex flex-col">
+                                <span class="font-black text-lg tracking-tight">${data.username}</span>
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">${data.role} • ${data.points || 0} pts • Lvl ${data.level || 1}</span>
+                            </div>
+                            <div class="flex gap-1">
+                                ${userBadges.map(b => BADGES[b] ? `<i data-lucide="${BADGES[b].icon}" class="w-4 h-4 ${BADGES[b].color}" title="${BADGES[b].description}"></i>` : '').join('')}
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="adminAction('${d.id}', 'mute')" class="bg-zinc-800 hover:bg-yellow-600/20 text-xs px-3 py-1.5 rounded-lg border border-zinc-700 transition-all">${data.muted ? 'Unmute' : 'Mute'}</button>
+                            <button onclick="manageUserBadges('${d.id}', '${data.username}')" class="bg-zinc-800 hover:bg-blue-600/20 text-xs px-3 py-1.5 rounded-lg border border-zinc-700 transition-all">Badges</button>
+                            <button onclick="editUserStats('${d.id}', '${data.username}')" class="bg-zinc-800 hover:bg-green-600/20 text-xs px-3 py-1.5 rounded-lg border border-zinc-700 transition-all">Stats</button>
+                            <button onclick="adminAction('${d.id}', 'delete_messages')" class="bg-zinc-800 hover:bg-orange-600/20 text-xs px-3 py-1.5 rounded-lg border border-zinc-700 transition-all text-orange-500">Clear Chat</button>
+                            <button onclick="adminAction('${d.id}', 'delete')" class="bg-zinc-800 hover:bg-red-600/20 text-xs px-3 py-1.5 rounded-lg border border-zinc-700 transition-all text-red-500">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        window.manageUserBadges = async (userId, username) => {
+            // Close admin panel
+            toggleAdminPanel();
+            
+            const userDoc = await getDoc(doc(db, "users", userId));
+            const currentBadges = userDoc.data().badges || [];
+            
+            let badgeList = Object.entries(BADGES).map(([id, info]) => {
+                const has = currentBadges.includes(id);
+                return `
+                    <div class="flex justify-between items-center p-2 bg-zinc-900 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="${info.icon}" class="w-4 h-4 ${info.color}"></i>
+                            <span class="text-sm">${info.name}</span>
+                        </div>
+                        <button onclick="toggleUserBadge('${userId}', '${id}', ${has})" class="px-2 py-1 rounded text-[10px] font-bold uppercase ${has ? 'bg-red-600' : 'bg-blue-600'}">
+                            ${has ? 'Remove' : 'Give'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            const modal = document.createElement('div');
+            modal.id = 'badge-manager-modal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-zinc-950 border border-zinc-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+                    <div class="p-4 border-b border-zinc-800 flex justify-between items-center">
+                        <h3 class="font-black">Badges: ${username}</h3>
+                        <button onclick="this.closest('#badge-manager-modal').remove()" class="text-zinc-500"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    </div>
+                    <div class="p-4 space-y-2 max-h-96 overflow-y-auto">
+                        ${badgeList}
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        };
+
+        window.toggleUserBadge = async (userId, badgeId, has) => {
+            const userDoc = await getDoc(doc(db, "users", userId));
+            let badges = userDoc.data().badges || [];
+            if (has) {
+                badges = badges.filter(b => b !== badgeId);
+            } else {
+                if (!badges.includes(badgeId)) badges.push(badgeId);
+            }
+            await updateDoc(doc(db, "users", userId), { badges });
+            document.getElementById('badge-manager-modal').remove();
+            manageUserBadges(userId, userDoc.data().username);
+            loadUsers();
+        };
+
+        window.editUserStats = async (userId, username) => {
+            // Close admin panel
+            toggleAdminPanel();
+            
+            const userDoc = await getDoc(doc(db, "users", userId));
+            const data = userDoc.data();
+            
+            const points = prompt(`Edit points for ${username}:`, data.points || 0);
+            if (points === null) return;
+            const level = prompt(`Edit level for ${username}:`, data.level || 1);
+            if (level === null) return;
+            
+            await updateDoc(doc(db, "users", userId), {
+                points: parseInt(points),
+                level: parseInt(level)
+            });
+            loadUsers();
+            alert("Stats updated!");
+        };
+
+        window.adminAction = async (id, action) => {
+            if (action === 'mute') {
+                const userDoc = await getDoc(doc(db, "users", id));
+                await updateDoc(doc(db, "users", id), { muted: !userDoc.data().muted });
+            } else if (action === 'delete') {
+                if (confirm("Are you sure you want to delete this user? This will also clean up their data.")) {
+                    // 1. Mark messages as deleted
+                    const msgSnap = await getDocs(query(collection(db, "messages"), where("uid", "==", id)));
+                    for (const d of msgSnap.docs) {
+                        await updateDoc(doc(db, "messages", d.id), { text: "[Account Deleted]", gif: "" });
+                    }
+                    // 2. Delete friend requests
+                    const frSnap1 = await getDocs(query(collection(db, "friend_requests"), where("fromId", "==", id)));
+                    const frSnap2 = await getDocs(query(collection(db, "friend_requests"), where("toId", "==", id)));
+                    for (const d of [...frSnap1.docs, ...frSnap2.docs]) {
+                        await deleteDoc(doc(db, "friend_requests", d.id));
+                    }
+                    // 3. Delete user doc
+                    await deleteDoc(doc(db, "users", id));
+                    alert("User deleted and data cleaned up.");
+                }
+            } else if (action === 'delete_messages') {
+                if (confirm("Delete ALL messages from this user?")) {
+                    const msgSnap = await getDocs(query(collection(db, "messages"), where("uid", "==", id)));
+                    for (const d of msgSnap.docs) await deleteDoc(doc(db, "messages", d.id));
+                    alert("Messages deleted.");
+                }
+            }
+            loadUsers();
+        };
+
+        // Profile
+        window.showOwnProfile = () => {
+            renderProfileData(currentUserProfile, true);
+        };
+
+        window.showUserProfile = async (userId) => {
+            const userDoc = await getDoc(doc(db, "users", userId));
+            if (userDoc.exists()) {
+                renderProfileData(userDoc.data(), false);
+            }
+        };
+
+        function renderProfileData(data, isOwn) {
+            document.getElementById('profile-username').innerText = data.username;
+            document.getElementById('profile-role').innerText = data.role;
+            document.getElementById('profile-points').innerText = data.points || 0;
+            document.getElementById('profile-level').innerText = data.level || 1;
+            document.getElementById('profile-games').innerText = data.gamesPlayed || 0;
+            document.getElementById('profile-playtime').innerText = Math.floor((data.totalPlaytime || 0) / 60) + 'm';
+            document.getElementById('profile-messages').innerText = data.messagesSent || 0;
+            document.getElementById('profile-bio').innerText = data.bio || "No bio set.";
+            document.getElementById('profile-fav-game-display').innerText = data.favoriteGame || "None";
+            
+            const badgesContainer = document.getElementById('profile-badges');
+            if (badgesContainer) {
+                const userBadges = data.badges || [];
+                badgesContainer.innerHTML = userBadges.map(b => BADGES[b] ? `
+                    <div title="${BADGES[b].description}" class="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center ${BADGES[b].color} border border-zinc-800 shadow-lg cursor-help transition-all hover:scale-110">
+                        <i data-lucide="${BADGES[b].icon}" class="w-6 h-6"></i>
+                    </div>
+                ` : '').join('');
+                if (userBadges.length === 0) {
+                    badgesContainer.innerHTML = '<span class="text-[10px] text-zinc-600 uppercase font-bold">No badges earned</span>';
+                }
+            }
+
+            const editSection = document.getElementById('profile-edit-section');
+            if (editSection) {
+                if (isOwn) {
+                    editSection.classList.remove('hidden');
+                    document.getElementById('profile-bio-input').value = data.bio || "";
+                    const favSelect = document.getElementById('profile-fav-game-input');
+                    favSelect.innerHTML = '<option value="">None</option>' + GAMES.map(g => `
+                        <option value="${g.title}" ${data.favoriteGame === g.title ? 'selected' : ''}>${g.title}</option>
+                    `).join('');
+                } else {
+                    editSection.classList.add('hidden');
+                }
+            }
+
+            const profileModal = document.getElementById('profile-modal');
+            if (profileModal) profileModal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        window.closeProfile = () => {
+            const profileModal = document.getElementById('profile-modal');
+            if (profileModal) profileModal.classList.add('hidden');
+        };
+        window.saveProfile = async () => {
+            const bio = document.getElementById('profile-bio-input').value;
+            const favoriteGame = document.getElementById('profile-fav-game-input').value;
+            if (bio.length > 500) return alert("Bio too long! Max 500 chars.");
+            
+            await updateDoc(doc(db, "users", currentUser.uid), { bio, favoriteGame });
+            currentUserProfile.bio = bio;
+            currentUserProfile.favoriteGame = favoriteGame;
+            
+            document.getElementById('profile-bio').innerText = bio || "No bio set.";
+            document.getElementById('profile-fav-game-display').innerText = favoriteGame || "None";
+            alert("Profile updated!");
+        };
+
+        window.showUpdateLog = async () => {
+            const updateLogModal = document.getElementById('update-log-modal');
+            if (updateLogModal) updateLogModal.classList.remove('hidden');
+            
+            const container = document.getElementById('update-logs-container');
+            if (!container) return;
+            
+            const snap = await getDocs(query(collection(db, "update_logs"), orderBy("timestamp", "desc")));
+            if (snap.empty) {
+                container.innerHTML = '<div class="text-center text-zinc-500 py-8 italic">No update logs found.</div>';
+                return;
+            }
+            
+            container.innerHTML = snap.docs.map(d => {
+                const log = d.data();
+                return `
+                    <div class="update-log-item border-b border-zinc-800 pb-6 last:border-0">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-black text-blue-500 tracking-tight">${log.version}</h3>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 bg-zinc-900 px-2 py-1 rounded">${log.date}</span>
+                        </div>
+                        <div class="text-sm text-zinc-400 leading-relaxed space-y-2">
+                            ${log.content}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+        window.toggleUpdateLog = () => {
+            const updateLogModal = document.getElementById('update-log-modal');
+            if (updateLogModal) updateLogModal.classList.add('hidden');
+        };
+
+        // Leaderboard
+        window.toggleLeaderboard = async () => {
+            const panel = document.getElementById('leaderboard-panel');
+            if (panel) {
+                panel.classList.toggle('hidden');
+                if (!panel.classList.contains('hidden')) {
+                    const snap = await getDocs(query(collection(db, "users"), orderBy("points", "desc"), limit(20)));
+                    const list = document.getElementById('leaderboard-list');
+                    if (list) {
+                        list.innerHTML = snap.docs.map((d, i) => {
+                            const data = d.data();
+                            let rankIcon = `#${i+1}`;
+                            if (i === 0) rankIcon = '👑';
+                            if (i === 1) rankIcon = '🥈';
+                            if (i === 2) rankIcon = '🥉';
+                            
+                            return `
+                                <div class="flex justify-between items-center p-3 bg-zinc-900 rounded-xl border border-zinc-800">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-lg font-black w-8 text-center">${rankIcon}</span>
+                                        <span class="font-bold">${data.username}</span>
+                                    </div>
+                                    <span class="text-blue-400 font-mono font-bold">${data.points} pts</span>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            }
+        };
+
+        function updatePointsDisplay() {
+            document.getElementById('my-points').innerText = currentUserProfile.points;
+        }
+
+        window.toggleWishlist = (title) => {
+            if (!title) {
+                showOnlyWishlist = !showOnlyWishlist;
+                const btn = document.querySelector('button[onclick="toggleWishlist()"]');
+                if (btn) btn.classList.toggle('text-red-500', showOnlyWishlist);
+                render();
+                return;
+            }
+            const idx = wishlist.indexOf(title);
+            if (idx >= 0) wishlist.splice(idx, 1);
+            else wishlist.push(title);
+            localStorage.setItem('nexus_wishlist', JSON.stringify(wishlist));
+            render();
+        };
+
+        window.addEventListener('error', (event) => {
+            const boundary = document.getElementById('error-boundary');
+            const message = document.getElementById('error-message');
+            if (boundary && message) {
+                boundary.classList.remove('hidden');
+                message.textContent = event.message || "An unexpected error occurred.";
+            }
+        });
 
         render();
         lucide.createIcons();
     </script>
+    <div id="dm-window" class="hidden dm-window">
+        <div class="flex flex-col h-full">
+            <div class="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span id="dm-target-name" class="font-bold text-sm">Username</span>
+                </div>
+                <button onclick="closeDM()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div id="dm-messages" class="flex-1 overflow-y-auto p-4 space-y-3 flex flex-col">
+                <!-- Messages here -->
+            </div>
+            <div class="p-4 bg-zinc-900 border-t border-zinc-800">
+                <div class="flex gap-2">
+                    <input id="dm-input" type="text" class="login-input mb-0 !py-2 !text-xs" placeholder="Type a message...">
+                    <button onclick="sendDM()" class="bg-blue-600 hover:bg-blue-700 px-4 rounded-lg transition-colors">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

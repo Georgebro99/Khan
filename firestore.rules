@@ -22,6 +22,15 @@ service cloud.firestore {
     //   - role: string (required, 'admin' or 'user')
     //   - createdAt: number (required)
     //
+    // Collection: dms
+    // Document ID: auto-generated
+    // Fields:
+    //   - from: string (required) - UID of the sender
+    //   - to: string (required) - UID of the recipient
+    //   - participants: list (required) - Array of [from, to] sorted
+    //   - text: string (required, 1-1000 chars) - Message content
+    //   - timestamp: number (required) - Milliseconds since epoch
+    //
     // ===============================================================
 
     // Helper Functions
@@ -45,7 +54,8 @@ service cloud.firestore {
       return isAuthenticated() &&
         (
           (userExists() && getUserData().role == 'admin') ||
-          (request.auth.token.email == "kyler@nexus.games")
+          (request.auth.token.email == "kyler@nexus.games") ||
+          (request.auth.token.email == "KylerTheCoolCat@gmail.com")
         );
     }
 
@@ -61,10 +71,11 @@ service cloud.firestore {
 
     function isValidMessage(data) {
       return data.user is string && data.user.size() > 0 && data.user.size() < 50 &&
-             data.text is string && data.text.size() > 0 && data.text.size() < 1000 &&
+             (data.get('text', '') is string && data.get('text', '').size() <= 1000) &&
+             (data.get('gif', '') is string && data.get('gif', '').size() <= 500) &&
              data.timestamp is number &&
-             data.uid == request.auth.uid &&
-             !isMuted();
+             data.uid is string &&
+             (data.uid == request.auth.uid || isAdmin());
     }
 
     function isValidUser(data) {
@@ -73,12 +84,32 @@ service cloud.firestore {
              data.approved is bool &&
              data.role in ['admin', 'user'] &&
              data.createdAt is number &&
-             (data.get('bio', '') is string && data.get('bio', '').size() < 500) &&
+             (data.get('bio', '') is string && data.get('bio', '').size() <= 500) &&
              (data.get('points', 0) is number) &&
              (data.get('banned', false) is bool) &&
              (data.get('muted', false) is bool) &&
              (data.get('muteExpires', 0) is number) &&
-             (data.get('wishlist', []) is list);
+             (data.get('wishlist', []) is list) &&
+             (data.get('totalPlaytime', 0) is number) &&
+             (data.get('gamesPlayed', 0) is number) &&
+             (data.get('messagesSent', 0) is number) &&
+             (data.get('favoriteGame', '') is string) &&
+             (data.get('badges', []) is list) &&
+             (data.get('level', 1) is number);
+    }
+
+    function isValidUpdateLog(data) {
+      return data.version is string &&
+             data.date is string &&
+             data.content is string &&
+             data.timestamp is number;
+    }
+
+    function isValidRating(data) {
+      return data.uid == request.auth.uid &&
+             data.gameTitle is string &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+             data.timestamp is number;
     }
 
     function isValidSuggestion(data) {
@@ -98,19 +129,22 @@ service cloud.firestore {
     }
 
     function isValidDirectMessage(data) {
-      return request.auth.uid in data.participants &&
+      return data.from == request.auth.uid &&
+             data.to is string &&
+             data.participants is list && data.participants.size() == 2 &&
+             request.auth.uid in data.participants &&
              data.text is string && data.text.size() > 0 && data.text.size() < 1000 &&
-             data.senderId == request.auth.uid &&
-             data.senderName is string &&
              data.timestamp is number &&
-             data.channelId is string &&
              !isMuted();
     }
 
     match /messages/{messageId} {
       allow read: if isApproved();
-      allow create: if isApproved() && isValidMessage(request.resource.data);
-      allow delete: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isApproved() && isValidMessage(request.resource.data) && !isMuted();
+      allow update: if (isAdmin() && isValidMessage(request.resource.data)) || 
+                      (isAuthenticated() && isApproved() && !isMuted() && 
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']));
+      allow delete: if isAuthenticated() && (isAdmin() || (resource.data.uid == request.auth.uid && (request.time.toMillis() - resource.data.timestamp < 10000)));
     }
     
     match /users/{userId} {
@@ -127,7 +161,10 @@ service cloud.firestore {
          request.resource.data.role == resource.data.role &&
          request.resource.data.get('banned', false) == resource.data.get('banned', false) &&
          request.resource.data.get('muted', false) == resource.data.get('muted', false) &&
-         request.resource.data.get('muteExpires', 0) == resource.data.get('muteExpires', 0)
+         request.resource.data.get('muteExpires', 0) == resource.data.get('muteExpires', 0) &&
+         request.resource.data.get('badges', []) == resource.data.get('badges', []) &&
+         request.resource.data.get('points', 0) == resource.data.get('points', 0) &&
+         request.resource.data.get('level', 1) == resource.data.get('level', 1)
         ) ||
         (isAdmin() && isValidUser(request.resource.data))
       );
@@ -143,15 +180,28 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && (resource.data.fromId == request.auth.uid || resource.data.toId == request.auth.uid);
     }
 
-    match /direct_messages/{messageId} {
+    match /dms/{messageId} {
       allow read: if isAuthenticated() && (request.auth.uid in resource.data.participants);
       allow create: if isAuthenticated() && isValidDirectMessage(request.resource.data);
-      allow delete: if isAuthenticated() && (resource.data.senderId == request.auth.uid);
+      allow delete: if isAuthenticated() && (resource.data.from == request.auth.uid);
     }
 
     match /suggestions/{suggestionId} {
       allow read: if isApproved();
       allow create: if isApproved() && isValidSuggestion(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /ratings/{ratingId} {
+      allow read: if isApproved();
+      allow create: if isApproved() && isValidRating(request.resource.data);
+      allow update: if isApproved() && resource.data.uid == request.auth.uid && isValidRating(request.resource.data);
+      allow delete: if isApproved() && resource.data.uid == request.auth.uid;
+    }
+
+    match /update_logs/{logId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidUpdateLog(request.resource.data);
       allow delete: if isAdmin();
     }
   }
