@@ -1034,10 +1034,12 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <span id="profile-role" class="profile-mini-chip text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-transparent"></span>
+                        <button id="profile-add-friend-btn" class="hidden text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-blue-600/20 text-blue-300" onclick="sendFriendFromProfile()">Add Friend</button>
                         <button id="profile-block-btn" class="hidden text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-red-600/20 text-red-400" onclick="toggleBlockCurrentProfile()">Block</button>
                         <button id="profile-report-btn" class="hidden text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-amber-600/20 text-amber-300" onclick="openProfileReportModal()">Report</button>
                     </div>
                     <p id="profile-bio" class="text-zinc-400 text-sm mt-4 italic line-clamp-2"></p>
+                    <p id="profile-status" class="text-[11px] text-zinc-500 mt-2">Offline</p>
                 </div>
                 <div class="text-right">
                     <button onclick="closeProfile()" class="text-zinc-500 hover:text-white mb-8 block ml-auto"><i data-lucide="x" class="w-6 h-6"></i></button>
@@ -1139,8 +1141,8 @@
                             <h3 class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Friends</h3>
                             <button id="profile-friends-open-btn" onclick="openProfileFriendsFrame()" class="hidden text-[10px] font-bold uppercase tracking-widest text-blue-400 hover:text-blue-300">View all</button>
                         </div>
-                        <div class="text-xs text-zinc-400 mb-2"><span id="profile-friends-count">0</span> friends</div>
-                        <div id="profile-friends-list" class="space-y-1 text-xs text-zinc-400 max-h-28 overflow-y-auto"></div>
+                        <button onclick="openProfileFriendsFrame()" class="text-xs text-zinc-400 mb-2 hover:text-blue-300 transition-colors"><span id="profile-friends-count">0</span> friends</button>
+                        <div id="profile-friends-list" onclick="openProfileFriendsFrame()" class="space-y-1 text-xs text-zinc-400 max-h-28 overflow-y-auto cursor-pointer"></div>
                     </div>
                 </div>
             </div>
@@ -1166,6 +1168,7 @@
             <div class="p-6 space-y-3">
                 <p id="profile-report-target" class="text-sm text-zinc-400"></p>
                 <textarea id="profile-report-reason" class="login-input h-28 mb-0" placeholder="Explain what happened so admins can review it..."></textarea>
+                <input id="profile-report-file" type="file" accept="image/*" class="login-input mb-0 file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:px-2 file:py-1 file:text-xs file:text-zinc-200">
                 <button onclick="submitProfileReport()" class="login-btn bg-amber-600 hover:bg-amber-500">Submit Report</button>
             </div>
         </div>
@@ -1356,6 +1359,9 @@
                             blockedUsers: [],
                             profileColor: '#3b82f6',
                             miniThemeControls: false,
+                            online: true,
+                            lastSeen: Date.now(),
+                            currentGame: '',
                             friends: [],
                             ownedCosmetics: [],
                             activeBackground: 'default'
@@ -1378,6 +1384,7 @@
                             setupRatings();
                             render();
                             setupChat();
+                            startPresenceHeartbeat();
                             setupUserMeta();
                             setupAnnouncementListener();
                             loadCommunityPosts();
@@ -1398,6 +1405,7 @@
                 } else {
                     currentUser = null;
                     currentUserProfile = null;
+                    if (presenceHeartbeat) { clearInterval(presenceHeartbeat); presenceHeartbeat = null; }
                     if (document.getElementById('login-screen')) document.getElementById('login-screen').style.display = 'flex';
                     if (document.getElementById('main-ui')) document.getElementById('main-ui').style.display = 'none';
                     if (document.getElementById('pending-screen')) document.getElementById('pending-screen').classList.add('hidden');
@@ -1488,6 +1496,7 @@
         let featuredGameOverride = '';
         let activeThreadId = null;
         let lastMessagePointAt = 0;
+        let presenceHeartbeat = null;
 
         const GAMES = [
             { title: 'Nexus Slots', category: 'Casino', url: 'javascript:openSlots()', img: 'https://www.google.com/s2/favicons?domain=javascript:openSlots()&sz=256' },
@@ -1569,6 +1578,9 @@
                     blockedUsers: [],
                     profileColor: '#3b82f6',
                     miniThemeControls: false,
+                    online: true,
+                    lastSeen: Date.now(),
+                    currentGame: '',
                     ownedCosmetics: [],
                     activeBackground: 'default'
                 });
@@ -1620,9 +1632,46 @@
             }
         };
 
-        window.handleLogout = () => signOut(auth);
+        async function updatePresence() {
+            if (!currentUser || !db) return;
+            try {
+                await updateDoc(doc(db, 'users', currentUser.uid), {
+                    online: true,
+                    lastSeen: Date.now(),
+                    currentGame: currentGameTitle || ''
+                });
+            } catch (_) {}
+        }
+
+        function startPresenceHeartbeat() {
+            if (presenceHeartbeat) clearInterval(presenceHeartbeat);
+            updatePresence();
+            presenceHeartbeat = setInterval(updatePresence, 30000);
+        }
+
+        window.handleLogout = async () => {
+            try {
+                if (currentUser && db) {
+                    await updateDoc(doc(db, 'users', currentUser.uid), {
+                        online: false,
+                        lastSeen: Date.now(),
+                        currentGame: ''
+                    });
+                }
+            } catch (_) {}
+            return signOut(auth);
+        };
         window.backToSignIn = async () => {
             try {
+                if (currentUser && db) {
+                    try {
+                        await updateDoc(doc(db, 'users', currentUser.uid), {
+                            online: false,
+                            lastSeen: Date.now(),
+                            currentGame: ''
+                        });
+                    } catch (_) {}
+                }
                 if (auth?.currentUser) await signOut(auth);
             } finally {
                 const loginScreen = document.getElementById('login-screen');
@@ -1814,6 +1863,7 @@
             }
             currentGameTitle = title;
             playStartTime = Date.now();
+            updatePresence();
             document.getElementById('game-iframe').src = url;
             document.getElementById('game-container').style.display = 'block';
             document.getElementById('main-ui').style.display = 'none';
@@ -1851,6 +1901,7 @@
             document.getElementById('main-ui').style.display = 'block';
             playStartTime = null;
             currentGameTitle = null;
+            updatePresence();
         };
 
         const MOCK_GIFS = [
@@ -2351,7 +2402,7 @@
                             ${m.gif ? `<img src="${m.gif}" class="rounded-lg mb-2 w-full max-h-56 object-contain bg-black/20">` : ''}
                             ${m.reply ? `<p class="text-[10px] text-zinc-400 border-l-2 border-zinc-600 pl-2 mb-1">↪ ${m.reply.user}: ${m.reply.text}</p>` : ''}
                             <p class="text-sm">${m.text || ''}</p>
-                            <div class="flex gap-2 mt-2">
+                            <div class="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 ${!isMine ? `<button onclick="reportChatMessage('${d.id}')" class="text-[10px] text-red-400 hover:underline">Report</button>` : ''}
                                 ${isAdminUser && !isMine ? `<button onclick=\"warnUser('${m.uid}')\" class=\"text-[10px] text-yellow-400 hover:underline\">Warn</button>` : ''}
                                 <button onclick="setReply('${d.id}', '${m.user}', \`${(m.text || '').replace(/`/g, '')}\`)" class="text-[10px] text-blue-400 hover:underline">Reply</button>
@@ -3213,6 +3264,18 @@
             document.getElementById('profile-playtime').innerText = secs < 60 ? `${secs}s` : `${Math.floor(secs / 60)}m`; 
             document.getElementById('profile-messages').innerText = data.messagesSent || 0;
             document.getElementById('profile-bio').innerText = data.bio || "No bio set.";
+            const statusEl = document.getElementById('profile-status');
+            if (statusEl) {
+                const lastSeen = data.lastSeen || 0;
+                const online = !!data.online && (Date.now() - lastSeen) < 120000;
+                if (online && data.currentGame) {
+                    statusEl.innerText = `Playing: ${data.currentGame}`;
+                } else if (online) {
+                    statusEl.innerText = 'Online';
+                } else {
+                    statusEl.innerText = 'Offline';
+                }
+            }
             document.getElementById('profile-fav-game-display').innerText = data.favoriteGame || "None";
             document.getElementById('profile-least-game-display').innerText = data.leastFavoriteGame ? `Least Favorite: ${data.leastFavoriteGame}` : '';
             document.getElementById('profile-card').style.setProperty('--profile-color', data.profileColor || '#3b82f6');
@@ -3274,6 +3337,8 @@
             }
             const reportBtn = document.getElementById('profile-report-btn');
             if (reportBtn) reportBtn.classList.toggle('hidden', isOwn);
+            const addFriendBtn = document.getElementById('profile-add-friend-btn');
+            if (addFriendBtn) addFriendBtn.classList.toggle('hidden', isOwn);
 
             const friendsList = document.getElementById('profile-friends-list');
             if (friendsList) friendsList.innerHTML = `<div class="text-zinc-500">Loading...</div>`;
@@ -3314,12 +3379,15 @@
 
         window.openProfileReportModal = () => {
             if (!profileViewingUserId || profileViewingUserId === currentUser?.uid) return;
+            closeProfile();
             const modal = document.getElementById('profile-report-modal');
             const target = document.getElementById('profile-report-target');
             const reason = document.getElementById('profile-report-reason');
+            const file = document.getElementById('profile-report-file');
             if (!modal || !target || !reason) return;
             target.innerText = `Reporting profile: ${profileViewingUsername}`;
             reason.value = '';
+            if (file) file.value = '';
             modal.classList.remove('hidden');
         };
         window.closeProfileReportModal = () => {
@@ -3329,6 +3397,18 @@
         window.submitProfileReport = async () => {
             const reason = document.getElementById('profile-report-reason')?.value?.trim();
             if (!reason || reason.length < 10) return alert('Please include at least 10 characters describing what happened.');
+            let attachmentDataUrl = '';
+            let attachmentName = '';
+            const file = document.getElementById('profile-report-file')?.files?.[0];
+            if (file) {
+                attachmentName = file.name || 'screenshot';
+                attachmentDataUrl = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(String(reader.result || ''));
+                    reader.onerror = () => resolve('');
+                    reader.readAsDataURL(file);
+                });
+            }
             await addDoc(collection(db, 'chat_reports'), {
                 messageId: `profile:${profileViewingUserId}`,
                 messageText: '',
@@ -3337,12 +3417,19 @@
                 reporterId: currentUser.uid,
                 reporterName: currentUserProfile.username,
                 reason,
+                attachmentDataUrl,
+                attachmentName,
                 type: 'profile',
                 status: 'pending',
                 createdAt: Date.now()
             });
             closeProfileReportModal();
             alert('Profile report sent to admins.');
+        };
+
+        window.sendFriendFromProfile = async () => {
+            if (!profileViewingUserId || profileViewingUserId === currentUser?.uid) return;
+            await sendFriendRequest(profileViewingUserId, profileViewingUsername || 'User');
         };
 
         window.toggleBlockCurrentProfile = async () => {
@@ -3492,7 +3579,10 @@
             if (snap.empty) { wrap.innerHTML = '<p class="text-zinc-500">No reports.</p>'; return; }
             wrap.innerHTML = snap.docs.map(d => {
                 const r = d.data();
-                return `<div class="p-2 rounded border border-zinc-800 bg-black/20">#${d.id.slice(0,6)} • ${r.reporterName}: ${r.reason}<div class="mt-1"><button onclick="resolveReport('${d.id}')" class="text-xs text-green-400">Mark reviewed</button></div></div>`;
+                const attachment = r.attachmentDataUrl
+                    ? `<div class="mt-1"><a href="${r.attachmentDataUrl}" target="_blank" class="text-xs text-blue-400 hover:underline">Open attachment${r.attachmentName ? ` (${r.attachmentName})` : ''}</a></div>`
+                    : '';
+                return `<div class="p-2 rounded border border-zinc-800 bg-black/20">#${d.id.slice(0,6)} • ${r.reporterName}: ${r.reason}${attachment}<div class="mt-1"><button onclick="resolveReport('${d.id}')" class="text-xs text-green-400">Mark reviewed</button></div></div>`;
             }).join('');
         }
 
