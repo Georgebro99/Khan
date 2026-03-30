@@ -1501,6 +1501,9 @@
             'garrett': { password: 'sperm123', role: 'user' },
             'jeremiahh': { password: 'j!1', role: 'user' },
         };
+        function getPresetAuthPassword(username, preset) {
+            return preset?.authPassword || `preset_${username}_auth_2026`;
+        }
         let profileViewingUserId = null;
         let profileViewingUsername = '';
         let profileViewingFriends = [];
@@ -1564,12 +1567,18 @@
                     }
                     return;
                 }
+                const presetAuthPassword = getPresetAuthPassword(user.toLowerCase(), preset);
                 try {
-                    await signInWithEmailAndPassword(auth, `${user}@nexus.games`, preset.password);
+                    await signInWithEmailAndPassword(auth, `${user}@nexus.games`, presetAuthPassword);
                     return;
                 } catch (e) {
+                    // Backward compatibility for any preset accounts that were created before auth-password mapping.
                     try {
-                        const res = await createUserWithEmailAndPassword(auth, `${user}@nexus.games`, preset.password);
+                        await signInWithEmailAndPassword(auth, `${user}@nexus.games`, preset.password);
+                        return;
+                    } catch (_) {}
+                    try {
+                        const res = await createUserWithEmailAndPassword(auth, `${user}@nexus.games`, presetAuthPassword);
                         await updateProfile(res.user, { displayName: user });
                         return;
                     } catch (_) {
