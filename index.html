@@ -1531,6 +1531,8 @@
         let customGameThumbnails = {};
         let profileDocUnsubscribe = null;
         let settingsUnsubscribers = [];
+        const LOCAL_FEATURED_KEY = 'nexus_featured_override';
+        const LOCAL_THUMBNAIL_KEY = 'nexus_game_thumbnails';
 
         const GAMES = [
             { title: 'Nexus Slots', category: 'Casino', url: 'javascript:openSlots()', img: 'https://www.google.com/s2/favicons?domain=javascript:openSlots()&sz=256' },
@@ -1717,14 +1719,32 @@
         function startSettingsListeners() {
             settingsUnsubscribers.forEach(unsub => { try { unsub(); } catch (_) {} });
             settingsUnsubscribers = [];
+            featuredGameOverride = localStorage.getItem(LOCAL_FEATURED_KEY) || featuredGameOverride || '';
+            try {
+                customGameThumbnails = JSON.parse(localStorage.getItem(LOCAL_THUMBNAIL_KEY) || '{}');
+            } catch (_) {
+                customGameThumbnails = {};
+            }
             settingsUnsubscribers.push(onSnapshot(doc(db, 'settings', 'featured'), (snap) => {
                 featuredGameOverride = snap.exists() ? (snap.data().gameTitle || '') : '';
+                localStorage.setItem(LOCAL_FEATURED_KEY, featuredGameOverride || '');
                 const select = document.getElementById('featured-game-select');
                 if (select) select.value = featuredGameOverride;
+                render();
+            }, () => {
+                featuredGameOverride = localStorage.getItem(LOCAL_FEATURED_KEY) || '';
                 render();
             }));
             settingsUnsubscribers.push(onSnapshot(doc(db, 'settings', 'game_thumbnails'), (snap) => {
                 customGameThumbnails = snap.exists() ? (snap.data().map || {}) : {};
+                localStorage.setItem(LOCAL_THUMBNAIL_KEY, JSON.stringify(customGameThumbnails || {}));
+                render();
+            }, () => {
+                try {
+                    customGameThumbnails = JSON.parse(localStorage.getItem(LOCAL_THUMBNAIL_KEY) || '{}');
+                } catch (_) {
+                    customGameThumbnails = {};
+                }
                 render();
             }));
         }
@@ -3753,6 +3773,12 @@
         };
 
         async function loadSlowmodeSettings() {
+            featuredGameOverride = localStorage.getItem(LOCAL_FEATURED_KEY) || featuredGameOverride || '';
+            try {
+                customGameThumbnails = JSON.parse(localStorage.getItem(LOCAL_THUMBNAIL_KEY) || '{}');
+            } catch (_) {
+                customGameThumbnails = customGameThumbnails || {};
+            }
             const options = GAMES.map(g => `<option value="${g.title}">${g.title}</option>`).join('');
             const select = document.getElementById('featured-game-select');
             if (select) {
@@ -3794,7 +3820,9 @@
                 render();
                 alert('Featured game updated.');
             } catch (e) {
-                alert(`Failed to update featured game: ${e?.message || e}`);
+                localStorage.setItem(LOCAL_FEATURED_KEY, featuredGameOverride || '');
+                render();
+                alert(`Cloud save failed (${e?.message || e}). Saved featured override locally on this device.`);
             }
         };
 
@@ -3816,7 +3844,9 @@
                 render();
                 alert(`Thumbnail updated for ${gameTitle}.`);
             } catch (e) {
-                alert(`Failed to upload thumbnail: ${e?.message || e}`);
+                localStorage.setItem(LOCAL_THUMBNAIL_KEY, JSON.stringify(customGameThumbnails || {}));
+                render();
+                alert(`Cloud upload failed (${e?.message || e}). Saved thumbnail locally on this device.`);
             }
         };
 
@@ -3829,7 +3859,9 @@
                 render();
                 alert(`Custom thumbnail cleared for ${gameTitle}.`);
             } catch (e) {
-                alert(`Failed to clear thumbnail: ${e?.message || e}`);
+                localStorage.setItem(LOCAL_THUMBNAIL_KEY, JSON.stringify(customGameThumbnails || {}));
+                render();
+                alert(`Cloud clear failed (${e?.message || e}). Cleared thumbnail locally on this device.`);
             }
         };
 
