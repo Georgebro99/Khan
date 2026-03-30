@@ -3730,23 +3730,34 @@
         };
 
         async function loadSlowmodeSettings() {
-            const snap = await getDoc(doc(db, 'settings', 'chat'));
-            if (snap.exists()) slowmodeSettings = { ...slowmodeSettings, ...snap.data() };
-            document.getElementById('slowmode-enabled').checked = !!slowmodeSettings.enabled;
-            document.getElementById('slowmode-seconds').value = slowmodeSettings.seconds || 5;
-            document.getElementById('slowmode-bypass').value = (slowmodeSettings.bypassUsers || []).join(', ');
             const select = document.getElementById('featured-game-select');
             if (select) {
-                select.innerHTML = '<option value=\"\">Auto (Top Rated)</option>' + GAMES.map(g => `<option value=\"${g.title}\">${g.title}</option>`).join('');
-                const featuredSnap = await getDoc(doc(db, 'settings', 'featured'));
-                featuredGameOverride = featuredSnap.exists() ? (featuredSnap.data().gameTitle || '') : '';
-                select.value = featuredGameOverride;
+                select.innerHTML = '<option value="">Auto (Top Rated)</option>' + GAMES.map(g => `<option value="${g.title}">${g.title}</option>`).join('');
             }
-            const thumbSnap = await getDoc(doc(db, 'settings', 'game_thumbnails'));
-            customGameThumbnails = thumbSnap.exists() ? (thumbSnap.data().map || {}) : {};
             const thumbSelect = document.getElementById('thumbnail-game-select');
             if (thumbSelect) {
-                thumbSelect.innerHTML = '<option value=\"\">Select game...</option>' + GAMES.map(g => `<option value=\"${g.title}\">${g.title}</option>`).join('');
+                thumbSelect.innerHTML = '<option value="">Select game...</option>' + GAMES.map(g => `<option value="${g.title}">${g.title}</option>`).join('');
+            }
+            try {
+                const snap = await getDoc(doc(db, 'settings', 'chat'));
+                if (snap.exists()) slowmodeSettings = { ...slowmodeSettings, ...snap.data() };
+            } catch (_) {}
+            const slowEnabled = document.getElementById('slowmode-enabled');
+            const slowSeconds = document.getElementById('slowmode-seconds');
+            const slowBypass = document.getElementById('slowmode-bypass');
+            if (slowEnabled) slowEnabled.checked = !!slowmodeSettings.enabled;
+            if (slowSeconds) slowSeconds.value = slowmodeSettings.seconds || 5;
+            if (slowBypass) slowBypass.value = (slowmodeSettings.bypassUsers || []).join(', ');
+            try {
+                const featuredSnap = await getDoc(doc(db, 'settings', 'featured'));
+                featuredGameOverride = featuredSnap.exists() ? (featuredSnap.data().gameTitle || '') : '';
+                if (select) select.value = featuredGameOverride;
+            } catch (_) {}
+            try {
+                const thumbSnap = await getDoc(doc(db, 'settings', 'game_thumbnails'));
+                customGameThumbnails = thumbSnap.exists() ? (thumbSnap.data().map || {}) : {};
+            } catch (_) {
+                customGameThumbnails = {};
             }
             render();
         }
