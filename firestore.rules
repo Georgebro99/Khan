@@ -204,5 +204,13 @@ service cloud.firestore {
       allow write: if isAdmin() && isValidUpdateLog(request.resource.data);
       allow delete: if isAdmin();
     }
+
+    match /settings/{settingId} {
+      // Everyone approved can read settings so featured overrides/thumbnails propagate server-wide.
+      allow read: if isApproved();
+
+      // Only admins can change settings docs.
+      allow create, update, delete: if isAdmin();
+    }
   }
 }
