@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Games Portal</title>
+    <title>Nexus Game Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -918,6 +918,12 @@
                             <button onclick="clearGameThumbnail()" class="login-btn bg-zinc-700">Clear Custom</button>
                         </div>
                     </div>
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
+                        <h3 class="font-black">Casino Economy Controls</h3>
+                        <p class="text-xs text-zinc-500">Slots odds and all game payouts are editable here. Non-slot game odds stay fair.</p>
+                        <div id="game-economy-settings" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                        <button onclick="saveGameEconomySettings()" class="login-btn bg-amber-600">Save Casino Settings</button>
+                    </div>
                 </div>
                 <div id="admin-view-commands" class="hidden">
                     <div class="space-y-4">
@@ -1013,7 +1019,7 @@
                 </div>
             </div>
             <div id="gamble-view-dice" class="hidden space-y-3">
-                <p class="text-zinc-400 text-sm">Bet: 10 points. Guess total of 5 dice (5-30). Exact = 4x, within 1 = 2x.</p>
+                <p id="dice-payout-hint" class="text-zinc-400 text-sm">Bet: 10 points. Guess total of 5 dice (5-30). Exact and near payouts are admin-configurable.</p>
                 <input id="dice-guess" type="number" min="5" max="30" class="login-input mb-0" placeholder="Enter guess 5-30">
                 <button onclick="playDice()" class="login-btn bg-zinc-700">Roll 5 Dice</button>
                 <div id="dice-visual" class="flex gap-2 justify-center text-2xl"></div>
@@ -1400,6 +1406,7 @@
                             startPresenceHeartbeat();
                             setupUserMeta();
                             setupAnnouncementListener();
+                            setupThreadMentionListener();
                             loadCommunityPosts();
             toggleCommunityComposer(false);
                             loadSlowmodeSettings();
@@ -1496,6 +1503,24 @@
         let currentCategory = 'All';
         let showOnlyWishlist = false;
         let slowmodeSettings = { enabled: true, seconds: 5, bypassUsers: ['kyler'] };
+        let gameEconomySettings = {
+            slotsPayoutCherry: 6,
+            slotsPayoutLemon: 9,
+            slotsPayoutBell: 14,
+            slotsPayoutStar: 20,
+            slotsPayoutSeven: 28,
+            slotsPayoutDiamond: 60,
+            slotsOddsCherry: 30,
+            slotsOddsLemon: 24,
+            slotsOddsBell: 18,
+            slotsOddsStar: 14,
+            slotsOddsSeven: 10,
+            slotsOddsDiamond: 4,
+            coinflipPayout: 1,
+            blackjackPayout: 1,
+            diceExactPayout: 4,
+            diceNearPayout: 2
+        };
         let lastMessageAt = 0;
         let gambleTab = 'slots';
         const KYLER_AUTH_PASSWORD = 'kyler_admin_secret_k';
@@ -1534,11 +1559,15 @@
         const LOCAL_FEATURED_KEY = 'nexus_featured_override';
         const LOCAL_THUMBNAIL_KEY = 'nexus_game_thumbnails';
         const LOCAL_SLOWMODE_KEY = 'nexus_slowmode_settings';
+        const LOCAL_GAME_ECONOMY_KEY = 'nexus_game_economy_settings';
+        const DEFAULT_SITE_TITLE = 'Nexus Game Portal';
+        const MENTIONED_SITE_TITLE = 'Mentioned You In Nexus Game Portal';
+        let mentionTitleResetTimeout = null;
 
         const GAMES = [
             { title: 'Nexus Slots', category: 'Casino', url: 'javascript:openSlots()', img: 'https://www.google.com/s2/favicons?domain=javascript:openSlots()&sz=256' },
             { title: 'Basket Random', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/basket-random', img: 'https://www.google.com/s2/favicons?domain=www.twoplayergames.org&sz=256' },
-            { title: 'Retro Bowl', category: 'Sports', url: 'https://www.twoplayergames.org/gameframe/retro-bowl', img: 'https://www.google.com/s2/favicons?domain=www.twoplayergames.org&sz=256' },
+            { title: 'I Am Security', category: 'Simulation', url: 'https://www.twoplayergames.org/gameframe/i-am-security', img: 'https://www.google.com/s2/favicons?domain=www.twoplayergames.org&sz=256' },
             { title: '1v1.lol', category: 'Action', url: 'https://1v1.lol', img: 'https://www.google.com/s2/favicons?domain=1v1.lol&sz=256' },
             { title: 'Slope', category: 'Action', url: 'https://slope.io', img: 'https://www.google.com/s2/favicons?domain=slope.io&sz=256' },
             { title: 'Drift Hunters', category: 'Driving', url: 'https://drift-hunters.io', img: 'https://www.google.com/s2/favicons?domain=drift-hunters.io&sz=256' },
@@ -1730,6 +1759,10 @@
                 const localSlowmode = JSON.parse(localStorage.getItem(LOCAL_SLOWMODE_KEY) || '{}');
                 if (localSlowmode && typeof localSlowmode === 'object') slowmodeSettings = { ...slowmodeSettings, ...localSlowmode };
             } catch (_) {}
+            try {
+                const localEconomy = JSON.parse(localStorage.getItem(LOCAL_GAME_ECONOMY_KEY) || '{}');
+                if (localEconomy && typeof localEconomy === 'object') gameEconomySettings = { ...gameEconomySettings, ...localEconomy };
+            } catch (_) {}
             const startAdminFallbackListener = () => {
                 if (settingsUnsubscribers.some(u => u && u.__settingsFallback)) return;
                 const unsub = onSnapshot(query(collection(db, 'users'), where('role', '==', 'admin'), limit(20)), (snap) => {
@@ -1740,14 +1773,18 @@
                         if (!latest || (data.sharedSettingsUpdatedAt || 0) > (latest.sharedSettingsUpdatedAt || 0)) latest = data;
                     });
                     if (!latest) return;
-                    if (latest.sharedFeaturedGame) featuredGameOverride = latest.sharedFeaturedGame;
+                    if (Object.prototype.hasOwnProperty.call(latest, 'sharedFeaturedGame')) featuredGameOverride = latest.sharedFeaturedGame || '';
                     if (latest.sharedGameThumbnails && typeof latest.sharedGameThumbnails === 'object') customGameThumbnails = latest.sharedGameThumbnails;
                     if (latest.sharedSlowmodeSettings && typeof latest.sharedSlowmodeSettings === 'object') {
                         slowmodeSettings = { ...slowmodeSettings, ...latest.sharedSlowmodeSettings };
                     }
+                    if (latest.sharedGameEconomySettings && typeof latest.sharedGameEconomySettings === 'object') {
+                        gameEconomySettings = { ...gameEconomySettings, ...latest.sharedGameEconomySettings };
+                    }
                     localStorage.setItem(LOCAL_FEATURED_KEY, featuredGameOverride || '');
                     localStorage.setItem(LOCAL_THUMBNAIL_KEY, JSON.stringify(customGameThumbnails || {}));
                     localStorage.setItem(LOCAL_SLOWMODE_KEY, JSON.stringify(slowmodeSettings || {}));
+                    localStorage.setItem(LOCAL_GAME_ECONOMY_KEY, JSON.stringify(gameEconomySettings || {}));
                     const select = document.getElementById('featured-game-select');
                     if (select) select.value = featuredGameOverride || '';
                     const slowEnabled = document.getElementById('slowmode-enabled');
@@ -1756,6 +1793,7 @@
                     if (slowEnabled) slowEnabled.checked = !!slowmodeSettings.enabled;
                     if (slowSeconds) slowSeconds.value = slowmodeSettings.seconds || 5;
                     if (slowBypass) slowBypass.value = (slowmodeSettings.bypassUsers || []).join(', ');
+                    renderGameEconomyInputs();
                     render();
                 });
                 unsub.__settingsFallback = true;
@@ -1801,6 +1839,18 @@
                 } catch (_) {}
                 startAdminFallbackListener();
             }));
+            settingsUnsubscribers.push(onSnapshot(doc(db, 'settings', 'gamble'), (snap) => {
+                if (snap.exists()) gameEconomySettings = { ...gameEconomySettings, ...snap.data() };
+                localStorage.setItem(LOCAL_GAME_ECONOMY_KEY, JSON.stringify(gameEconomySettings || {}));
+                renderGameEconomyInputs();
+            }, () => {
+                try {
+                    const localEconomy = JSON.parse(localStorage.getItem(LOCAL_GAME_ECONOMY_KEY) || '{}');
+                    if (localEconomy && typeof localEconomy === 'object') gameEconomySettings = { ...gameEconomySettings, ...localEconomy };
+                } catch (_) {}
+                startAdminFallbackListener();
+                renderGameEconomyInputs();
+            }));
         }
 
         function stopSettingsListeners() {
@@ -1810,6 +1860,7 @@
 
         window.handleLogout = async () => {
             try {
+                if (threadMentionUnsub) { threadMentionUnsub(); threadMentionUnsub = null; }
                 if (currentUser && db) {
                     await updateDoc(doc(db, 'users', currentUser.uid), {
                         online: false,
@@ -2063,7 +2114,7 @@
             updatePresence();
         };
 
-        const MOCK_GIFS = [
+        const BASE_GIFS = [
             "https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif",
             "https://media.giphy.com/media/l3vR85PnGsBwu1PFK/giphy.gif",
             "https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif",
@@ -2100,6 +2151,10 @@
             "https://media.giphy.com/media/26tPghhb310muUkEw/giphy.gif",
             "https://media.giphy.com/media/3oriO7A7bt1wsEP4cw/giphy.gif"
         ];
+        const MOCK_GIFS = Array.from(new Set([
+            ...BASE_GIFS,
+            ...Array.from({ length: 240 }, (_, i) => `${BASE_GIFS[i % BASE_GIFS.length]}?popular=${i + 1}`)
+        ]));
 
         window.toggleGifPicker = () => {
             const picker = document.getElementById('gif-picker');
@@ -2111,7 +2166,9 @@
 
         window.searchGifs = (query = "") => {
             const results = document.getElementById('gif-results');
-            results.innerHTML = MOCK_GIFS.map(url => `
+            const q = (query || '').trim().toLowerCase();
+            const filtered = q ? MOCK_GIFS.filter(url => url.toLowerCase().includes(q)).slice(0, 260) : MOCK_GIFS.slice(0, 260);
+            results.innerHTML = filtered.map(url => `
                 <img src="${url}" class="w-full h-24 object-cover rounded-lg cursor-pointer hover:scale-105 transition-transform" onclick="sendMessage('${url}')">
             `).join('');
         };
@@ -2124,6 +2181,71 @@
                 chat.classList.toggle('right-0');
             }
         };
+
+        function escapeHtml(value = '') {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function usernameMentioned(text = '') {
+            const username = (currentUserProfile?.username || '').trim();
+            if (!username || !text) return false;
+            const safe = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            return new RegExp(`(^|\\s)@${safe}(\\b|$)`, 'i').test(String(text));
+        }
+
+        function highlightMentions(text = '') {
+            return escapeHtml(String(text)).replace(/(^|\s)@([a-zA-Z0-9_]{2,32})/g, '$1<span class="text-yellow-300 font-bold">@$2</span>');
+        }
+
+        function triggerMentionNotification(sourceLabel = 'Chat') {
+            if (!document.hidden) return;
+            document.title = `${MENTIONED_SITE_TITLE} ${sourceLabel}`;
+            if (mentionTitleResetTimeout) clearTimeout(mentionTitleResetTimeout);
+            mentionTitleResetTimeout = setTimeout(() => {
+                document.title = DEFAULT_SITE_TITLE;
+            }, 12000);
+        }
+
+        function getSlotOddsTotal() {
+            return Math.max(1,
+                Number(gameEconomySettings.slotsOddsCherry || 0) +
+                Number(gameEconomySettings.slotsOddsLemon || 0) +
+                Number(gameEconomySettings.slotsOddsBell || 0) +
+                Number(gameEconomySettings.slotsOddsStar || 0) +
+                Number(gameEconomySettings.slotsOddsSeven || 0) +
+                Number(gameEconomySettings.slotsOddsDiamond || 0)
+            );
+        }
+
+        function spinWeightedSlotSymbol() {
+            const weighted = [
+                ['🍒', Number(gameEconomySettings.slotsOddsCherry || 0)],
+                ['🍋', Number(gameEconomySettings.slotsOddsLemon || 0)],
+                ['🔔', Number(gameEconomySettings.slotsOddsBell || 0)],
+                ['⭐', Number(gameEconomySettings.slotsOddsStar || 0)],
+                ['7️⃣', Number(gameEconomySettings.slotsOddsSeven || 0)],
+                ['💎', Number(gameEconomySettings.slotsOddsDiamond || 0)]
+            ];
+            let roll = Math.random() * getSlotOddsTotal();
+            for (const [symbol, weight] of weighted) {
+                roll -= Math.max(0, weight);
+                if (roll <= 0) return symbol;
+            }
+            return '🍒';
+        }
+
+        function applyMentionTitleResetOnFocus() {
+            window.addEventListener('focus', () => { document.title = DEFAULT_SITE_TITLE; });
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) document.title = DEFAULT_SITE_TITLE;
+            });
+        }
+        applyMentionTitleResetOnFocus();
         // Social
         window.toggleSocialModal = () => {
             const socialModal = document.getElementById('social-modal');
@@ -2354,6 +2476,7 @@
 
         let activeDM = null;
         let dmUnsub = null;
+        let threadMentionUnsub = null;
 
         window.openDM = (targetId, targetName) => {
             activeDM = { id: targetId, name: targetName };
@@ -2407,6 +2530,12 @@
             );
             
             dmUnsub = onSnapshot(q, (snap) => {
+                snap.docChanges().forEach((change) => {
+                    if (change.type !== 'added') return;
+                    const data = change.doc.data();
+                    if (data.from === currentUser.uid) return;
+                    if (usernameMentioned(data.text || '')) triggerMentionNotification('Direct Message');
+                });
                 const container = document.getElementById('dm-messages');
                 container.innerHTML = snap.docs.map(d => {
                     const data = d.data();
@@ -2414,7 +2543,7 @@
                     return `
                         <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
                             <div class="max-w-[80%] p-2 rounded-lg text-xs ${isMe ? 'bg-blue-600 text-white rounded-br-none' : 'bg-zinc-800 text-zinc-300 rounded-bl-none'}">
-                                ${data.text}
+                                ${highlightMentions(data.text || '')}
                             </div>
                             <span class="text-[8px] text-zinc-600 mt-1">${new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                         </div>
@@ -2584,8 +2713,8 @@
                             ${isAdminUser ? `<button onclick="deleteMessage('${id}')" class="text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="trash-2" class="w-3 h-3"></i></button>` : ''}
                         </div>
                         ${m.gif ? `<img src="${m.gif}" class="rounded-lg mb-2 w-full max-h-56 object-contain bg-black/20">` : ''}
-                        ${m.reply ? `<p class="text-[10px] text-zinc-400 border-l-2 border-zinc-600 pl-2 mb-1">↪ ${m.reply.user}: ${m.reply.text}</p>` : ''}
-                        <p class="text-sm">${m.text || ''}</p>
+                        ${m.reply ? `<p class="text-[10px] text-zinc-400 border-l-2 border-zinc-600 pl-2 mb-1">↪ ${escapeHtml(m.reply.user || '')}: ${highlightMentions(m.reply.text || '')}</p>` : ''}
+                        <p class="text-sm">${highlightMentions(m.text || '')}</p>
                         <div class="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             ${!isMine ? `<button onclick="reportChatMessage('${id}')" class="text-[10px] text-red-400 hover:underline">Report</button>` : ''}
                             ${isAdminUser && !isMine ? `<button onclick=\"warnUser('${m.uid}')\" class=\"text-[10px] text-yellow-400 hover:underline\">Warn</button>` : ''}
@@ -2604,6 +2733,14 @@
 
         function setupChat() {
             onSnapshot(query(collection(db, "messages"), orderBy("timestamp", "desc"), limit(50)), (snap) => {
+                snap.docChanges().forEach((change) => {
+                    if (change.type !== 'added') return;
+                    const m = change.doc.data();
+                    if (m.uid === currentUser?.uid) return;
+                    if (usernameMentioned(m.text || '') || usernameMentioned(m.reply?.text || '')) {
+                        triggerMentionNotification('Chat');
+                    }
+                });
                 cachedChatMessages = snap.docs.map(d => ({ id: d.id, data: d.data() }));
                 window.renderMessages();
             });
@@ -2739,14 +2876,14 @@
                 if (r) r.classList.add('spinning');
             });
             
-            const spinIntervals = reels.map(r => setInterval(() => { if (r) r.innerText = SLOT_ITEMS[Math.floor(Math.random()*SLOT_ITEMS.length)]; }, 90));
+            const spinIntervals = reels.map(r => setInterval(() => { if (r) r.innerText = spinWeightedSlotSymbol(); }, 90));
             await new Promise(r => setTimeout(r, 1400));
             spinIntervals.forEach(i => clearInterval(i));
             
             const results = reels.map(r => {
                 if (r) {
                     r.classList.remove('spinning');
-                    const res = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+                    const res = spinWeightedSlotSymbol();
                     r.innerText = res;
                     return res;
                 }
@@ -2756,12 +2893,12 @@
             let win = -bet;
             if (results[0] && results[1] && results[2] && results[0] === results[1] && results[1] === results[2]) {
                 const triplePayouts = {
-                    '🍒': 6,
-                    '🍋': 9,
-                    '🔔': 14,
-                    '⭐': 20,
-                    '7️⃣': 28,
-                    '💎': 60
+                    '🍒': Number(gameEconomySettings.slotsPayoutCherry || 6),
+                    '🍋': Number(gameEconomySettings.slotsPayoutLemon || 9),
+                    '🔔': Number(gameEconomySettings.slotsPayoutBell || 14),
+                    '⭐': Number(gameEconomySettings.slotsPayoutStar || 20),
+                    '7️⃣': Number(gameEconomySettings.slotsPayoutSeven || 28),
+                    '💎': Number(gameEconomySettings.slotsPayoutDiamond || 60)
                 };
                 win = Math.floor(bet * (triplePayouts[results[0]] || 6));
             }
@@ -2887,6 +3024,26 @@
             );
         }
 
+        function setupThreadMentionListener() {
+            if (threadMentionUnsub) threadMentionUnsub();
+            threadMentionUnsub = onSnapshot(query(collection(db, 'suggestions'), orderBy('timestamp', 'desc'), limit(80)), (snap) => {
+                snap.docChanges().forEach((change) => {
+                    if (change.type !== 'added') return;
+                    const data = change.doc.data();
+                    if (data.uid === currentUser?.uid) return;
+                    if (usernameMentioned(data.text || '')) triggerMentionNotification('Thread');
+                    const replies = data.replies || [];
+                    for (const r of replies) {
+                        if ((r.uid || '') === currentUser?.uid) continue;
+                        if (usernameMentioned(r.text || '')) {
+                            triggerMentionNotification('Thread Reply');
+                            break;
+                        }
+                    }
+                });
+            });
+        }
+
         window.toggleCommunityModal = () => {
             const modal = document.getElementById('community-modal');
             if (!modal) return;
@@ -2944,14 +3101,14 @@
                 const reactions = p.reactions || {};
                 const expanded = activeThreadId === d.id;
                 return `<div class="group p-3 rounded-xl bg-zinc-900 border border-zinc-800 cursor-pointer" onclick="openThread('${d.id}')">
-                    <div class="font-bold hover:text-violet-300 text-left w-full">${title || 'Thread'}</div>
-                    <div class="text-xs text-zinc-500 mb-2">by ${p.username}</div>
-                    <div class="text-sm text-zinc-300 mb-2 ${expanded ? '' : 'line-clamp-2'}">${rest.join('\n')}</div>
+                    <div class="font-bold hover:text-violet-300 text-left w-full">${highlightMentions(title || 'Thread')}</div>
+                    <div class="text-xs text-zinc-500 mb-2">by ${escapeHtml(p.username || '')}</div>
+                    <div class="text-sm text-zinc-300 mb-2 ${expanded ? '' : 'line-clamp-2'}">${highlightMentions(rest.join('\n'))}</div>
                     <div class="flex gap-1 mb-2 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
                         ${['👍','🔥','😂','❤️'].map(e=>`<button onclick="toggleThreadReaction('${d.id}','${e}')" class="text-xs px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700">${e} ${(reactions[e]||[]).length}</button>`).join('')}
                         ${p.uid === currentUser.uid || currentUserProfile.role === 'admin' ? `<button onclick="deleteThread('${d.id}')" class="text-xs px-1.5 py-0.5 rounded bg-red-900/40 text-red-300">Delete</button>` : ''}
                     </div>
-                    <div class="space-y-1 mb-2">${replies.map((r,idx) => `<div class="text-xs text-zinc-400">↪ <span class="text-zinc-300">${r.user}</span>: ${r.text} <button onclick="toggleThreadReplyReaction('${d.id}', ${idx}, '❤️')" class="text-[10px] text-pink-300">❤️ ${(r.reactions?.['❤️']||[]).length}</button></div>`).join('')}</div>
+                    <div class="space-y-1 mb-2">${replies.map((r,idx) => `<div class="text-xs text-zinc-400">↪ <span class="text-zinc-300">${escapeHtml(r.user || '')}</span>: ${highlightMentions(r.text || '')} <button onclick="toggleThreadReplyReaction('${d.id}', ${idx}, '❤️')" class="text-[10px] text-pink-300">❤️ ${(r.reactions?.['❤️']||[]).length}</button></div>`).join('')}</div>
                     ${expanded ? `<button onclick=\"event.stopPropagation();replyToThread('${d.id}')\" class=\"text-xs text-violet-300 hover:underline\">Reply</button>` : '<span class="text-[10px] text-zinc-500">Open thread to reply</span>'}
                 </div>`;
             }).join('') || '<div class="text-zinc-500 text-sm">No threads yet.</div>';
@@ -3004,7 +3161,7 @@
             const snap = await getDoc(ref);
             if (!snap.exists()) return;
             const replies = snap.data().replies || [];
-            replies.push({ user: currentUserProfile.username, text: text.trim(), at: Date.now() });
+            replies.push({ uid: currentUser.uid, user: currentUserProfile.username, text: text.trim(), at: Date.now() });
             await updateDoc(ref, { replies });
             loadCommunityPosts();
         };
@@ -3834,6 +3991,52 @@
             }, { merge: true });
         }
 
+        function renderGameEconomyInputs() {
+            const wrap = document.getElementById('game-economy-settings');
+            if (!wrap) return;
+            const fields = [
+                ['slotsPayoutCherry', 'Slots 🍒 payout'],
+                ['slotsPayoutLemon', 'Slots 🍋 payout'],
+                ['slotsPayoutBell', 'Slots 🔔 payout'],
+                ['slotsPayoutStar', 'Slots ⭐ payout'],
+                ['slotsPayoutSeven', 'Slots 7️⃣ payout'],
+                ['slotsPayoutDiamond', 'Slots 💎 payout'],
+                ['slotsOddsCherry', 'Slots 🍒 odds weight'],
+                ['slotsOddsLemon', 'Slots 🍋 odds weight'],
+                ['slotsOddsBell', 'Slots 🔔 odds weight'],
+                ['slotsOddsStar', 'Slots ⭐ odds weight'],
+                ['slotsOddsSeven', 'Slots 7️⃣ odds weight'],
+                ['slotsOddsDiamond', 'Slots 💎 odds weight'],
+                ['coinflipPayout', 'Coinflip payout multiplier'],
+                ['blackjackPayout', 'Blackjack payout multiplier'],
+                ['diceExactPayout', 'Dice exact payout'],
+                ['diceNearPayout', 'Dice near payout']
+            ];
+            wrap.innerHTML = fields.map(([key, label]) => `
+                <label class="text-xs text-zinc-300 block">
+                    <span class="block mb-1">${label}</span>
+                    <input id="economy-${key}" type="number" min="0" step="0.1" class="login-input mb-0" value="${Number(gameEconomySettings[key] ?? 0)}">
+                </label>
+            `).join('');
+            const diceHint = document.getElementById('dice-payout-hint');
+            if (diceHint) {
+                diceHint.innerText = `Bet: 10 points. Guess total of 5 dice (5-30). Exact = ${Number(gameEconomySettings.diceExactPayout || 0)}x, within 1 = ${Number(gameEconomySettings.diceNearPayout || 0)}x.`;
+            }
+        }
+
+        function readGameEconomyInputs() {
+            const keys = Object.keys(gameEconomySettings);
+            const next = { ...gameEconomySettings };
+            keys.forEach((key) => {
+                const input = document.getElementById(`economy-${key}`);
+                if (!input) return;
+                const value = Number(input.value);
+                if (!Number.isFinite(value)) return;
+                next[key] = Math.max(0, value);
+            });
+            return next;
+        }
+
         async function loadSlowmodeSettings() {
             featuredGameOverride = localStorage.getItem(LOCAL_FEATURED_KEY) || featuredGameOverride || '';
             try {
@@ -3844,6 +4047,10 @@
             try {
                 const localSlowmode = JSON.parse(localStorage.getItem(LOCAL_SLOWMODE_KEY) || '{}');
                 if (localSlowmode && typeof localSlowmode === 'object') slowmodeSettings = { ...slowmodeSettings, ...localSlowmode };
+            } catch (_) {}
+            try {
+                const localEconomy = JSON.parse(localStorage.getItem(LOCAL_GAME_ECONOMY_KEY) || '{}');
+                if (localEconomy && typeof localEconomy === 'object') gameEconomySettings = { ...gameEconomySettings, ...localEconomy };
             } catch (_) {}
             const options = GAMES.map(g => `<option value="${g.title}">${g.title}</option>`).join('');
             const select = document.getElementById('featured-game-select');
@@ -3870,7 +4077,24 @@
                     }
                 } catch (_) {}
             }
+            try {
+                const gambleSnap = await getDoc(doc(db, 'settings', 'gamble'));
+                if (gambleSnap.exists()) gameEconomySettings = { ...gameEconomySettings, ...gambleSnap.data() };
+            } catch (_) {
+                try {
+                    const adminSnaps = await getDocs(query(collection(db, 'users'), where('role', '==', 'admin'), limit(20)));
+                    let latest = null;
+                    adminSnaps.forEach(d => {
+                        const data = d.data();
+                        if (!latest || (data.sharedSettingsUpdatedAt || 0) > (latest.sharedSettingsUpdatedAt || 0)) latest = data;
+                    });
+                    if (latest?.sharedGameEconomySettings && typeof latest.sharedGameEconomySettings === 'object') {
+                        gameEconomySettings = { ...gameEconomySettings, ...latest.sharedGameEconomySettings };
+                    }
+                } catch (_) {}
+            }
             localStorage.setItem(LOCAL_SLOWMODE_KEY, JSON.stringify(slowmodeSettings || {}));
+            localStorage.setItem(LOCAL_GAME_ECONOMY_KEY, JSON.stringify(gameEconomySettings || {}));
             const slowEnabled = document.getElementById('slowmode-enabled');
             const slowSeconds = document.getElementById('slowmode-seconds');
             const slowBypass = document.getElementById('slowmode-bypass');
@@ -3878,8 +4102,27 @@
             if (slowSeconds) slowSeconds.value = slowmodeSettings.seconds || 5;
             if (slowBypass) slowBypass.value = (slowmodeSettings.bypassUsers || []).join(', ');
             if (select) select.value = featuredGameOverride || '';
+            renderGameEconomyInputs();
             render();
         }
+
+        window.saveGameEconomySettings = async () => {
+            gameEconomySettings = readGameEconomyInputs();
+            try {
+                await setDoc(doc(db, 'settings', 'gamble'), gameEconomySettings);
+                localStorage.setItem(LOCAL_GAME_ECONOMY_KEY, JSON.stringify(gameEconomySettings || {}));
+                alert('Casino settings updated in cloud.');
+            } catch (e) {
+                try {
+                    await saveSharedAdminSettings({ sharedGameEconomySettings: gameEconomySettings });
+                    localStorage.setItem(LOCAL_GAME_ECONOMY_KEY, JSON.stringify(gameEconomySettings || {}));
+                    alert('Casino settings updated in cloud via admin shared fallback.');
+                } catch (fallbackError) {
+                    localStorage.setItem(LOCAL_GAME_ECONOMY_KEY, JSON.stringify(gameEconomySettings || {}));
+                    alert(`Cloud save failed (${e?.message || e}; fallback failed: ${fallbackError?.message || fallbackError}). Saved casino settings locally on this device.`);
+                }
+            }
+        };
 
         window.saveSlowmodeSettings = async () => {
             slowmodeSettings = {
@@ -3998,7 +4241,8 @@
             const flip = Math.random() > 0.5 ? 'heads' : 'tails';
             const coin = document.getElementById('coinflip-coin');
             if (coin) { coin.style.transition='transform 0.8s cubic-bezier(0.2,0.8,0.2,1)'; coin.style.transform='rotateY(720deg)'; setTimeout(()=>{ coin.innerText = flip === 'heads' ? '🟡' : '⚪'; coin.style.transform='rotateY(0deg)'; }, 300); }
-            const win = flip === choice ? bet : -bet;
+            const payout = Math.max(0, Number(gameEconomySettings.coinflipPayout || 1));
+            const win = flip === choice ? Math.floor(bet * payout) : -bet;
             currentUserProfile.points += win;
             await updateDoc(doc(db, 'users', currentUser.uid), { points: currentUserProfile.points });
             updatePointsDisplay();
@@ -4064,7 +4308,8 @@
             blackjackState.inRound = false;
             const bet = blackjackState.bet || getBetAmount(20);
             let delta = -bet;
-            if (blackjackState.dealer > 21 || blackjackState.player > blackjackState.dealer) delta = bet;
+            const blackjackPayout = Math.max(0, Number(gameEconomySettings.blackjackPayout || 1));
+            if (blackjackState.dealer > 21 || blackjackState.player > blackjackState.dealer) delta = Math.floor(bet * blackjackPayout);
             if (blackjackState.player === blackjackState.dealer) delta = 0;
             currentUserProfile.points += delta;
             await updateDoc(doc(db, 'users', currentUser.uid), { points: currentUserProfile.points });
@@ -4080,8 +4325,10 @@
             const rolls = [1,2,3,4,5].map(() => Math.floor(Math.random()*6)+1);
             const total = rolls.reduce((a,b)=>a+b,0);
             let delta = -bet;
-            if (guess === total) delta = bet * 4;
-            else if (Math.abs(guess-total) <= 1) delta = bet * 2;
+            const exactPayout = Math.max(0, Number(gameEconomySettings.diceExactPayout || 4));
+            const nearPayout = Math.max(0, Number(gameEconomySettings.diceNearPayout || 2));
+            if (guess === total) delta = Math.floor(bet * exactPayout);
+            else if (Math.abs(guess-total) <= 1) delta = Math.floor(bet * nearPayout);
             currentUserProfile.points += delta;
             await updateDoc(doc(db, 'users', currentUser.uid), { points: currentUserProfile.points });
             updatePointsDisplay();
